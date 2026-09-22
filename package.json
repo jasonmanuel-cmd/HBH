@@ -1,0 +1,15 @@
+{
+  "name": "harbison-buys-homes",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Harbison Buys Homes website",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node dev.mjs",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
