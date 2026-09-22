@@ -33,6 +33,7 @@ export const timelineOptions = ['As soon as possible', 'Within 30 days', '1–3 
 export const situations = [
   {
     slug: 'inherited-property',
+    answer: "Yes — you can sell an inherited house in Kern County as-is, without clearing it out or making repairs. If the home is in a living trust, the trustee can usually sell without court involvement; if it is going through probate, the executor can often sell during the process. Harbison can buy directly or help you compare a direct sale against listing.",
     name: 'Inherited Property',
     title: 'Sell an Inherited House in Kern County',
     description: 'Inherited a house in Bakersfield, Tehachapi, or elsewhere in Kern County? Harbison helps heirs understand their options and sell as-is on a clear timeline.',
@@ -57,6 +58,7 @@ export const situations = [
   },
   {
     slug: 'needs-major-repairs',
+    answer: "You can sell a Kern County house that needs major repairs without fixing anything. A direct buyer like Harbison prices the repairs into the offer, so there are no contractors, lender inspections, or repair requests. California sellers must still disclose known defects, even when selling as-is.",
     name: 'Needs Major Repairs',
     title: 'Sell a House That Needs Repairs As-Is',
     description: 'Roof, foundation, plumbing, or years of deferred maintenance? Sell your Kern County house as-is to Harbison — no repairs, no showings.',
@@ -81,6 +83,7 @@ export const situations = [
   },
   {
     slug: 'vacant-property',
+    answer: "Yes — Harbison buys vacant houses and lots across Kern County as-is, including properties that are neglected, overgrown, or owned by out-of-area sellers. Most of the process can be done remotely, and closing happens through a local title or escrow company.",
     name: 'Vacant Property',
     title: 'Sell a Vacant House or Property',
     description: 'A vacant house costs you in taxes, insurance, utilities, and risk. Harbison buys vacant properties across Kern County as-is.',
@@ -105,6 +108,7 @@ export const situations = [
   },
   {
     slug: 'problem-tenants',
+    answer: "You can sell a Kern County rental with tenants still living in it. Harbison can buy tenant-occupied properties subject to the existing lease and California tenant protections, so you do not need to handle a turnover, showings, or tenant-caused repairs before selling.",
     name: 'Problem Tenants',
     title: 'Sell a Rental Property With Problem Tenants',
     description: 'Tired of being a landlord? Harbison buys Kern County rental properties with tenants in place — including difficult situations.',
@@ -129,6 +133,7 @@ export const situations = [
   },
   {
     slug: 'relocation',
+    answer: "If you are relocating, you can sell your Kern County house on your timeline — including choosing the closing date and, in many cases, staying briefly after closing. A direct sale to Harbison avoids staging, showings, and carrying two housing payments while a listing sits.",
     name: 'Relocation',
     title: 'Relocating? Sell Your Kern County House Fast',
     description: 'Moving for work, family, or a fresh start? Harbison buys houses in Bakersfield and Kern County on your timeline so you can move without carrying two homes.',
@@ -153,8 +158,9 @@ export const situations = [
   },
   {
     slug: 'life-change',
+    answer: "During a divorce, downsizing, or other life change, a direct sale can simplify selling a Kern County home: one walkthrough, a clear number, and a closing date that fits your transition. All owners on title generally must sign, and Harbison can share information with each party and their representatives.",
     name: 'Life Change',
-    title: 'Selling a House During Divorce, Downsizing, or a Life Change',
+    title: 'Selling a House During Divorce or a Life Change',
     description: 'Divorce, downsizing, health changes, or retirement — Harbison offers a calm, simple way to sell a Kern County property when life shifts.',
     headline: 'Life changed? <em>Your next step can be simple.</em>',
     lead: 'Divorce, downsizing, a health change, retirement, or a growing family — big life changes often mean the house needs to change too.',
@@ -177,6 +183,7 @@ export const situations = [
   },
   {
     slug: 'fire-water-damage',
+    answer: "Yes — you can sell a fire- or water-damaged house in Kern County as-is, even if it is not livable. Harbison evaluates the damage and makes an offer on the property as it sits. Check with your insurer before selling, because a sale can affect how your claim is paid.",
     name: 'Fire / Water Damage',
     title: 'Sell a Fire- or Water-Damaged House As-Is',
     description: 'Fire, smoke, flood, or water damage? Harbison buys damaged houses across Kern County as-is — no restoration required.',
@@ -201,6 +208,7 @@ export const situations = [
   },
   {
     slug: 'unfinished-remodel',
+    answer: "You can sell a house with an unfinished remodel or open permits as-is. Harbison evaluates the remaining work — including unpermitted items — and prices it into the offer, so you do not need to hire another contractor or finish the project first.",
     name: 'Unfinished Remodel',
     title: 'Sell a House With an Unfinished Remodel',
     description: 'Stalled renovation, open permits, or a contractor who walked away? Harbison buys Kern County homes with unfinished remodels.',
@@ -228,6 +236,8 @@ export const situations = [
 export const areas = [
   {
     slug: 'bakersfield',
+    geo: [35.3733, -119.0187],
+    answer: "Harbison Buys Homes buys houses in Bakersfield, CA in any condition — including inherited, vacant, damaged, and tenant-occupied homes. You can sell as-is with no repairs, no showings, and a closing date you choose, or ask Harbison to compare a direct offer with listing on the market.",
     name: 'Bakersfield',
     title: 'Sell My House Fast in Bakersfield, CA',
     description: 'Sell your Bakersfield house as-is — no repairs, no showings. Harbison Buys Homes reviews every option: direct sale, listing, renovation, or development.',
@@ -242,6 +252,8 @@ export const areas = [
   },
   {
     slug: 'tehachapi',
+    geo: [35.1322, -118.449],
+    answer: "Harbison Buys Homes buys houses, cabins, and land in Tehachapi, Golden Hills, Bear Valley Springs, and Stallion Springs. Properties are purchased as-is, and Harbison evaluates wells, septic, access, and acreage — including development potential — when presenting your options.",
     name: 'Tehachapi',
     title: 'Sell My House Fast in Tehachapi, CA',
     description: 'Selling a house or land in Tehachapi, Golden Hills, Bear Valley Springs, or Stallion Springs? Harbison buys as-is and reviews every option.',
@@ -256,6 +268,8 @@ export const areas = [
   },
   {
     slug: 'kern-county',
+    geo: [35.3433, -118.7279],
+    answer: "Harbison Buys Homes buys houses and land throughout Kern County, California — including Bakersfield, Tehachapi, California City, Delano, Shafter, Wasco, Taft, Arvin, and Ridgecrest. Sellers can sell as-is with no repairs or showings, or compare a direct sale with listing, renovation, or development.",
     name: 'Kern County',
     title: 'We Buy Houses Throughout Kern County, CA',
     description: 'Harbison Buys Homes buys houses and land throughout Kern County — Bakersfield, Tehachapi, Delano, Shafter, Wasco, Taft, Arvin, Ridgecrest, and more.',
@@ -266,7 +280,7 @@ export const areas = [
       'Whether your property is in a smaller community or on a rural parcel, we can evaluate it and give you a clear, honest set of options.',
       'Not sure if your location qualifies? Send the address. If it is not a fit for us, we will tell you quickly.',
     ],
-    places: ['Arvin', 'Delano', 'Lamont', 'McFarland', 'Shafter', 'Wasco', 'Taft', 'Ridgecrest', 'Lake Isabella', 'California City'],
+    places: ['California City', 'Stallion Springs', 'Arvin', 'Delano', 'Lamont', 'McFarland', 'Shafter', 'Wasco', 'Taft', 'Ridgecrest', 'Lake Isabella', 'California City'],
   },
 ];
 

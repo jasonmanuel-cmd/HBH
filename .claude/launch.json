@@ -1,6 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "hbh", "runtimeExecutable": "node", "runtimeArgs": ["dev.mjs"], "port": 3000 }
+    { "name": "hbh", "runtimeExecutable": "node", "runtimeArgs": ["dev.mjs"], "port": 3100, "autoPort": true }
   ]
 }

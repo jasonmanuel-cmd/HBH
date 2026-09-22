@@ -14,6 +14,15 @@ export default {
   dre: '02059393',
   brokerage: 'Harbison Standard',
   brokerageUrl: 'https://www.harbisonstandard.com',
+  agentProfiles: [
+    'https://www.harbisonstandard.com/about',
+    'https://www.facebook.com/nate85.realtor',
+    'https://www.instagram.com/nathanaelharbison',
+    'https://www.youtube.com/@Nathanaelharbison',
+    'https://www.linkedin.com/in/nathanael-harbison',
+  ],
+  // Add the Google Business Profile URL here once it exists (strong local + AI search signal).
+  businessProfiles: [],
 
   city: 'Bakersfield',
   state: 'CA',
