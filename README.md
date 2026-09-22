@@ -49,7 +49,6 @@ Until a destination is configured, leads are still accepted and written to Verce
 
 ## Before launch checklist
 
-- [ ] Replace placeholder phone `(661) 555-0123` and email in `site.config.mjs`
 - [ ] Set `SITE_URL` to the real domain
 - [ ] Configure a lead destination and submit a test lead
 - [ ] Swap Unsplash stock photos (in `src/content.mjs`) for real local project photos

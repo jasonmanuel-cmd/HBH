@@ -18,6 +18,7 @@ const businessLd = {
   image: `${site.url}${logo}`,
   telephone: site.phoneHref,
   email: site.email,
+  employee: { '@type': 'Person', name: site.agent, identifier: `DRE #${site.dre}` },
   address: { '@type': 'PostalAddress', addressLocality: site.city, addressRegion: site.state, addressCountry: 'US' },
   areaServed: [
     ...site.serviceAreas.map((name) => ({ '@type': name.includes('County') ? 'AdministrativeArea' : 'City', name: `${name}, ${site.state}` })),
@@ -96,7 +97,7 @@ function footer(cta) {
     <div><h4>Contact</h4><a href="tel:${site.phoneHref}">${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/#lead-form">Request property options</a></div>
     <div><h4>Service Area</h4>${areas.map((a) => `<a href="/areas/${a.slug}">${esc(a.name)}</a>`).join('')}</div>
   </div>
-  <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. All rights reserved.</span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a></span></div>
+  <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a></span></div>
 </footer>
 <div class="mobile-bar"><a href="tel:${site.phoneHref}" class="btn btn-outline">Call Now</a><a href="${cta}" class="btn btn-gold">Get My Options</a></div>
 <script src="/script.js" defer></script>`;

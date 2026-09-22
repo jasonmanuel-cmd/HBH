@@ -5,10 +5,15 @@ export default {
   // Production URL (used for canonical links, sitemap, social cards). Override with SITE_URL on Vercel.
   url: (process.env.SITE_URL || 'https://www.harbisonbuyshomes.com').replace(/\/$/, ''),
 
-  // TODO before launch: replace placeholder phone + email.
-  phone: '(661) 555-0123',
-  phoneHref: '+16615550123',
-  email: 'hello@harbisonbuyshomes.com',
+  phone: '(661) 472-7499',
+  phoneHref: '+16614727499',
+  email: 'nate85.realtor@gmail.com',
+
+  // Licensee info — California requires the DRE number on advertising.
+  agent: 'Nathanael Harbison',
+  dre: '02059393',
+  brokerage: 'Harbison Standard',
+  brokerageUrl: 'https://www.harbisonstandard.com',
 
   city: 'Bakersfield',
   state: 'CA',
