@@ -66,6 +66,8 @@ function head({ title, description, path, image = `${site.url}${logo}`, noindex 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
   ${ga}
+  <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
+  <script defer src="/_vercel/insights/script.js"></script>
   ${ld.map(jsonLd).join('\n  ')}
 </head>`;
 }
