@@ -4,6 +4,9 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
+  "redirects": [
+    { "source": "/family", "destination": "/sell-parents-house", "permanent": false }
+  ],
   "headers": [
     {
       "source": "/(.*)",

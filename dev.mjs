@@ -32,6 +32,12 @@ createServer(async (req, res) => {
     return handler(req, res);
   }
 
+  // Mirror vercel.json redirects locally.
+  if (url.pathname === '/family') {
+    res.writeHead(307, { Location: `/sell-parents-house${url.search}` });
+    return res.end();
+  }
+
   const file = (await findFile(url.pathname)) || 'dist/404.html';
   res.statusCode = file === 'dist/404.html' && url.pathname !== '/404' ? 404 : 200;
   res.setHeader('Content-Type', types[extname(file)] || 'application/octet-stream');

@@ -1,6 +1,7 @@
 import site from '../site.config.mjs';
 import { images, situations, areas as baseAreas, faqs as baseFaqs, situationOptions, timelineOptions } from './content.mjs';
 import { californiaCity, extraFaqs, glance, testimonials, about, guides } from './content-extra.mjs';
+import { family, familyForm, partnerGuide } from './family.mjs';
 
 export const areas = [...baseAreas.slice(0, 2), californiaCity, ...baseAreas.slice(2)];
 export const faqs = [...baseFaqs.slice(0, 4), ...extraFaqs, ...baseFaqs.slice(4)];
@@ -139,6 +140,9 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
     ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(site.gaId)}"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(site.gaId)}');</script>`
     : '';
+  const gtm = site.gtmId
+    ? `<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${esc(site.gtmId)}');</script>`
+    : '';
   return `<!doctype html>
 <html lang="en-US">
 <head>
@@ -173,6 +177,7 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
+  ${gtm}
   ${ga}
   <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
   <script defer src="/_vercel/insights/script.js"></script>
@@ -189,6 +194,7 @@ function header(cta) {
     <nav class="nav" id="site-nav" aria-label="Main">
       <a href="/#how">How It Works</a>
       <a href="/situations">Situations</a>
+      <a href="/sell-parents-house">Parent’s House</a>
       <a href="/guides">Guides</a>
       <a href="/about">About</a>
       <a href="/#faq">FAQ</a>
@@ -210,7 +216,7 @@ function footer(cta) {
   return `<footer class="footer" id="contact">
   <div class="container footer-grid">
     <div><img class="footer-logo" src="${logo}" alt="${esc(site.name)} logo" width="74" height="74" loading="lazy"><p>${esc(site.tagline)}</p><p class="footer-social">${socials}</p></div>
-    <div><h2 class="footer-h">Explore</h2><a href="/#how">How It Works</a><a href="/situations">Situations</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
+    <div><h2 class="footer-h">Explore</h2><a href="/#how">How It Works</a><a href="/situations">Situations</a><a href="/sell-parents-house">Selling a Parent’s House</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
     <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/#lead-form">Request property options</a><p>Replies typically within 24 hours</p></div>
     <div><h2 class="footer-h">Service Area</h2>${areas.map((a) => `<a href="/areas/${a.slug}">${esc(a.name)}</a>`).join('')}</div>
   </div>
@@ -224,6 +230,7 @@ function page(opts, body) {
   const cta = opts.hasForm === false ? '/#lead-form' : '#lead-form';
   return `${head(opts)}
 <body>
+${site.gtmId ? `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${esc(site.gtmId)}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>` : ''}
 ${header(cta)}
 <main id="main">
 ${body}
@@ -529,7 +536,10 @@ const guideLinks = (list) =>
 export function situationPage(s) {
   const others = situations.filter((o) => o.slug !== s.slug);
   const url = `${site.url}/situations/${s.slug}`;
-  const extra = `${guideLinks(relatedGuidesFor(s.slug))}
+  const familyLink = ['life-change', 'inherited-property', 'relocation'].includes(s.slug)
+    ? `<h3>Helping a parent move?</h3><ul class="link-list"><li><a href="/sell-parents-house">Selling a parent’s house in Kern County — as-is vs. listing</a></li></ul>`
+    : '';
+  const extra = `${familyLink}${guideLinks(relatedGuidesFor(s.slug))}
       <h3>Where we buy</h3><ul class="chip-list">${areas.map((a) => `<li><a href="/areas/${a.slug}">${esc(a.name)}</a></li>`).join('')}</ul>
       <h3>Other situations we help with</h3><ul class="chip-list">${others.map((o) => `<li><a href="/situations/${o.slug}">${esc(o.name)}</a></li>`).join('')}</ul>`;
   return detailPage({
@@ -812,4 +822,184 @@ export function termsPage() {
     <h2 class="prose-h">Contact</h2>
     <p><a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a> • <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a></p>`,
   });
+}
+
+// ---------- Family Property Transition ----------
+
+const radios = (name, list, required = true) => `<div class="choice-grid" role="radiogroup">${list
+  .map((o, i) => `<label class="choice"><input type="radio" name="${name}" value="${esc(o)}"${required && i === 0 ? ' required' : ''}><span>${esc(o)}</span></label>`)
+  .join('')}</div>`;
+
+// Four-step form. Step 1 asks for the address only, so the first commitment is small.
+function familyLeadForm() {
+  return `<aside class="lead-card family-card" id="lead-form" aria-label="Talk with Nathanael about a parent's house">
+      <h2>What property are you trying to figure out?</h2>
+      <form data-lead-form data-form-type="family_transition" data-steps novalidate>
+        <input type="hidden" name="form_type" value="family_transition">
+        <ol class="step-dots" aria-hidden="true"><li class="on"></li><li></li><li></li><li></li></ol>
+        <fieldset class="fstep" data-step="1">
+          <legend class="sr-only">Step 1 of 4: property</legend>
+          <label>Property address<input name="address" autocomplete="street-address" placeholder="123 Main St, Bakersfield, CA" required></label>
+          <button class="btn btn-gold btn-full" type="button" data-next>Continue →</button>
+        </fieldset>
+        <fieldset class="fstep" data-step="2" hidden>
+          <legend class="fstep-q">What’s happening with the property?</legend>
+          ${radios('situation', familyForm.situations)}
+          <div class="fstep-nav"><button class="btn btn-ghost" type="button" data-back>Back</button><button class="btn btn-gold" type="button" data-next>Continue →</button></div>
+        </fieldset>
+        <fieldset class="fstep" data-step="3" hidden>
+          <legend class="fstep-q">What would help most?</legend>
+          ${radios('help_needed', familyForm.helpNeeded)}
+          <label>Timing<select name="timeline"><option value="">Not sure</option>${familyForm.timelines.map((t) => `<option>${esc(t)}</option>`).join('')}</select></label>
+          <div class="fstep-nav"><button class="btn btn-ghost" type="button" data-back>Back</button><button class="btn btn-gold" type="button" data-next>Continue →</button></div>
+        </fieldset>
+        <fieldset class="fstep" data-step="4" hidden>
+          <legend class="fstep-q">How should we reach you?</legend>
+          <div class="two-col">
+            <label>Your name<input name="name" autocomplete="name" required></label>
+            <label>Phone<input name="phone" type="tel" autocomplete="tel" required></label>
+          </div>
+          <label>Email <span class="muted">(optional)</span><input name="email" type="email" autocomplete="email"></label>
+          <label>Your relationship to the property<select name="relationship" required><option value="">Select one</option>${familyForm.relationships.map((t) => `<option>${esc(t)}</option>`).join('')}</select></label>
+          <label>Best way to reach you<select name="contact_pref">${familyForm.contactPrefs.map((t) => `<option>${esc(t)}</option>`).join('')}</select></label>
+          <label class="hp" aria-hidden="true">Company<input name="company" tabindex="-1" autocomplete="off"></label>
+          <div class="fstep-nav"><button class="btn btn-ghost" type="button" data-back>Back</button><button class="btn btn-gold" type="submit">Talk With Nathanael →</button></div>
+          <p class="form-note">By submitting, you agree ${esc(site.name)} may contact you by phone, text, or email about this property. Consent is not a condition of any sale. Msg &amp; data rates may apply; reply STOP to opt out. We never ask for medical information. See our <a href="/privacy">Privacy Policy</a>.</p>
+        </fieldset>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </aside>`;
+}
+
+// Click-to-load YouTube (no third-party JS until the viewer asks for it). Placeholder until an ID exists.
+const videoBlock = (v, { large = false } = {}) => v.id
+  ? `<figure class="video${large ? ' video-lg' : ''}"><button class="video-btn" type="button" data-yt="${esc(v.id)}" aria-label="Play video: ${esc(v.title || v.q)}" style="--thumb:url('https://i.ytimg.com/vi/${esc(v.id)}/hqdefault.jpg')"><span class="play" aria-hidden="true">▶</span></button><figcaption>${esc(v.title || v.q)}</figcaption></figure>`
+  : `<figure class="video video-pending${large ? ' video-lg' : ''}"><div class="video-btn"><span class="play" aria-hidden="true">▶</span><span class="soon">Video coming soon</span></div><figcaption>${esc(v.title || v.q)}</figcaption></figure>`;
+
+const videoLd = (v, url) => (v.id ? [{
+  '@type': 'VideoObject',
+  '@id': `${url}#video-${v.id}`,
+  name: v.title || v.q,
+  description: v.title || v.q,
+  thumbnailUrl: `https://i.ytimg.com/vi/${v.id}/hqdefault.jpg`,
+  embedUrl: `https://www.youtube-nocookie.com/embed/${v.id}`,
+  uploadDate: BUILD_DATE,
+}] : []);
+
+export function familyPage() {
+  const f = family;
+  const url = `${site.url}${f.path}`;
+  const title = pageTitle('Selling a Parent’s House in Kern County');
+  const crumbs = [['Home', '/'], ['Selling a Parent’s House', f.path]];
+  const heroImg = sized(f.image, 1600, 1000);
+  const ogImg = sized(f.image, 1200, 630);
+  const allFaqs = [...f.faqs, ...faqs.slice(0, 2)];
+  const service = serviceLd({ name: f.title, description: f.description, url, areaServed: areas.map(placeLd) });
+  const vids = [f.heroVideo, ...f.videos].flatMap((v) => videoLd(v, url));
+  const howTo = {
+    '@type': 'HowTo',
+    '@id': `${url}#howto`,
+    name: 'How to sell a parent’s house in Kern County',
+    step: f.timeline.map(([n, t], i) => ({ '@type': 'HowToStep', position: i + 1, name: n, text: t })),
+  };
+  const { direct, listing } = f.paths;
+  return page(
+    { title, description: f.description, path: f.path, image: ogImg, preload: heroImg, ld: graph({ path: f.path, title, description: f.description, image: ogImg, crumbs, faq: allFaqs, extra: [service, howTo, ...vids] }) },
+    `<section class="hero hero-sub" style="--hero:url('${heroImg}')">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      ${crumbNav(crumbs)}
+      <p class="eyebrow gold">For families in ${esc(site.region)}</p>
+      <h1 class="h1-sub">${f.headline}</h1>
+      <p class="hero-lead">${esc(f.lead)}</p>
+      <div class="hero-actions"><a class="btn btn-gold" href="tel:${site.phoneHref}" data-track="call_click">Call Nathanael · ${esc(site.phone)}</a><a class="btn btn-outline" href="#options">See My Options</a></div>
+    </div>
+    ${familyLeadForm()}
+  </div>
+</section>
+
+<section class="section white">
+  <div class="container family-intro">
+    <div>
+      ${answerBox(esc(f.answer))}
+      <p class="fam-note">Families usually call because they’re handling two things at once: helping a parent through a major move, and suddenly being responsible for an entire house.</p>
+    </div>
+    ${videoBlock(f.heroVideo, { large: true })}
+  </div>
+</section>
+
+<section class="section cream">
+  <div class="container">
+    <div class="section-head">
+      <h2>You’re probably dealing with <em>more than a house.</em></h2>
+    </div>
+    <div class="problem-grid">${f.problems.map(([h, p]) => `<article class="problem"><h3>${esc(h)}</h3><p>${esc(p)}</p></article>`).join('')}</div>
+  </div>
+</section>
+
+<section class="section white" id="options">
+  <div class="container">
+    <div class="section-head center">
+      <h2>Two paths. <em>Your family chooses.</em></h2>
+      <p>Neither is automatically better. The right one depends on the house, the budget for the move, and how much time and energy the family has.</p>
+    </div>
+    <div class="path-grid">
+      <article class="path-col"><h3>${esc(direct.name)}</h3><ul>${direct.rows.map((r) => `<li>${esc(r)}</li>`).join('')}</ul><p class="path-best">Best when convenience, speed, or condition matters most.</p></article>
+      <article class="path-col alt"><h3>${esc(listing.name)}</h3><ul>${listing.rows.map((r) => `<li>${esc(r)}</li>`).join('')}</ul><p class="path-best">Best when the house shows well and there’s time to prepare it.</p></article>
+    </div>
+    <p class="disclosure">${esc(f.disclosure)}</p>
+    <p class="btn-row"><a class="btn btn-gold big" href="#lead-form">Compare My Options →</a></p>
+  </div>
+</section>
+
+<section class="section navy">
+  <div class="container">
+    <div class="section-head center"><h2 class="light">What the process <em>looks like.</em></h2></div>
+    <ol class="steps light-steps five">${f.timeline.map(([h, p], i) => `<li><span class="step-num" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span><h3>${esc(h)}</h3><p>${esc(p)}</p></li>`).join('')}</ol>
+  </div>
+</section>
+
+<section class="section cream">
+  <div class="container detail-grid">
+    <div>
+      <div class="section-head"><h2>Questions families <em>ask Nathanael.</em></h2></div>
+      <div class="video-grid">${f.videos.map((v) => videoBlock(v)).join('')}</div>
+    </div>
+    <aside class="help-card"><h2>How Harbison helps</h2><ul>${f.helps.map((h) => `<li>${esc(h)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="#lead-form">Talk With Nathanael →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}" data-track="call_click">Call ${esc(site.phone)}</a></aside>
+  </div>
+</section>
+
+<section class="section white" id="faq">
+  <div class="container narrow">
+    <div class="section-head center"><h2>Common <em>questions.</em></h2></div>
+    ${faqList(allFaqs)}
+    <p class="disclaimer">General information, not legal or tax advice. For questions about authority to sell, trusts, or conservatorships, talk with an elder-law or estate attorney.</p>
+    <h3>Related</h3><ul class="chip-list">${['inherited-property', 'vacant-property', 'needs-major-repairs', 'relocation'].map((slug) => situations.find((s) => s.slug === slug)).filter(Boolean).map((s) => `<li><a href="/situations/${s.slug}">${esc(s.name)}</a></li>`).join('')}<li><a href="/guides/sell-inherited-house-california">Inherited house guide</a></li></ul>
+  </div>
+</section>
+
+${finalCta()}`
+  );
+}
+
+// Printable guide handed out by referral partners. Not indexed — it's a leave-behind, not a search page.
+export function partnerGuidePage() {
+  const g = partnerGuide;
+  return page(
+    { title: pageTitle('Family Property Guide'), description: g.intro, path: g.path, noindex: true, hasForm: false },
+    `<section class="section cream page-top print-guide">
+  <div class="container narrow prose">
+    <h1 class="page-title">What to do with <em>a parent’s house.</em></h1>
+    <p class="lead">${esc(g.intro)}</p>
+    <h2 class="prose-h">Five questions to answer first</h2>
+    <ol>${g.questions.map((q) => `<li>${esc(q)}</li>`).join('')}</ol>
+    <h2 class="prose-h">Your two main options</h2>
+    <p><strong>Sell as-is:</strong> no repairs, belongings can stay, closing on your schedule. <strong>List traditionally:</strong> prepare the home and aim for full market value. Many families compare both before deciding.</p>
+    <h2 class="prose-h">Talk it through with a local, licensed agent</h2>
+    <p>${esc(site.agent)} · ${esc(site.name)} · DRE #${esc(site.dre)}<br>Call or text <strong>${esc(site.phone)}</strong> · ${esc(site.email)}<br>Online: <strong>${esc(site.url.replace(/^https?:\/\//, ''))}/family</strong></p>
+    <p class="disclaimer">You choose whether to contact us. We never ask for medical information. On a direct purchase, Harbison is the buyer and discloses its license status in writing; you’re welcome to have anyone you trust review an offer.</p>
+    <p class="no-print"><button class="btn btn-gold" type="button" onclick="print()">Print this guide</button></p>
+  </div>
+</section>`
+  );
 }

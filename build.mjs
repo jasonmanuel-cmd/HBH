@@ -6,8 +6,9 @@ import { situations } from './src/content.mjs';
 import {
   areas, guides, faqs,
   homePage, situationPage, areaPage, situationsIndexPage, aboutPage, guidesIndexPage, guidePage,
-  thankYouPage, notFoundPage, privacyPage, termsPage,
+  thankYouPage, notFoundPage, privacyPage, termsPage, familyPage, partnerGuidePage,
 } from './src/templates.mjs';
+import { family } from './src/family.mjs';
 
 const out = 'dist';
 rmSync(out, { recursive: true, force: true });
@@ -20,6 +21,8 @@ const today = new Date().toISOString().slice(0, 10);
 const pages = [
   ['index.html', homePage(), '/'],
   ['about.html', aboutPage(), '/about'],
+  ['sell-parents-house.html', familyPage(), '/sell-parents-house'],
+  ['family-property-guide.html', partnerGuidePage(), null],
   ['situations/index.html', situationsIndexPage(), '/situations'],
   ...situations.map((s) => [`situations/${s.slug}.html`, situationPage(s), `/situations/${s.slug}`]),
   ...areas.map((a) => [`areas/${a.slug}.html`, areaPage(a), `/areas/${a.slug}`]),
@@ -57,6 +60,7 @@ writeFileSync(
 Allow: /
 Disallow: /api/
 Disallow: /thank-you
+Disallow: /family-property-guide
 
 ${aiBots.map((b) => `User-agent: ${b}`).join('\n')}
 Allow: /
@@ -86,6 +90,7 @@ Key facts:
 ${link('/', 'Home', 'overview, process, direct sale vs. listing comparison, FAQ')}
 ${link('/about', `About ${site.agent}`, 'credentials, approach, profiles')}
 ${link('/situations', 'Situations we help with')}
+${link(family.path, 'Selling a parent’s house', family.answer)}
 
 ## Situations
 ${situations.map((s) => link(`/situations/${s.slug}`, s.title, s.answer)).join('\n')}

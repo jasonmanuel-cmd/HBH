@@ -31,4 +31,6 @@ export default {
 
   // Optional Google Analytics 4 ID (e.g. G-XXXXXXX). Set GA_MEASUREMENT_ID on Vercel to enable.
   gaId: process.env.GA_MEASUREMENT_ID || '',
+  // Optional Google Tag Manager container (GTM-XXXXXXX). Preferred for Ads conversions + call tracking. Set GTM_ID on Vercel.
+  gtmId: process.env.GTM_ID || '',
 };
