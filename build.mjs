@@ -76,6 +76,7 @@ Allow: /
 Disallow: /api/
 Disallow: /thank-you
 Disallow: /family-property-guide
+Disallow: /hq
 
 ${aiBots.map((b) => `User-agent: ${b}`).join('\n')}
 Allow: /

@@ -1,6 +1,7 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "hbh", "runtimeExecutable": "node", "runtimeArgs": ["dev.mjs"], "port": 3100, "autoPort": true }
+    { "name": "hbh", "runtimeExecutable": "node", "runtimeArgs": ["dev.mjs"], "port": 3100, "autoPort": true },
+    { "name": "hbh-hq-mock", "runtimeExecutable": "node", "runtimeArgs": ["dev.mjs", "--mock"], "port": 3101, "autoPort": true }
   ]
 }

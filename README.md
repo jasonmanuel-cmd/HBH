@@ -78,3 +78,13 @@ Analytics events (GTM/GA4, no personal data): `phone_click`, `cta_click`, `lead_
 ## Brand assets
 
 `static/assets/` holds the logo cut from the brand sheet: `logo-horizontal.png` (full color, transparent), `logo-header-reverse.png` (ivory + gold for navy), `logo-symbol-gold.png`, app/favicon icons, and `og-default.jpg`. For the sharpest icons, replace them with exports from the original vector logo file when available.
+
+## HQ panel (dashboard + CRM) — `/hq`
+
+Private, password-protected team panel at **https://www.callharbison.com/hq**.
+
+- **Dashboard:** leads waiting for first contact, follow-ups due, new today / 7 days, open pipeline, appointments, median time to first contact, gross profit (90 days), leads per week, pipeline by stage, source, and path of interest.
+- **CRM:** filter (open, new, follow-ups due, closed, all) and search; open a lead to call/text/email/map, see everything they submitted, change stage, set follow-up and appointment, record values and outcome, add notes and call logs, and see the activity timeline.
+- **Setup:** in Vercel set `HQ_PASSWORD` (long and unique) plus `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, then redeploy. Changing the password signs everyone out.
+- **Security:** one `/api/hq` function; signed HttpOnly/Secure/SameSite=Strict session cookie (12 hours); failed-login throttling; writes require the panel's own header; edits are whitelisted and validated; the database key never reaches the browser; `/hq` is noindex and blocked in robots.txt.
+- **Try it locally with sample data:** `npm run dev -- --mock`, open http://localhost:3000/hq, password `demo`.

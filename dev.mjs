@@ -1,9 +1,17 @@
-// Local preview: builds the site, serves ./dist with clean URLs, and runs /api/leads. Run: npm run dev
+// Local preview: builds the site, serves ./dist with clean URLs, and runs /api/leads + /api/hq. Run: npm run dev
+// Add `-- --mock` to try HQ with sample data and password "demo" (no real database needed).
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, join, normalize } from 'node:path';
 import { execSync } from 'node:child_process';
 import handler from './api/leads.js';
+import hqHandler from './api/hq.js';
+import { installMockSupabase } from './dev/mock-supabase.mjs';
+
+if (process.argv.includes('--mock')) {
+  installMockSupabase();
+  console.log('HQ mock mode: sample data, password "demo" → http://localhost:' + (Number(process.env.PORT) || 3000) + '/hq');
+}
 
 execSync('node build.mjs', { stdio: 'inherit' });
 
@@ -23,13 +31,13 @@ async function findFile(pathname) {
 createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
-  if (url.pathname === '/api/leads') {
+  if (url.pathname === '/api/leads' || url.pathname === '/api/hq') {
     let raw = '';
     for await (const chunk of req) raw += chunk;
     req.body = raw;
     res.status = (c) => ((res.statusCode = c), res);
     res.json = (b) => (res.setHeader('Content-Type', 'application/json'), res.end(JSON.stringify(b)));
-    return handler(req, res);
+    return url.pathname === '/api/hq' ? hqHandler(req, res) : handler(req, res);
   }
 
   // Mirror vercel.json redirects locally.
