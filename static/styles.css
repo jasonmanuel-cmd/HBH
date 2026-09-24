@@ -206,3 +206,8 @@
   .nav,.header-cta{display:none}.menu-toggle{display:flex;margin-left:auto;flex-direction:column;gap:5px;background:none;border:0;padding:10px}.menu-toggle span{width:28px;height:2px;background:#fff}
   .nav.open{position:absolute;top:86px;left:0;right:0;display:flex;flex-direction:column;align-items:flex-start;padding:22px 4vw 28px;background:var(--navy);gap:18px}.nav.open .nav-phone{display:block}
 }
+.about-hero{display:grid;grid-template-columns:auto 1fr;gap:36px;align-items:center}
+.headshot{width:200px;height:200px;border-radius:50%;object-fit:cover;border:3px solid var(--gold2);box-shadow:var(--shadow)}
+.author-box{grid-template-columns:64px 1fr}
+.author-photo{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid var(--gold2)}
+@media(max-width:640px){.about-hero{grid-template-columns:1fr;gap:20px}.headshot{width:140px;height:140px}}

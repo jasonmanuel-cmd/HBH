@@ -21,6 +21,7 @@ const year = new Date().getFullYear();
 const logo = '/assets/logo-horizontal.png'; // full color, transparent, 1172×231
 const logoReverse = '/assets/logo-header-reverse.png'; // ivory + gold for navy grounds, 487×96
 const ogDefault = '/assets/og-default.jpg'; // 1200×630
+const headshot = '/assets/nathanael-harbison.jpg'; // 325×325
 const BUILD_DATE = new Date().toISOString().slice(0, 10);
 const niceDate = (d) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -76,6 +77,7 @@ const personLd = () => ({
   name: site.agent,
   jobTitle: 'REALTOR®',
   url: `${site.url}/about`,
+  image: { '@type': 'ImageObject', url: `${site.url}${headshot}`, width: 325, height: 325 },
   telephone: site.phoneHref,
   email: site.email,
   worksFor: [{ '@id': ids.org }, { '@type': 'RealEstateAgent', name: site.brokerage, url: site.brokerageUrl }],
@@ -683,15 +685,21 @@ export function aboutPage() {
       path: '/about',
       pageType: 'about',
       image,
+      preload: headshot,
       hasForm: false,
       ld: graph({ path: '/about', title, description: about.description, image, type: 'ProfilePage', crumbs }),
     },
     `<section class="section navy page-top">
   <div class="container">
     ${crumbNav(crumbs)}
-    <p class="eyebrow gold">About Harbison Buys Homes</p>
-    <h1 class="page-title light">Meet <em>${esc(site.agent)}.</em></h1>
-    <p class="light-soft about-lead">California-licensed REALTOR® · DRE #${esc(site.dre)} · ${esc(site.brokerage)}</p>
+    <div class="about-hero">
+      <img class="headshot" src="${headshot}" alt="${esc(site.agent)}, REALTOR®, Harbison Buys Homes" width="325" height="325" fetchpriority="high">
+      <div>
+        <p class="eyebrow gold">About Harbison Buys Homes</p>
+        <h1 class="page-title light">Meet <em>${esc(site.agent)}.</em></h1>
+        <p class="light-soft about-lead">California-licensed REALTOR® · DRE #${esc(site.dre)} · ${esc(site.brokerage)}</p>
+      </div>
+    </div>
   </div>
 </section>
 <section class="section cream">
@@ -780,7 +788,7 @@ export function guidePage(g) {
       <nav class="toc" aria-label="In this guide"><p class="answer-label">In this guide</p><ol>${toc}</ol></nav>
       ${g.sections.map(([h, paras], i) => `<section id="s${i + 1}"><h2 class="prose-h">${esc(h)}</h2>${paras.map((p) => (p.startsWith('<ul') || p.startsWith('<div') ? p : `<p>${p}</p>`)).join('')}</section>`).join('\n      ')}
       ${g.meaning ? `<aside class="meaning"><h2>What this means for your property</h2><p>${esc(g.meaning)}</p><a class="btn btn-gold" href="#lead-form" data-cta="guide_meaning">Get Options for My Property →</a></aside>` : ''}
-      <aside class="author-box"><img src="/assets/logo-symbol-gold.png" alt="" width="48" height="52" loading="lazy"><div><p class="answer-label">About the author</p><p>Written by the ${esc(site.name)} team, led by ${esc(site.agent)}, California-licensed REALTOR® (DRE #${esc(site.dre)}) with ${esc(site.brokerage)}. <a class="link" href="/about">About Nathanael →</a></p></div></aside>
+      <aside class="author-box"><img class="author-photo" src="${headshot}" alt="${esc(site.agent)}" width="64" height="64" loading="lazy"><div><p class="answer-label">About the author</p><p>Written by the ${esc(site.name)} team, led by ${esc(site.agent)}, California-licensed REALTOR® (DRE #${esc(site.dre)}) with ${esc(site.brokerage)}. <a class="link" href="/about">About Nathanael →</a></p></div></aside>
       <p class="disclaimer">This guide is educational and does not replace legal, tax, or financial advice. Laws and thresholds change — consult a qualified attorney, CPA, or your agent about your specific situation.</p>
       <h3>Related situations</h3><ul class="chip-list">${related.map((s) => `<li><a href="/situations/${s.slug}">${esc(s.name)}</a></li>`).join('')}</ul>
       <h3>More guides</h3><ul class="link-list">${guides.filter((o) => o.slug !== g.slug).map((o) => `<li><a href="/guides/${o.slug}">${esc(o.title)}</a></li>`).join('')}</ul>
