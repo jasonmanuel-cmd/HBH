@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Harbison Buys Homes Sitemap</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&display=swap">
+<style>
+:root{
+  --ground:#f6f2e9;--surface:#ffffff;--ink:#10222d;--muted:#5d6c74;--line:rgba(3,31,43,.12);
+  --navy:#031f2b;--gold:#9f7528;--gold-soft:#f0cf84;--chip:#efe7d6;--hidden:#8a6d5b;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  color-scheme:dark;--ground:#021720;--surface:#082f3f;--ink:#eef2f3;--muted:#9fb0b8;--line:rgba(240,207,132,.16);
+  --navy:#f0cf84;--gold:#f0cf84;--gold-soft:#f0cf84;--chip:#0d3a4c;--hidden:#d9b39a;
+}}
+:root[data-theme="dark"]{
+  color-scheme:dark;--ground:#021720;--surface:#082f3f;--ink:#eef2f3;--muted:#9fb0b8;--line:rgba(240,207,132,.16);
+  --navy:#f0cf84;--gold:#f0cf84;--gold-soft:#f0cf84;--chip:#0d3a4c;--hidden:#d9b39a;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.55 Inter,system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:16px}
+.wrap{max-width:1080px;margin:0 auto;padding-block:40px 64px;display:grid;gap:28px}
+.eyebrow{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--gold);margin:0}
+h1{font-family:"Playfair Display",Georgia,serif;font-weight:600;font-size:clamp(2rem,5vw,3rem);line-height:1.05;margin:6px 0 10px;color:var(--navy);text-wrap:balance}
+h1 em{color:var(--gold)}
+.lede{max-width:65ch;color:var(--muted);margin:0}
+.notice{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--gold-soft);padding:16px 20px;display:grid;gap:6px}
+.notice p{margin:0}
+.notice strong{color:var(--navy)}
+code{font:13px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--chip);padding:2px 6px;border-radius:3px;word-break:break-all}
+.copy{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:600 13px Inter,system-ui,sans-serif;background:var(--navy);color:var(--ground);border:0;padding:7px 12px;border-radius:3px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--gold-soft);outline-offset:2px}
+.root{background:var(--surface);border:1px solid var(--line);padding:20px 22px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:baseline}
+.root h2{font-family:"Playfair Display",Georgia,serif;font-size:1.5rem;margin:0;color:var(--navy)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:18px}
+section.group{background:var(--surface);border:1px solid var(--line);padding:20px 22px;display:grid;gap:12px;align-content:start}
+.ghead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.ghead h3{margin:0;font-size:1rem;color:var(--navy)}
+.count{font-size:.75rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+ul{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+li{display:grid;gap:1px}
+.name{font-weight:600}
+.path{font:12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--gold);word-break:break-all}
+.hub .name::after{content:"Hub page";margin-left:8px;font:600 10px Inter,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border:1px solid var(--line);padding:1px 6px;border-radius:2px;vertical-align:2px}
+.off .path{color:var(--hidden)}
+.tag{font-size:.75rem;color:var(--muted)}
+.files{display:grid;gap:8px}
+.files div{display:grid;grid-template-columns:minmax(110px,160px) 1fr;gap:12px}
+@media (max-width:480px){.files div{grid-template-columns:1fr;gap:0}}
+footer{color:var(--muted);font-size:.82rem}
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Site structure · 25 pages</p>
+    <h1>Harbison Buys Homes <em>sitemap</em></h1>
+    <p class="lede">Every page on the public website, grouped the way visitors move through it. 22 pages are listed in <code>sitemap.xml</code> for Google and AI search; 3 are intentionally hidden from search.</p>
+  </header>
+
+  <div class="notice">
+    <p><strong>Submit this URL to Google Search Console and Bing Webmaster Tools:</strong></p>
+    <div class="copy"><code id="xmlurl">https://www.harbisonbuyshomes.com/sitemap.xml</code><button type="button" id="copybtn">Copy</button></div>
+    <p class="tag">It goes live once the website is deployed on that domain. Right now the Vercel project <code>harbison-buys-homes</code> is serving the private Lead Desk app, not this website.</p>
+  </div>
+
+  <div class="root">
+    <h2>Home</h2>
+    <span class="path">/</span>
+  </div>
+
+  <div class="grid">
+    <section class="group">
+      <div class="ghead"><h3>Situations</h3><span class="count">9 pages</span></div>
+      <ul>
+        <li class="hub"><span class="name">Property situations we help with</span><span class="path">/situations</span></li>
+        <li><span class="name">Inherited property</span><span class="path">/situations/inherited-property</span></li>
+        <li><span class="name">Needs major repairs</span><span class="path">/situations/needs-major-repairs</span></li>
+        <li><span class="name">Vacant property</span><span class="path">/situations/vacant-property</span></li>
+        <li><span class="name">Problem tenants</span><span class="path">/situations/problem-tenants</span></li>
+        <li><span class="name">Relocation</span><span class="path">/situations/relocation</span></li>
+        <li><span class="name">Divorce or life change</span><span class="path">/situations/life-change</span></li>
+        <li><span class="name">Fire or water damage</span><span class="path">/situations/fire-water-damage</span></li>
+        <li><span class="name">Unfinished remodel</span><span class="path">/situations/unfinished-remodel</span></li>
+      </ul>
+    </section>
+
+    <section class="group">
+      <div class="ghead"><h3>Service areas</h3><span class="count">4 pages</span></div>
+      <ul>
+        <li><span class="name">Bakersfield</span><span class="path">/areas/bakersfield</span></li>
+        <li><span class="name">Tehachapi</span><span class="path">/areas/tehachapi</span></li>
+        <li><span class="name">California City</span><span class="path">/areas/california-city</span></li>
+        <li><span class="name">Kern County</span><span class="path">/areas/kern-county</span></li>
+      </ul>
+    </section>
+
+    <section class="group">
+      <div class="ghead"><h3>Seller guides</h3><span class="count">4 pages</span></div>
+      <ul>
+        <li class="hub"><span class="name">All seller guides</span><span class="path">/guides</span></li>
+        <li><span class="name">How to sell a house as-is in California</span><span class="path">/guides/sell-house-as-is-california</span></li>
+        <li><span class="name">Cash offer vs. listing</span><span class="path">/guides/cash-offer-vs-listing</span></li>
+        <li><span class="name">Selling an inherited house in California</span><span class="path">/guides/sell-inherited-house-california</span></li>
+      </ul>
+    </section>
+
+    <section class="group">
+      <div class="ghead"><h3>Company &amp; family</h3><span class="count">4 pages</span></div>
+      <ul>
+        <li><span class="name">About Nathanael Harbison</span><span class="path">/about</span></li>
+        <li><span class="name">Selling a parent’s house</span><span class="path">/sell-parents-house</span></li>
+        <li><span class="name">Privacy policy</span><span class="path">/privacy</span></li>
+        <li><span class="name">Terms of use</span><span class="path">/terms</span></li>
+      </ul>
+    </section>
+
+    <section class="group">
+      <div class="ghead"><h3>Hidden from search</h3><span class="count">3 pages</span></div>
+      <ul>
+        <li class="off"><span class="name">Thank you</span><span class="path">/thank-you</span><span class="tag">Shown after a form is submitted</span></li>
+        <li class="off"><span class="name">Family property guide</span><span class="path">/family-property-guide</span><span class="tag">Partner-only page, shared by link</span></li>
+        <li class="off"><span class="name">Page not found</span><span class="path">/404</span><span class="tag">Any broken or mistyped link</span></li>
+      </ul>
+    </section>
+
+    <section class="group">
+      <div class="ghead"><h3>Files for search engines</h3><span class="count">3 files</span></div>
+      <div class="files">
+        <div><span class="path">/sitemap.xml</span><span>The 22 indexable pages, for Google and Bing</span></div>
+        <div><span class="path">/robots.txt</span><span>Crawl rules; allows AI search crawlers</span></div>
+        <div><span class="path">/llms.txt</span><span>Plain-language summary for AI assistants</span></div>
+      </div>
+    </section>
+  </div>
+
+  <footer>The <code>/family</code> short link redirects to <code>/sell-parents-house</code>. The sitemap is regenerated automatically on every build.</footer>
+</div>
+
+<script>
+document.getElementById('copybtn').addEventListener('click', function () {
+  var btn = this, text = document.getElementById('xmlurl').textContent;
+  function done(){ btn.textContent = 'Copied'; setTimeout(function(){ btn.textContent = 'Copy'; }, 1600); }
+  function fallback(){ var r = document.createRange(); r.selectNodeContents(document.getElementById('xmlurl')); var s = getSelection(); s.removeAllRanges(); s.addRange(r); btn.textContent = 'Press Ctrl+C'; }
+  try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
+});
+</script>
+</html>
