@@ -1,5 +1,6 @@
 // Builds the static site into ./dist. Run: npm run build
-import { rmSync, mkdirSync, writeFileSync, cpSync } from 'node:fs';
+import { rmSync, mkdirSync, writeFileSync, cpSync, readFileSync, renameSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import site from './site.config.mjs';
 import {
@@ -36,10 +37,22 @@ const pages = [
   ['404.html', notFoundPage(), null],
 ];
 
+// Mobile performance: inline the (small) stylesheet so first paint doesn't wait on a second request,
+// and fingerprint script.js so it can be cached for a year.
+const css = readFileSync('static/styles.css', 'utf8')
+  .replace(/\/\*[\s\S]*?\*\//g, '')
+  .replace(/\s+/g, ' ')
+  .replace(/\s*([{}:;,>])\s*/g, '$1')
+  .replace(/;}/g, '}')
+  .trim();
+const jsHash = createHash('sha256').update(readFileSync('static/script.js')).digest('hex').slice(0, 10);
+renameSync(join(out, 'script.js'), join(out, `script.${jsHash}.js`));
+rmSync(join(out, 'styles.css'));
+
 for (const [file, html] of pages) {
   const path = join(out, file);
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, html);
+  writeFileSync(path, html.replace('<link rel="stylesheet" href="/styles.css">', `<style>${css}</style>`).replace('src="/script.js"', `src="/script.${jsHash}.js"`));
 }
 
 writeFileSync(

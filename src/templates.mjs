@@ -30,6 +30,22 @@ const sized = (url, w, h) => url.replace(/([?&])w=\d+/, `$1w=${w}&h=${h}`);
 const img = (url, alt, w, h, { eager = false, cls = '' } = {}) =>
   `<img${cls ? ` class="${cls}"` : ''} src="${sized(url, w, h)}" srcset="${sized(url, Math.round(w / 1.5), Math.round(h / 1.5))} ${Math.round(w / 1.5)}w, ${sized(url, w, h)} ${w}w" sizes="(max-width: 640px) 92vw, ${w}px" alt="${esc(alt)}" width="${w}" height="${h}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 
+// Hero photo as a real <img> so the browser finds it early (LCP). On phones the photo sat under a ~90%
+// overlay, so it isn't downloaded there at all (a 1×1 placeholder source) — the headline becomes the LCP.
+const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const heroSources = (url) => ({
+  mobile: `${BLANK} 1w`,
+  desktop: `${sized(url, 1100, 700)} 1100w, ${sized(url, 1500, 950)} 1500w, ${sized(url, 1900, 1200)} 1900w`,
+});
+const heroPicture = (url) => {
+  const s = heroSources(url);
+  return `<picture class="hero-img"><source media="(max-width: 980px)" srcset="${s.mobile}" sizes="100vw"><img src="${sized(url, 1500, 950)}" srcset="${s.desktop}" sizes="100vw" alt="" width="1500" height="950" fetchpriority="high" decoding="async"></picture>`;
+};
+const heroPreload = (url) => {
+  const s = heroSources(url);
+  return `<link rel="preload" as="image" media="(min-width: 981px)" imagesrcset="${s.desktop}" imagesizes="100vw" fetchpriority="high">`;
+};
+
 const pageTitle = (t) => (`${t} | ${site.name}`.length <= 66 ? `${t} | ${site.name}` : `${t} | Harbison`);
 
 // ---------- Structured data (one connected @graph per page) ----------
@@ -185,10 +201,10 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   <link rel="manifest" href="/site.webmanifest">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
-  ${preload ? `<link rel="preload" as="image" href="${preload}" fetchpriority="high">` : ''}
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  ${preload ? (preload.startsWith('https://images.unsplash.com') ? heroPreload(preload) : `<link rel="preload" as="image" href="${preload}" fetchpriority="high">`) : ''}
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-latin.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/playfair-latin.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="/fonts/playfair-italic-latin.woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
   ${gtm}
   ${ga}
@@ -388,7 +404,7 @@ const crumbNav = (crumbs) =>
 export function homePage() {
   const title = 'We Buy Houses in Bakersfield & Kern County | Harbison Buys Homes';
   const description = 'Property problem? Call Harbison. Sell as-is or compare listing, renovation, and development — licensed, local, no obligation. Call or text (661) 472-7499.';
-  const heroImg = sized(images.hero, 1800, 1100);
+  const heroImg = images.hero;
   return page(
     {
       title,
@@ -399,7 +415,8 @@ export function homePage() {
       preload: heroImg,
       ld: graph({ path: '/', title, description, image: sized(images.hero, 1200, 630), faq: faqs }),
     },
-    `<section class="hero" style="--hero:url('${heroImg}')">
+    `<section class="hero">
+  ${heroPicture(heroImg)}
   <div class="container hero-grid">
     <div class="hero-copy">
       <p class="eyebrow">${esc(heroCopy.eyebrow)}</p>
@@ -529,7 +546,7 @@ ${finalCta()}`
 function detailPage({ item, path, crumbs, eyebrow, extra = '', form = {}, pageType = 'page', service }) {
   const allFaqs = item.faqs ? [...item.faqs, ...faqs.slice(0, 3)] : faqs.slice(0, 4);
   const title = pageTitle(item.title);
-  const heroImg = sized(item.image, 1600, 1000);
+  const heroImg = item.image;
   const ogImg = sized(item.image, 1200, 630);
   return page(
     {
@@ -541,7 +558,8 @@ function detailPage({ item, path, crumbs, eyebrow, extra = '', form = {}, pageTy
       preload: heroImg,
       ld: graph({ path, title, description: item.description, image: ogImg, crumbs, faq: allFaqs, extra: [service] }),
     },
-    `<section class="hero hero-sub" style="--hero:url('${heroImg}')">
+    `<section class="hero hero-sub">
+  ${heroPicture(heroImg)}
   <div class="container hero-grid">
     <div class="hero-copy">
       ${crumbNav(crumbs)}
@@ -1080,7 +1098,7 @@ export function familyPage() {
   const url = `${site.url}${f.path}`;
   const title = pageTitle('Selling a Parent’s House in Kern County');
   const crumbs = [['Home', '/'], ['Selling a Parent’s House', f.path]];
-  const heroImg = sized(f.image, 1600, 1000);
+  const heroImg = f.image;
   const ogImg = sized(f.image, 1200, 630);
   const allFaqs = [...f.faqs, ...faqs.slice(0, 2)];
   const service = serviceLd({ name: f.title, description: f.description, url, areaServed: areas.map(placeLd) });
@@ -1094,7 +1112,8 @@ export function familyPage() {
   const { direct, listing } = f.paths;
   return page(
     { title, description: f.description, path: f.path, image: ogImg, preload: heroImg, pageType: 'family', ld: graph({ path: f.path, title, description: f.description, image: ogImg, crumbs, faq: allFaqs, extra: [service, howTo, ...vids] }) },
-    `<section class="hero hero-sub" style="--hero:url('${heroImg}')">
+    `<section class="hero hero-sub">
+  ${heroPicture(heroImg)}
   <div class="container hero-grid">
     <div class="hero-copy">
       ${crumbNav(crumbs)}

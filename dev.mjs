@@ -8,7 +8,7 @@ import handler from './api/leads.js';
 execSync('node build.mjs', { stdio: 'inherit' });
 
 const PORT = Number(process.env.PORT) || 3000;
-const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.xml': 'application/xml', '.txt': 'text/plain' };
+const types = { '.html': 'text/html; charset=utf-8', '.css': 'text/css', '.js': 'text/javascript', '.svg': 'image/svg+xml', '.png': 'image/png', '.xml': 'application/xml', '.txt': 'text/plain', '.woff2': 'font/woff2', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.webmanifest': 'application/manifest+json' };
 
 async function findFile(pathname) {
   const base = normalize(join('dist', decodeURIComponent(pathname))).replace(/[\\/]+$/, '');
