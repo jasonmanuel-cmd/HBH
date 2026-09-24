@@ -1,16 +1,26 @@
 import site from '../site.config.mjs';
-import { images, situations, areas as baseAreas, faqs as baseFaqs, situationOptions, timelineOptions } from './content.mjs';
-import { californiaCity, extraFaqs, glance, testimonials, about, guides } from './content-extra.mjs';
+import { images, situations as baseSituations, areas as baseAreas, faqs as baseFaqs } from './content.mjs';
+import { californiaCity, extraFaqs, glance, testimonials, about, guides as baseGuides } from './content-extra.mjs';
 import { family, familyForm, partnerGuide } from './family.mjs';
+import {
+  supportingPromise, heroCopy, reassurance, processSteps, routes, compareDisclosure, whyHarbison, transparency, safeguards,
+  offerExplanation, offerExample, walkthrough, formSituations, situationFormMap, detailOptions,
+  newSituations, stallionSprings, newGuides, guideMeaning,
+} from './content-playbook.mjs';
 
-export const areas = [...baseAreas.slice(0, 2), californiaCity, ...baseAreas.slice(2)];
+export const situations = [...baseSituations, ...newSituations];
+// Bakersfield, Tehachapi, Stallion Springs, California City, Kern County
+export const areas = [...baseAreas.slice(0, 2), stallionSprings, californiaCity, ...baseAreas.slice(2)];
 export const faqs = [...baseFaqs.slice(0, 4), ...extraFaqs, ...baseFaqs.slice(4)];
-export { guides };
+export const guides = [...baseGuides.map((g) => ({ ...g, meaning: guideMeaning[g.slug] })), ...newGuides];
 
 const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const strip = (s = '') => String(s).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 const year = new Date().getFullYear();
-const logo = '/assets/harbison-buys-homes-logo.png';
+// Brand assets cut from the Harbison Buys Homes logo sheet (see static/assets).
+const logo = '/assets/logo-horizontal.png'; // full color, transparent, 1172×231
+const logoReverse = '/assets/logo-header-reverse.png'; // ivory + gold for navy grounds, 487×96
+const ogDefault = '/assets/og-default.jpg'; // 1200×630
 const BUILD_DATE = new Date().toISOString().slice(0, 10);
 const niceDate = (d) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
@@ -42,8 +52,8 @@ const orgLd = () => ({
   slogan: site.tagline,
   description: `${site.name} buys houses and land as-is in Bakersfield, Tehachapi, California City, and throughout Kern County, California, and helps owners compare a direct sale with listing, renovation, or development.`,
   url: `${site.url}/`,
-  logo: { '@type': 'ImageObject', url: `${site.url}${logo}`, width: 1254, height: 1254 },
-  image: `${site.url}${logo}`,
+  logo: { '@type': 'ImageObject', url: `${site.url}${logo}`, width: 1172, height: 231 },
+  image: `${site.url}${ogDefault}`,
   telephone: site.phoneHref,
   email: site.email,
   address: { '@type': 'PostalAddress', addressLocality: site.city, addressRegion: site.state, addressCountry: 'US' },
@@ -66,7 +76,6 @@ const personLd = () => ({
   name: site.agent,
   jobTitle: 'REALTOR®',
   url: `${site.url}/about`,
-  image: `${site.url}${logo}`,
   telephone: site.phoneHref,
   email: site.email,
   worksFor: [{ '@id': ids.org }, { '@type': 'RealEstateAgent', name: site.brokerage, url: site.brokerageUrl }],
@@ -135,7 +144,7 @@ const serviceLd = ({ name, description, url, areaServed }) => ({
 
 function head({ title, description, path, image, noindex = false, ld, preload, article }) {
   const canonical = `${site.url}${path === '/' ? '/' : path}`;
-  const ogImage = image || `${site.url}${logo}`;
+  const ogImage = image || `${site.url}${ogDefault}`;
   const ga = site.gaId
     ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(site.gaId)}"></script>
   <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(site.gaId)}');</script>`
@@ -168,8 +177,10 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   <meta name="twitter:title" content="${esc(title)}">
   <meta name="twitter:description" content="${esc(description)}">
   <meta name="twitter:image" content="${esc(ogImage)}">
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="${logo}">
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/assets/favicon-48.png" type="image/png" sizes="48x48">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <link rel="preconnect" href="https://images.unsplash.com" crossorigin>
   ${preload ? `<link rel="preload" as="image" href="${preload}" fetchpriority="high">` : ''}
@@ -189,18 +200,18 @@ function header(cta) {
   return `<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="container nav-wrap">
-    <a class="brand" href="/" aria-label="${esc(site.name)} home"><img src="${logo}" alt="${esc(site.name)} logo" width="58" height="58"></a>
+    <a class="brand" href="/" aria-label="${esc(site.name)} home"><img src="${logoReverse}" alt="${esc(site.name)}" width="233" height="46"></a>
     <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button>
     <nav class="nav" id="site-nav" aria-label="Main">
-      <a href="/#how">How It Works</a>
+      <a href="/how-it-works">How It Works</a>
       <a href="/situations">Situations</a>
       <a href="/sell-parents-house">Parent’s House</a>
       <a href="/guides">Guides</a>
       <a href="/about">About</a>
-      <a href="/#faq">FAQ</a>
+      <a href="/contact">Contact</a>
       <a class="nav-phone" href="tel:${site.phoneHref}">${esc(site.phone)}</a>
     </nav>
-    <a class="btn btn-gold header-cta" href="${cta}">Get My Options</a>
+    <a class="btn btn-gold header-cta" href="${cta}" data-cta="header">Get My Options</a>
   </div>
 </header>`;
 }
@@ -215,21 +226,21 @@ function footer(cta) {
     .join(' · ');
   return `<footer class="footer" id="contact">
   <div class="container footer-grid">
-    <div><img class="footer-logo" src="${logo}" alt="${esc(site.name)} logo" width="74" height="74" loading="lazy"><p>${esc(site.tagline)}</p><p class="footer-social">${socials}</p></div>
-    <div><h2 class="footer-h">Explore</h2><a href="/#how">How It Works</a><a href="/situations">Situations</a><a href="/sell-parents-house">Selling a Parent’s House</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
-    <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/#lead-form">Request property options</a><p>Replies typically within 24 hours</p></div>
+    <div><img class="footer-logo" src="${logoReverse}" alt="${esc(site.name)}" width="243" height="48" loading="lazy"><p><strong class="footer-tag">${esc(site.tagline)}</strong><br>${esc(supportingPromise)}</p><p class="footer-social">${socials}</p></div>
+    <div><h2 class="footer-h">Explore</h2><a href="/how-it-works">How It Works</a><a href="/situations">Situations</a><a href="/sell-parents-house">Selling a Parent’s House</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
+    <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">Call or text ${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/contact">Contact page</a><a href="/#lead-form">Request property options</a></div>
     <div><h2 class="footer-h">Service Area</h2>${areas.map((a) => `<a href="/areas/${a.slug}">${esc(a.name)}</a>`).join('')}</div>
   </div>
-  <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a></span></div>
+  <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/accessibility">Accessibility</a></span></div>
 </footer>
-<div class="mobile-bar"><a href="tel:${site.phoneHref}" class="btn btn-outline">Call Now</a><a href="${cta}" class="btn btn-gold">Get My Options</a></div>
+<div class="mobile-bar"><a href="tel:${site.phoneHref}" class="btn btn-outline">Call or Text</a><a href="${cta}" class="btn btn-gold" data-cta="mobile_bar">Get My Options</a></div>
 <script src="/script.js" defer></script>`;
 }
 
 function page(opts, body) {
   const cta = opts.hasForm === false ? '/#lead-form' : '#lead-form';
   return `${head(opts)}
-<body>
+<body data-page-type="${esc(opts.pageType || 'page')}">
 ${site.gtmId ? `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${esc(site.gtmId)}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>` : ''}
 ${header(cta)}
 <main id="main">
@@ -243,31 +254,55 @@ ${footer(cta)}
 
 // ---------- Components ----------
 
-const options = (list) => list.map((o) => `<option>${esc(o)}</option>`).join('');
-
-function leadForm({ situation = '', heading = 'Get Your Property Options' } = {}) {
-  const situationSelect = situationOptions
-    .map((o) => `<option${situation && o.toLowerCase().startsWith(situation.toLowerCase()) ? ' selected' : ''}>${esc(o)}</option>`)
+// Progressive options form (playbook §4): situation → address → contact. The lead is created at step 3;
+// timeline, occupancy, condition, and goals are asked afterwards on the thank-you page.
+// `situation` preselects step 1 and opens the form on the address step.
+function leadForm({ situation = '', heading = 'Get Your Property Options', city = '', location = '', pageType = 'page' } = {}) {
+  const preset = formSituations.includes(situation) ? situation : '';
+  const choice = formSituations
+    .map((o) => `<label class="choice"><input type="radio" name="situation" value="${esc(o)}"${o === preset ? ' checked' : ''}><span>${esc(o)}</span></label>`)
     .join('');
   return `<aside class="lead-card" id="lead-form" aria-label="Request property options">
-      <p class="eyebrow gold">Start Here</p>
+      <p class="eyebrow gold">Start Here · Free &amp; No Obligation</p>
       <h2>${esc(heading)}</h2>
-      <p>Tell us a little about the property. No obligation.</p>
-      <form data-lead-form novalidate>
-        <label>Property address<input name="address" autocomplete="street-address" placeholder="123 Main St, Bakersfield, CA" required></label>
-        <div class="two-col">
-          <label>Your name<input name="name" autocomplete="name" required></label>
-          <label>Phone number<input name="phone" type="tel" autocomplete="tel" required></label>
-        </div>
-        <label>Email <span class="muted">(optional)</span><input name="email" type="email" autocomplete="email"></label>
-        <div class="two-col">
-          <label>Situation<select name="situation"><option value="">Select one</option>${situationSelect}</select></label>
-          <label>Timeline<select name="timeline"><option value="">Select one</option>${options(timelineOptions)}</select></label>
-        </div>
-        <label class="hp" aria-hidden="true">Company<input name="company" tabindex="-1" autocomplete="off"></label>
-        <button class="btn btn-gold btn-full" type="submit">See My Options →</button>
-        <p class="form-note">By submitting, you agree ${esc(site.name)} may contact you by phone, text, or email about your property. Consent is not a condition of any sale. Msg &amp; data rates may apply; reply STOP to opt out. See our <a href="/privacy">Privacy Policy</a>.</p>
+      <form data-lead-form data-steps data-form-type="options"${preset ? ' data-start="1"' : ''} novalidate>
+        <input type="hidden" name="form_type" value="options">
+        <input type="hidden" name="route_interest" value="">
+        <input type="hidden" name="location_interest" value="${esc(location)}">
+        <input type="hidden" name="page_type" value="${esc(pageType)}">
+        <ol class="step-dots" aria-hidden="true">${Array.from({ length: 3 }, (_, i) => `<li${i === 0 ? ' class="on"' : ''}></li>`).join('')}</ol>
+        <fieldset class="fstep" data-step="1"${preset ? ' hidden' : ''}>
+          <legend class="fstep-q">What would you like help with?</legend>
+          <div class="choice-grid choice-list" role="radiogroup">${choice}</div>
+          <button class="btn btn-gold btn-full" type="button" data-next>Continue →</button>
+        </fieldset>
+        <fieldset class="fstep" data-step="2"${preset ? '' : ' hidden'}>
+          <legend class="fstep-q">Where is the property?</legend>
+          <label for="f-street-${pageType}">Street address</label><input id="f-street-${pageType}" name="street" autocomplete="address-line1" placeholder="123 Main St" required>
+          <div class="addr-row">
+            <div><label for="f-city-${pageType}">City</label><input id="f-city-${pageType}" name="city" autocomplete="address-level2" value="${esc(city)}" required></div>
+            <div><label for="f-zip-${pageType}">ZIP</label><input id="f-zip-${pageType}" name="zip" autocomplete="postal-code" inputmode="numeric" maxlength="10" required></div>
+          </div>
+          <input type="hidden" name="state" value="CA">
+          <p class="form-hint">California · Kern County and nearby</p>
+          <div class="fstep-nav">${preset ? '' : '<button class="btn btn-ghost" type="button" data-back>Back</button>'}<button class="btn btn-gold" type="button" data-next>Continue →</button></div>
+        </fieldset>
+        <fieldset class="fstep" data-step="3" hidden>
+          <legend class="fstep-q">How can we reach you?</legend>
+          <div class="two-col">
+            <div><label for="f-first-${pageType}">First name</label><input id="f-first-${pageType}" name="first_name" autocomplete="given-name" required></div>
+            <div><label for="f-last-${pageType}">Last name</label><input id="f-last-${pageType}" name="last_name" autocomplete="family-name" required></div>
+          </div>
+          <label for="f-phone-${pageType}">Mobile phone</label><input id="f-phone-${pageType}" name="phone" type="tel" autocomplete="tel" required>
+          <label for="f-email-${pageType}">Email <span class="muted">(optional)</span></label><input id="f-email-${pageType}" name="email" type="email" autocomplete="email">
+          <label class="check"><input type="checkbox" name="consent_response" value="yes" required><span>${esc(site.name)} may contact me by phone, text, or email about this property.</span></label>
+          <label class="check"><input type="checkbox" name="consent_marketing" value="yes"><span>Also send me occasional seller tips and market updates. <span class="muted">(optional)</span></span></label>
+          <label class="hp" aria-hidden="true">Company<input name="company" tabindex="-1" autocomplete="off"></label>
+          <div class="fstep-nav"><button class="btn btn-ghost" type="button" data-back>Back</button><button class="btn btn-gold" type="submit">Get My Property Options →</button></div>
+          <p class="form-note">Consent is not a condition of any sale. Msg &amp; data rates may apply; reply STOP to opt out. We never share your number for others’ marketing. See our <a href="/privacy">Privacy Policy</a>.</p>
+        </fieldset>
         <p class="form-status" role="status" aria-live="polite"></p>
+        <p class="form-alt">Prefer to talk? Call or text <a href="tel:${site.phoneHref}">${esc(site.phone)}</a></p>
       </form>
     </aside>`;
 }
@@ -280,16 +315,47 @@ const faqList = (list) => `<div class="faq-list">${list
 
 const finalCta = (href = '#lead-form') => `<section class="section final-cta">
   <div class="container final-cta-grid">
-    <div><p class="eyebrow gold-dark">Ready When You Are</p><h2>Not sure what to do with the property?</h2><p>Start with the address. We’ll take it from there — or call <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>.</p></div>
-    <a class="btn btn-gold big" href="${href}">Get My Property Options →</a>
+    <div><p class="eyebrow gold-dark">Ready When You Are</p><h2>Not sure what to do with the property?</h2><p>Start with the address. We’ll help you find the clearest next step — or call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>.</p></div>
+    <a class="btn btn-gold big" href="${href}" data-cta="final">Get My Property Options →</a>
   </div>
 </section>`;
 
-const steps = (light = false) => `<ol class="steps${light ? ' light-steps' : ''}">
-      <li><span class="step-num" aria-hidden="true">01</span><h3>Tell Us About the Property</h3><p>Send the address, fill out a quick form, or call or text ${esc(site.phone)}.</p></li>
-      <li><span class="step-num" aria-hidden="true">02</span><h3>We Review Your Options</h3><p>We evaluate the property, condition, timeline, and situation — usually within 24 hours.</p></li>
-      <li><span class="step-num" aria-hidden="true">03</span><h3>Choose Your Next Step</h3><p>Take a direct offer, list, renovate, or explore development. You decide; there is no obligation.</p></li>
+// Four steps; real sequence, so numbered.
+const steps = (light = false) => `<ol class="steps four${light ? ' light-steps' : ''}">
+      ${processSteps.map(([h, p], i) => `<li><span class="step-num" aria-hidden="true">${i + 1}</span><h3>${esc(h)}</h3><p>${esc(p)}</p></li>`).join('\n      ')}
     </ol>`;
+
+const reassuranceStrip = () => `<section class="reassure" aria-label="What to expect">
+  <ul class="container reassure-list">${reassurance.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>
+</section>`;
+
+// Each path pre-fills route_interest on the form so the team knows what the seller came in curious about.
+const routeCards = () => `<div class="route-grid">${routes
+  .map((r) => `<article class="route-card">${img(images[r.image], r.alt, 600, 380, { cls: 'solution-media' })}<div class="solution-body"><h3>${esc(r.name)}</h3><p>${esc(r.text)}</p><a class="route-link" href="#lead-form" data-route="${r.route}">${r.route === 'not_ready' ? 'Get information' : 'Ask about this path'} →</a></div></article>`)
+  .join('')}</div>`;
+
+const compareTable = () => `<div class="compare-wrap">
+      <table class="compare">
+        <caption class="sr-only">Selling directly to Harbison compared with a traditional listing</caption>
+        <thead><tr><th scope="col"><span class="sr-only">Factor</span></th><th scope="col">Sell Direct to Harbison</th><th scope="col">Traditional Listing</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Repairs</th><td>None — sold as-is</td><td>Often needed to attract buyers</td></tr>
+          <tr><th scope="row">Showings</th><td>One walkthrough</td><td>Open houses and repeat showings</td></tr>
+          <tr><th scope="row">Timeline</th><td>You pick the closing date, subject to title</td><td>Depends on market and buyer financing</td></tr>
+          <tr><th scope="row">Commissions</th><td>None paid to Harbison</td><td>Typically paid to agents</td></tr>
+          <tr><th scope="row">Price</th><td>Reflects condition, costs, and convenience</td><td>Can be higher, especially for move-in-ready homes</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="disclosure">${esc(compareDisclosure)}</p>`;
+
+const transparencyList = () => `<ul class="promise-list">${transparency.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`;
+
+// Shown on every situation page: the realistic paths for this kind of property.
+const pathsBlock = () => `<h3>Possible paths</h3><ul class="path-mini">${routes
+  .map((r) => `<li><strong>${esc(r.name)}.</strong> ${esc(r.text)}</li>`)
+  .join('')}</ul>
+      <p class="note-small"><strong>What we don’t provide:</strong> legal, tax, or financial advice. For probate, trusts, taxes, or tenant disputes, we’ll suggest you check with an attorney or CPA — and we’re happy to coordinate with them.</p>`;
 
 const glanceTable = () => `<dl class="glance">${glance.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
 
@@ -319,13 +385,14 @@ const crumbNav = (crumbs) =>
 
 export function homePage() {
   const title = 'We Buy Houses in Bakersfield & Kern County | Harbison Buys Homes';
-  const description = 'Sell your Kern County house as-is — no repairs, showings, or pressure. Harbison compares a cash offer with listing, renovation, or development. Call (661) 472-7499.';
+  const description = 'Property problem? Call Harbison. Sell as-is or compare listing, renovation, and development — licensed, local, no obligation. Call or text (661) 472-7499.';
   const heroImg = sized(images.hero, 1800, 1100);
   return page(
     {
       title,
       description,
       path: '/',
+      pageType: 'home',
       image: sized(images.hero, 1200, 630),
       preload: heroImg,
       ld: graph({ path: '/', title, description, image: sized(images.hero, 1200, 630), faq: faqs }),
@@ -333,55 +400,44 @@ export function homePage() {
     `<section class="hero" style="--hero:url('${heroImg}')">
   <div class="container hero-grid">
     <div class="hero-copy">
-      <p class="eyebrow">Kern County • Bakersfield • Tehachapi • California City</p>
+      <p class="eyebrow">${esc(heroCopy.eyebrow)}</p>
       <h1><span class="h1-kicker">We buy houses in Bakersfield &amp; Kern County</span>Property<br>Problem?<br><em>Call Harbison.</em></h1>
-      <p class="hero-lead">Sell your property as-is without repairs, showings, or the usual headache. We’ll help you understand your options and choose a clear next step.</p>
+      <p class="hero-lead">${esc(heroCopy.sub)}</p>
+      <div class="hero-actions"><a class="btn btn-gold" href="#lead-form" data-cta="hero">Get My Property Options</a><a class="btn btn-outline" href="tel:${site.phoneHref}">Call or Text ${esc(site.phone)}</a></div>
       <ul class="hero-benefits">
-        <li><strong>Fair Offers</strong><span>No pressure</span></li>
-        <li><strong>Fast Process</strong><span>Move on your timeline</span></li>
-        <li><strong>Any Condition</strong><span>Sell as-is</span></li>
-        <li><strong>Licensed &amp; Local</strong><span>DRE #${esc(site.dre)}</span></li>
+        ${heroCopy.trust.map(([s, t]) => `<li><strong>${esc(s)}</strong><span>${esc(t)}</span></li>`).join('\n        ')}
       </ul>
     </div>
-    ${leadForm()}
+    ${leadForm({ pageType: 'home' })}
   </div>
 </section>
 
-<section class="section white glance-section" aria-labelledby="glance-h">
+${reassuranceStrip()}
+
+<section class="section cream" id="how">
   <div class="container">
-    <div class="glance-grid">
-      <div>
-        <p class="eyebrow gold-dark">At a Glance</p>
-        <h2 id="glance-h">Harbison Buys Homes, <em>in brief.</em></h2>
-        ${answerBox(`${esc(site.name)} buys houses and land as-is in Bakersfield, Tehachapi, California City, and throughout Kern County, California. Led by licensed REALTOR® ${esc(site.agent)} (DRE #${esc(site.dre)}), Harbison compares a direct cash offer with listing, renovation, or development so owners can choose the best path — with no repairs, showings, or obligation.`, 'In short')}
-      </div>
-      ${glanceTable()}
+    <div class="section-head center">
+      <p class="eyebrow gold-dark">How It Works</p>
+      <h2>A clear path starts <em>with the property.</em></h2>
+      <p>No runaround and no pressure — four steps, and you decide at the end. <a class="link" href="/how-it-works">More on how it works →</a></p>
     </div>
+    ${steps()}
   </div>
 </section>
 
-<section class="section cream" id="approach">
+<section class="section white" id="approach">
   <div class="container">
     <div class="section-head split">
       <div>
         <p class="eyebrow gold-dark">More Than a Cash Buyer</p>
-        <h2>Real solutions for <em>real situations.</em></h2>
+        <h2>One property. <em>Several possible paths.</em></h2>
       </div>
       <div class="section-copy">
-        <p>Harbison can evaluate more than one path for a property. A direct purchase may be right. A traditional listing, renovation strategy, or development opportunity may be better.</p>
+        <p>A direct purchase may be right. A traditional listing, a renovation plan, or a development review may be better.</p>
         <p><strong>The goal is not to force one solution. It is to identify the right one.</strong></p>
       </div>
     </div>
-    <div class="solution-grid">
-      ${[
-        ['home', '⌂', 'Sell Direct', 'Get a straightforward cash offer and close on a timeline that works for you.', 'Modern single-family home exterior'],
-        ['list', '◇', 'List on the Market', 'If retail exposure makes more sense, our licensed agent can take that route instead.', 'Bright staged living room ready for listing'],
-        ['renovate', '✦', 'Renovate &amp; Add Value', 'Repairs or improvements may materially change your property’s outcome.', 'Contractor reviewing renovation plans'],
-        ['land', '↗', 'Development', 'Some homes and parcels may have a bigger opportunity than the structure itself.', 'Open land with development potential'],
-      ]
-        .map(([k, icon, h, p, alt]) => `<article class="solution-card">${img(images[k], alt, 600, 380, { cls: 'solution-media' })}<div class="solution-body"><span class="icon" aria-hidden="true">${icon}</span><h3>${h}</h3><p>${p}</p></div></article>`)
-        .join('\n      ')}
-    </div>
+    ${routeCards()}
   </div>
 </section>
 
@@ -396,50 +452,36 @@ export function homePage() {
   </div>
 </section>
 
-<section class="section cream" id="how">
-  <div class="container">
-    <div class="section-head center">
-      <p class="eyebrow gold-dark">A Simple Process</p>
-      <h2>How to sell your house to Harbison <em>in three steps.</em></h2>
-      <p>No runaround. No complicated process. Just a clear path forward.</p>
-    </div>
-    ${steps()}
-  </div>
-</section>
-
-<section class="section white" id="compare">
+<section class="section cream" id="compare">
   <div class="container">
     <div class="section-head center">
       <p class="eyebrow gold-dark">Side by Side</p>
       <h2>Direct sale vs. <em>traditional listing.</em></h2>
-      <p>Both can be the right answer. Here’s how they typically compare. <a class="link" href="/guides/cash-offer-vs-listing">See a worked example →</a></p>
+      <p>Both can be the right answer. <a class="link" href="/guides/cash-offer-vs-listing">See a worked example →</a></p>
     </div>
-    <div class="compare-wrap">
-      <table class="compare">
-        <caption class="sr-only">Selling directly to Harbison compared with a traditional listing</caption>
-        <thead><tr><th scope="col"><span class="sr-only">Factor</span></th><th scope="col">Sell Direct to Harbison</th><th scope="col">Traditional Listing</th></tr></thead>
-        <tbody>
-          <tr><th scope="row">Repairs</th><td>None — sold as-is</td><td>Often needed to attract buyers</td></tr>
-          <tr><th scope="row">Showings</th><td>One walkthrough</td><td>Open houses and repeat showings</td></tr>
-          <tr><th scope="row">Timeline</th><td>You pick the closing date</td><td>Depends on market and buyer financing</td></tr>
-          <tr><th scope="row">Commissions</th><td>None paid to Harbison</td><td>Typically paid to agents</td></tr>
-          <tr><th scope="row">Price</th><td>Reflects condition and speed</td><td>Can be higher for move-in-ready homes</td></tr>
-        </tbody>
-      </table>
-    </div>
+    ${compareTable()}
   </div>
 </section>
 
 <section class="local-band" id="about-band">
   <div class="local-photo" style="--local:url('${sized(images.local, 1200, 900)}')" role="img" aria-label="Kern County landscape"></div>
-  <div class="local-copy">
+  <div class="local-copy why">
+    <p class="eyebrow gold">Why Harbison</p>
+    <h2 class="light">Local roots.<br><em>Larger possibilities.</em></h2>
+    <dl class="why-list">${whyHarbison.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+    <a class="btn btn-gold" href="/about">Meet Nathanael →</a>
+  </div>
+</section>
+
+<section class="section white" id="transparency">
+  <div class="container promise-grid">
     <div>
-      <p class="eyebrow gold">Kern County. Local Knowledge.</p>
-      <h2 class="light">Local roots.<br><em>Larger possibilities.</em></h2>
-      <p class="light-soft">Harbison is led by ${esc(site.agent)}, a California-licensed REALTOR® (DRE #${esc(site.dre)}) — built around practical real-estate judgment, local market knowledge, construction perspective, and a long-term view of property value.</p>
-      <a class="btn btn-gold" href="/about">Meet Nathanael →</a>
+      <p class="eyebrow gold-dark">Seller Transparency</p>
+      <h2>A more transparent <em>way to sell.</em></h2>
+      <p class="section-copy">Selling a property, especially in a hard moment, deserves clear information and room to decide. These are commitments, not fine print.</p>
+      <p><a class="link" href="/how-it-works#promise">Read our full seller promise →</a></p>
     </div>
-    <div class="local-points"><span>Local Experience</span><span>Real Solutions</span><span>Clear Next Steps</span></div>
+    ${transparencyList()}
   </div>
 </section>
 
@@ -451,11 +493,24 @@ ${testimonialSection()}
       <div><p class="eyebrow gold-dark">Seller Guides</p><h2 id="guides-h">Straight answers <em>before you sell.</em></h2></div>
       <div class="section-copy"><p>Plain-English guides to the questions Kern County owners ask most — written to help you decide, whether or not you work with us.</p><p><a class="link" href="/guides">All guides →</a></p></div>
     </div>
-    ${guideCards()}
+    ${guideCards(guides.slice(0, 3))}
   </div>
 </section>
 
-<section class="section white" id="faq">
+<section class="section white glance-section" aria-labelledby="glance-h">
+  <div class="container">
+    <div class="glance-grid">
+      <div>
+        <p class="eyebrow gold-dark">At a Glance</p>
+        <h2 id="glance-h">Harbison Buys Homes, <em>in brief.</em></h2>
+        ${answerBox(`${esc(site.name)} buys houses and land as-is in Bakersfield, Tehachapi, California City, Stallion Springs, and throughout Kern County, California. Led by licensed REALTOR® ${esc(site.agent)} (DRE #${esc(site.dre)}), Harbison compares a direct offer with listing, renovation, or development so owners can choose the best path — with no repairs, showings, or obligation.`, 'In short')}
+      </div>
+      ${glanceTable()}
+    </div>
+  </div>
+</section>
+
+<section class="section cream" id="faq">
   <div class="container narrow">
     <div class="section-head center">
       <p class="eyebrow gold-dark">Questions</p>
@@ -469,7 +524,7 @@ ${finalCta()}`
   );
 }
 
-function detailPage({ item, path, crumbs, eyebrow, extra = '', formSituation = '', service }) {
+function detailPage({ item, path, crumbs, eyebrow, extra = '', form = {}, pageType = 'page', service }) {
   const allFaqs = item.faqs ? [...item.faqs, ...faqs.slice(0, 3)] : faqs.slice(0, 4);
   const title = pageTitle(item.title);
   const heroImg = sized(item.image, 1600, 1000);
@@ -479,6 +534,7 @@ function detailPage({ item, path, crumbs, eyebrow, extra = '', formSituation = '
       title,
       description: item.description,
       path,
+      pageType,
       image: ogImg,
       preload: heroImg,
       ld: graph({ path, title, description: item.description, image: ogImg, crumbs, faq: allFaqs, extra: [service] }),
@@ -491,7 +547,7 @@ function detailPage({ item, path, crumbs, eyebrow, extra = '', formSituation = '
       <h1 class="h1-sub">${item.headline}</h1>
       <p class="hero-lead">${esc(item.lead)}</p>
     </div>
-    ${leadForm({ situation: formSituation })}
+    ${leadForm({ ...form, pageType })}
   </div>
 </section>
 
@@ -504,7 +560,7 @@ function detailPage({ item, path, crumbs, eyebrow, extra = '', formSituation = '
       ${extra}
       <p class="updated">Last updated ${niceDate(BUILD_DATE)} · Reviewed by the ${esc(site.name)} team</p>
     </article>
-    <aside class="help-card"><h2>How Harbison helps</h2><ul>${item.helps.map((h) => `<li>${esc(h)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="#lead-form">Get My Options →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a></aside>
+    <aside class="help-card"><h2>How Harbison helps</h2><ul>${item.helps.map((h) => `<li>${esc(h)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="#lead-form" data-cta="help_card">Get Options for This Property →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a></aside>
   </div>
 </section>
 
@@ -512,7 +568,7 @@ function detailPage({ item, path, crumbs, eyebrow, extra = '', formSituation = '
   <div class="container">
     <div class="section-head center">
       <p class="eyebrow gold">A Simple Process</p>
-      <h2 class="light">Three steps to <em>clarity.</em></h2>
+      <h2 class="light">A clear path starts <em>with the property.</em></h2>
     </div>
     ${steps(true)}
   </div>
@@ -539,7 +595,7 @@ export function situationPage(s) {
   const familyLink = ['life-change', 'inherited-property', 'relocation'].includes(s.slug)
     ? `<h3>Helping a parent move?</h3><ul class="link-list"><li><a href="/sell-parents-house">Selling a parent’s house in Kern County — as-is vs. listing</a></li></ul>`
     : '';
-  const extra = `${familyLink}${guideLinks(relatedGuidesFor(s.slug))}
+  const extra = `${pathsBlock()}${familyLink}${guideLinks(relatedGuidesFor(s.slug))}
       <h3>Where we buy</h3><ul class="chip-list">${areas.map((a) => `<li><a href="/areas/${a.slug}">${esc(a.name)}</a></li>`).join('')}</ul>
       <h3>Other situations we help with</h3><ul class="chip-list">${others.map((o) => `<li><a href="/situations/${o.slug}">${esc(o.name)}</a></li>`).join('')}</ul>`;
   return detailPage({
@@ -548,7 +604,8 @@ export function situationPage(s) {
     crumbs: [['Home', '/'], ['Situations', '/situations'], [s.name, `/situations/${s.slug}`]],
     eyebrow: `${s.name} • ${site.region}`,
     extra,
-    formSituation: s.name.split(' ')[0],
+    pageType: 'situation',
+    form: { situation: situationFormMap[s.slug] || '', heading: 'Get Options for This Property' },
     service: serviceLd({ name: s.title, description: s.description, url, areaServed: areas.map(placeLd) }),
   });
 }
@@ -569,6 +626,8 @@ export function areaPage(a) {
     crumbs: [['Home', '/'], [a.name, `/areas/${a.slug}`]],
     eyebrow: `We Buy Houses • ${a.name}, CA`,
     extra,
+    pageType: 'location',
+    form: { city: a.slug === 'kern-county' ? '' : a.name, location: a.slug, heading: `Get Options for Your ${a.name} Property` },
     service: serviceLd({ name: a.title, description: a.description, url, areaServed: placeLd(a) }),
   });
 }
@@ -582,6 +641,7 @@ export function situationsIndexPage() {
       title,
       description,
       path: '/situations',
+      pageType: 'situations_index',
       image: sized(images.street, 1200, 630),
       ld: graph({
         path: '/situations', title, description, image: sized(images.street, 1200, 630), type: 'CollectionPage', crumbs,
@@ -606,7 +666,7 @@ export function situationsIndexPage() {
 <section class="section cream">
   <div class="container form-band">
     <div><p class="eyebrow gold-dark">Don’t see yours?</p><h2>Every property is <em>different.</em></h2><p>Tell us what’s going on. If we can’t help, we’ll tell you quickly and point you in the right direction.</p></div>
-    ${leadForm({ heading: 'Tell Us About the Property' })}
+    ${leadForm({ heading: 'Tell Us About the Property', pageType: 'situations_index' })}
   </div>
 </section>`
   );
@@ -615,12 +675,13 @@ export function situationsIndexPage() {
 export function aboutPage() {
   const title = pageTitle(`${about.title}, REALTOR®`);
   const crumbs = [['Home', '/'], ['About', '/about']];
-  const image = `${site.url}${logo}`;
+  const image = `${site.url}${ogDefault}`;
   return page(
     {
       title,
       description: about.description,
       path: '/about',
+      pageType: 'about',
       image,
       hasForm: false,
       ld: graph({ path: '/about', title, description: about.description, image, type: 'ProfilePage', crumbs }),
@@ -664,6 +725,7 @@ export function guidesIndexPage() {
       title,
       description,
       path: '/guides',
+      pageType: 'guides_index',
       image,
       hasForm: false,
       ld: graph({
@@ -706,31 +768,33 @@ export function guidePage(g) {
     inLanguage: 'en-US',
   };
   return page(
-    { title, description: g.description, path, image, article: g, ld: graph({ path, title, description: g.description, image, crumbs, extra: [article], modified: g.updated }) },
+    { title, description: g.description, path, image, article: g, pageType: 'guide', ld: graph({ path, title, description: g.description, image, crumbs, extra: [article], modified: g.updated }) },
     `<section class="section cream page-top guide">
   <div class="container detail-grid">
     <article class="prose">
       ${crumbNav(crumbs)}
       <p class="eyebrow gold-dark">Seller Guide</p>
       <h1 class="page-title guide-title">${esc(g.title)}</h1>
-      <p class="updated">By the ${esc(site.name)} team · Updated <time datetime="${g.updated}">${niceDate(g.updated)}</time></p>
+      <p class="updated">By the ${esc(site.name)} team · Published <time datetime="${g.updated}">${niceDate(g.updated)}</time> · Last reviewed <time datetime="${BUILD_DATE}">${niceDate(BUILD_DATE)}</time></p>
       ${answerBox(esc(g.answer), 'The short answer')}
       <nav class="toc" aria-label="In this guide"><p class="answer-label">In this guide</p><ol>${toc}</ol></nav>
       ${g.sections.map(([h, paras], i) => `<section id="s${i + 1}"><h2 class="prose-h">${esc(h)}</h2>${paras.map((p) => (p.startsWith('<ul') || p.startsWith('<div') ? p : `<p>${p}</p>`)).join('')}</section>`).join('\n      ')}
-      <p class="disclaimer">This guide is general information, not legal, tax, or financial advice. Laws and thresholds change — consult a qualified attorney, CPA, or your agent about your specific situation.</p>
+      ${g.meaning ? `<aside class="meaning"><h2>What this means for your property</h2><p>${esc(g.meaning)}</p><a class="btn btn-gold" href="#lead-form" data-cta="guide_meaning">Get Options for My Property →</a></aside>` : ''}
+      <aside class="author-box"><img src="/assets/logo-symbol-gold.png" alt="" width="48" height="52" loading="lazy"><div><p class="answer-label">About the author</p><p>Written by the ${esc(site.name)} team, led by ${esc(site.agent)}, California-licensed REALTOR® (DRE #${esc(site.dre)}) with ${esc(site.brokerage)}. <a class="link" href="/about">About Nathanael →</a></p></div></aside>
+      <p class="disclaimer">This guide is educational and does not replace legal, tax, or financial advice. Laws and thresholds change — consult a qualified attorney, CPA, or your agent about your specific situation.</p>
       <h3>Related situations</h3><ul class="chip-list">${related.map((s) => `<li><a href="/situations/${s.slug}">${esc(s.name)}</a></li>`).join('')}</ul>
       <h3>More guides</h3><ul class="link-list">${guides.filter((o) => o.slug !== g.slug).map((o) => `<li><a href="/guides/${o.slug}">${esc(o.title)}</a></li>`).join('')}</ul>
     </article>
-    ${leadForm({ heading: 'Want Real Numbers?' })}
+    ${leadForm({ heading: 'Want Real Numbers for Your Property?', pageType: 'guide' })}
   </div>
 </section>
 ${finalCta()}`
   );
 }
 
-function simplePage({ title, description, path, heading, body, noindex = false }) {
+function simplePage({ title, description, path, heading, body, noindex = false, pageType = 'page' }) {
   return page(
-    { title: pageTitle(title), description, path, noindex, hasForm: false, ld: noindex ? null : graph({ path, title: pageTitle(title), description, image: `${site.url}${logo}` }) },
+    { title: pageTitle(title), description, path, noindex, pageType, hasForm: false, ld: noindex ? null : graph({ path, title: pageTitle(title), description, image: `${site.url}${ogDefault}` }) },
     `<section class="section cream page-top">
   <div class="container narrow prose legal">
     <h1 class="page-title">${heading}</h1>
@@ -740,23 +804,140 @@ function simplePage({ title, description, path, heading, body, noindex = false }
   );
 }
 
+// Optional follow-up questions. The lead already exists; these add context for the first call.
+const detailRadios = (name, list) => `<div class="choice-grid" role="radiogroup">${list
+  .map((o) => `<label class="choice"><input type="radio" name="${name}" value="${esc(o)}"><span>${esc(o)}</span></label>`)
+  .join('')}</div>`;
+const detailChecks = (name, list) => `<div class="choice-grid">${list
+  .map((o) => `<label class="choice"><input type="checkbox" name="${name}" value="${esc(o)}"><span>${esc(o)}</span></label>`)
+  .join('')}</div>`;
+
 export function thankYouPage() {
+  return page(
+    { title: pageTitle('Thank You'), description: 'We received your property information.', path: '/thank-you', noindex: true, hasForm: false, pageType: 'thank_you' },
+    `<section class="section cream page-top">
+  <div class="container detail-grid">
+    <div class="prose">
+      <p class="eyebrow gold-dark">Request received</p>
+      <h1 class="page-title">We received your <em>property information.</em></h1>
+      <p class="lead">We’ll review the address and situation before contacting you. If a direct sale, listing, renovation, or development path appears relevant, we’ll explain why. There is no obligation to move forward.</p>
+      <p>We typically respond within 24 hours. If there’s a specific deadline or issue we should know about, reply to our confirmation text or call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>.</p>
+      <div class="hero-actions ty-actions"><a class="btn btn-gold" href="tel:${site.phoneHref}">Call or Text ${esc(site.phone)}</a><a class="btn btn-ghost-dark" href="/guides">Read the seller guides</a><a class="btn btn-ghost-dark" href="/how-it-works">How it works</a></div>
+    </div>
+    <aside class="lead-card details-card" aria-label="Optional property details">
+      <p class="eyebrow gold">Optional · 30 seconds</p>
+      <h2>Help us prepare for your call</h2>
+      <form data-details-form novalidate>
+        <fieldset><legend class="fstep-q">Timeline</legend>${detailRadios('timeline', detailOptions.timeline)}</fieldset>
+        <fieldset><legend class="fstep-q">Who lives there now?</legend>${detailRadios('occupancy', detailOptions.occupancy)}</fieldset>
+        <fieldset><legend class="fstep-q">Condition <span class="muted">(pick any)</span></legend>${detailChecks('condition', detailOptions.condition)}</fieldset>
+        <fieldset><legend class="fstep-q">What matters most?</legend>${detailRadios('desired_outcome', detailOptions.outcome)}</fieldset>
+        <button class="btn btn-gold btn-full" type="submit">Add to My Request</button>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </form>
+    </aside>
+  </div>
+</section>`
+  );
+}
+
+export function howItWorksPage() {
+  const path = '/how-it-works';
+  const title = pageTitle('How It Works: Selling With Harbison');
+  const description = 'How Harbison reviews a property, how direct offers are figured, what happens at the walkthrough, and the seller promise behind every conversation.';
+  const crumbs = [['Home', '/'], ['How It Works', path]];
+  const image = sized(images.renovate, 1200, 630);
+  return page(
+    { title, description, path, image, pageType: 'how_it_works', hasForm: false, ld: graph({ path, title, description, image, crumbs }) },
+    `<section class="section navy page-top">
+  <div class="container">
+    ${crumbNav(crumbs)}
+    <p class="eyebrow gold">How It Works</p>
+    <h1 class="page-title light">A clear path starts <em>with the property.</em></h1>
+    <p class="light-soft page-intro">${esc(supportingPromise)} Here is exactly what happens — and what doesn’t.</p>
+    ${steps(true)}
+  </div>
+</section>
+
+<section class="section cream">
+  <div class="container detail-grid">
+    <article class="prose">
+      ${answerBox(`Start with the address. ${esc(site.name)} reviews the property and your situation, then shows you the realistic paths — a direct sale, a listing, repairs first, or a development review — in writing, with the assumptions behind any number. You decide, with no obligation and no deadline.`, 'The short version')}
+      <h2 class="prose-h" id="walkthrough">The walkthrough</h2>
+      ${walkthrough.map((p) => `<p>${esc(p)}</p>`).join('')}
+      <p><a class="link" href="/guides/direct-sale-walkthrough">What to expect at a walkthrough →</a></p>
+
+      <h2 class="prose-h" id="offers">How a direct offer is figured</h2>
+      <p>${esc(offerExplanation)}</p>
+      <div class="compare-wrap"><table class="compare offer-table"><caption class="sr-only">Illustrative direct-offer breakdown</caption><thead><tr><th scope="col">Illustrative example</th><th scope="col">Amount</th></tr></thead><tbody>${offerExample.map(([k, v], i) => `<tr${i === offerExample.length - 1 ? ' class="total"' : ''}><th scope="row">${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</tbody></table></div>
+      <p class="note-small">This is an example to show how the pieces fit together — not a formula applied to every property, a valuation of any home, or a promise of any offer. Every property’s numbers are different, and we show you yours.</p>
+
+      <h2 class="prose-h">Direct sale or listing?</h2>
+      ${compareTable()}
+
+      <h2 class="prose-h" id="promise">Our seller promise</h2>
+      ${transparencyList()}
+      <dl class="principles safeguards">${safeguards.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+
+      <h2 class="prose-h">Closing</h2>
+      <p>Every sale closes through a licensed title or escrow company, which holds funds, handles payoffs, and records the deed. Signatures can often be done remotely. You choose the closing date, subject to title and any required approvals.</p>
+    </article>
+    <aside class="help-card"><h2>Ready to start?</h2><ul>${reassurance.map((r) => `<li>${esc(r)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="/#lead-form" data-cta="how_it_works">Get My Property Options →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call or Text ${esc(site.phone)}</a></aside>
+  </div>
+</section>
+${finalCta('/#lead-form')}`
+  );
+}
+
+export function contactPage() {
+  const path = '/contact';
+  const title = pageTitle('Contact Harbison Buys Homes');
+  const description = `Call or text ${site.phone}, email ${site.email}, or send the property address. Serving Bakersfield, Tehachapi, and Kern County.`;
+  const crumbs = [['Home', '/'], ['Contact', path]];
+  const image = `${site.url}${ogDefault}`;
+  const contactLd = { '@type': 'ContactPage', '@id': `${site.url}${path}#contact`, about: { '@id': `${site.url}/#business` } };
+  return page(
+    { title, description, path, image, pageType: 'contact', ld: graph({ path, title, description, image, crumbs, extra: [contactLd] }) },
+    `<section class="section cream page-top">
+  <div class="container form-band">
+    <div>
+      ${crumbNav(crumbs)}
+      <p class="eyebrow gold-dark">Contact</p>
+      <h1 class="page-title">Property problem? <em>Call Harbison.</em></h1>
+      <dl class="contact-list">
+        <div><dt>Call or text</dt><dd><a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a></dd></div>
+        <div><dt>Email</dt><dd><a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a></dd></div>
+        <div><dt>Response</dt><dd>Typically within 24 hours</dd></div>
+        <div><dt>Service area</dt><dd>${areas.map((a) => `<a class="link" href="/areas/${a.slug}">${esc(a.name)}</a>`).join(', ')}</dd></div>
+        <div><dt>Licensed</dt><dd>${esc(site.agent)}, REALTOR® · DRE #${esc(site.dre)} · ${esc(site.brokerage)}</dd></div>
+      </dl>
+      <p class="note-small">If you’ve asked us to stop contacting you, you won’t hear from us again. To make that request, reply STOP to any text or email ${esc(site.email)}.</p>
+    </div>
+    ${leadForm({ heading: 'Send Us the Property', pageType: 'contact' })}
+  </div>
+</section>`
+  );
+}
+
+export function accessibilityPage() {
   return simplePage({
-    title: 'Thank You',
-    description: 'Thanks for reaching out to Harbison Buys Homes.',
-    path: '/thank-you',
-    noindex: true,
-    heading: 'Thank you — <em>we’ve got it.</em>',
-    body: `<p class="lead">We received your property information and will reach out shortly — typically within 24 hours.</p>
-    <h2 class="prose-h">What happens next</h2>
-    <ol>
-      <li>We review the address, condition, and timeline you shared.</li>
-      <li>We call or text to ask a few quick questions and schedule a walkthrough if needed.</li>
-      <li>We lay out your options — including a direct offer if it fits.</li>
-    </ol>
-    <p>Need us sooner? Call <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>. While you wait, our <a class="link" href="/guides">seller guides</a> answer common questions.</p>
-    <p><a class="btn btn-gold" href="/">Back to home</a></p>
-    <script>window.gtag&&gtag('event','generate_lead');</script>`,
+    title: 'Accessibility',
+    description: `${site.name} is committed to a website everyone can use. How to reach us if something doesn’t work for you.`,
+    path: '/accessibility',
+    pageType: 'accessibility',
+    heading: 'Accessibility',
+    body: `<p class="muted-note">Last updated: ${niceDate(BUILD_DATE)}</p>
+    <p>${esc(site.name)} wants everyone to be able to learn about their options and reach us, including people who use screen readers, keyboard navigation, magnification, or voice control.</p>
+    <h2 class="prose-h">What we do</h2>
+    <ul>
+      <li>Aim to meet WCAG 2.1 Level AA</li>
+      <li>Label every form field and announce form errors to assistive technology</li>
+      <li>Keep pages usable by keyboard, with visible focus</li>
+      <li>Maintain color contrast and never rely on color alone</li>
+      <li>Describe meaningful images with alternative text</li>
+    </ul>
+    <h2 class="prose-h">Need help or found a problem?</h2>
+    <p>If any part of this site is hard to use, call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a> or email <a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a>. We’ll help you directly and fix the issue.</p>`,
   });
 }
 
@@ -904,7 +1085,7 @@ export function familyPage() {
   };
   const { direct, listing } = f.paths;
   return page(
-    { title, description: f.description, path: f.path, image: ogImg, preload: heroImg, ld: graph({ path: f.path, title, description: f.description, image: ogImg, crumbs, faq: allFaqs, extra: [service, howTo, ...vids] }) },
+    { title, description: f.description, path: f.path, image: ogImg, preload: heroImg, pageType: 'family', ld: graph({ path: f.path, title, description: f.description, image: ogImg, crumbs, faq: allFaqs, extra: [service, howTo, ...vids] }) },
     `<section class="hero hero-sub" style="--hero:url('${heroImg}')">
   <div class="container hero-grid">
     <div class="hero-copy">

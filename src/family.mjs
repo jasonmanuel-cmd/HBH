@@ -7,7 +7,7 @@ const img = (id, w = 1600) => `https://images.unsplash.com/${id}?auto=format&fit
 export const family = {
   path: '/sell-parents-house',
   title: 'Selling a Parent’s House in Bakersfield & Kern County',
-  description: `Parent downsizing, moving to senior living, or unable to keep up the house? Compare an as-is sale with a traditional listing — with licensed local help. Call ${site.phone}.`,
+  description: `Parent downsizing, moving to senior living, or unable to keep up the house? Compare an as-is sale with a traditional listing. Call or text ${site.phone}.`,
   image: img('photo-1570129477492-45c003edd2be'),
   headline: 'Not sure what to do with <em>your parent’s house?</em>',
   lead: 'Whether your parent is downsizing, moving into senior living, or simply can’t keep up with the property anymore, we’ll help you understand your options — including selling as-is or listing traditionally.',

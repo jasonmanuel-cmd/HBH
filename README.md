@@ -8,10 +8,11 @@ Website for Harbison Buys Homes — "Property problem? Call Harbison." Static pa
 | --- | --- |
 | Home (hero + lead form, approach, situations, process, direct-vs-listing comparison, FAQ) | `/` |
 | Situations overview | `/situations` |
-| 8 situation pages (inherited, repairs, vacant, tenants, relocation, life change, fire/water, unfinished remodel) | `/situations/<slug>` |
-| Service-area pages | `/areas/bakersfield`, `/areas/tehachapi`, `/areas/california-city`, `/areas/kern-county` |
+| 11 situation pages (inherited, repairs, vacant, tenants, relocation, life change, fire/water, unfinished remodel, rental property, failed listing, land/development) | `/situations/<slug>` |
+| Service-area pages | `/areas/bakersfield`, `/areas/tehachapi`, `/areas/stallion-springs`, `/areas/california-city`, `/areas/kern-county` |
 | About Nathanael Harbison (credentials, E-E-A-T) | `/about` |
-| Seller guides (as-is sales, cash vs. listing, inherited homes) | `/guides`, `/guides/<slug>` |
+| Seller guides (as-is sales, cash vs. listing, inherited homes, renovate vs. as-is, what affects a cash offer, the walkthrough) | `/guides`, `/guides/<slug>` |
+| How it works (process, walkthrough, offer math, seller promise), Contact, Accessibility | `/how-it-works`, `/contact`, `/accessibility` |
 | Thank-you (post-submit), Privacy, Terms, 404 | `/thank-you`, `/privacy`, `/terms` |
 
 Also: lead form API (`/api/leads`), `sitemap.xml`, `robots.txt` (AI crawlers explicitly allowed), `llms.txt`, favicon, Open Graph/Twitter tags, a connected Schema.org `@graph` on every page (RealEstateAgent, Person with DRE license credential, WebSite, WebPage, Service, Article, BreadcrumbList, FAQPage), answer-first "Quick answer" blocks, an "At a glance" facts section, optional GA4, a sticky mobile call bar, a spam honeypot, and UTM tracking on leads.
@@ -22,6 +23,7 @@ Also: lead form API (`/api/leads`), `sitemap.xml`, `robots.txt` (AI crawlers exp
 site.config.mjs     ← phone, email, service area, site URL (edit once, used everywhere)
 src/content.mjs     ← situations, areas, FAQs, form options, images
 src/content-extra.mjs ← About page, guides, testimonials, "at a glance" facts, California City page
+src/content-playbook.mjs ← site-playbook content: hero, 5 paths, seller promise, offer explanation, form options, new pages
 src/templates.mjs   ← HTML layout and page templates
 static/             ← styles.css, script.js, logo, favicon (copied as-is)
 api/leads.js        ← Vercel serverless function that receives the form
@@ -66,3 +68,13 @@ Until a destination is configured, leads are still accepted and written to Verce
 - **Add a guide every month or two** in `src/content-extra.mjs` — answer-first, question-style headings. Update the `updated` date when you revise one.
 - **Reviews:** ask each seller for a Google review. Do not add review star markup to this site (Google ignores self-hosted reviews for local businesses).
 - The guides are general information written for Nathanael to review. Once he has reviewed them, the byline can be changed to him.
+
+## Lead form (options form)
+
+Three steps, per the site playbook: **situation → address (street, city, ZIP) → contact + consent**. The lead is created at step 3. Timeline, occupancy, condition, and goals are asked afterward on `/thank-you` and attached to the same lead (`{ kind: 'details' }` → `/api/leads`). Transactional consent (required) and marketing consent (optional) are stored separately. Run `supabase/migrations/003_options_form.sql` to store the new fields.
+
+Analytics events (GTM/GA4, no personal data): `phone_click`, `cta_click`, `lead_form_view`, `lead_form_start`, `lead_form_step_complete`, `lead_form_submit`, `lead_form_error`, `lead_form_success`, `generate_lead`, `guide_view`, `situation_page_view`, `location_page_view`.
+
+## Brand assets
+
+`static/assets/` holds the logo cut from the brand sheet: `logo-horizontal.png` (full color, transparent), `logo-header-reverse.png` (ivory + gold for navy), `logo-symbol-gold.png`, app/favicon icons, and `og-default.jpg`. For the sharpest icons, replace them with exports from the original vector logo file when available.

@@ -2,10 +2,9 @@
 import { rmSync, mkdirSync, writeFileSync, cpSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import site from './site.config.mjs';
-import { situations } from './src/content.mjs';
 import {
-  areas, guides, faqs,
-  homePage, situationPage, areaPage, situationsIndexPage, aboutPage, guidesIndexPage, guidePage,
+  areas, guides, faqs, situations,
+  homePage, howItWorksPage, contactPage, accessibilityPage, situationPage, areaPage, situationsIndexPage, aboutPage, guidesIndexPage, guidePage,
   thankYouPage, notFoundPage, privacyPage, termsPage, familyPage, partnerGuidePage,
 } from './src/templates.mjs';
 import { family } from './src/family.mjs';
@@ -21,6 +20,8 @@ const today = new Date().toISOString().slice(0, 10);
 const pages = [
   ['index.html', homePage(), '/'],
   ['about.html', aboutPage(), '/about'],
+  ['how-it-works.html', howItWorksPage(), '/how-it-works'],
+  ['contact.html', contactPage(), '/contact'],
   ['sell-parents-house.html', familyPage(), '/sell-parents-house'],
   ['family-property-guide.html', partnerGuidePage(), null],
   ['situations/index.html', situationsIndexPage(), '/situations'],
@@ -30,6 +31,7 @@ const pages = [
   ...guides.map((g) => [`guides/${g.slug}.html`, guidePage(g), `/guides/${g.slug}`, g.updated]),
   ['privacy.html', privacyPage(), '/privacy'],
   ['terms.html', termsPage(), '/terms'],
+  ['accessibility.html', accessibilityPage(), '/accessibility'],
   ['thank-you.html', thankYouPage(), null],
   ['404.html', notFoundPage(), null],
 ];
@@ -88,7 +90,9 @@ Key facts:
 
 ## Main pages
 ${link('/', 'Home', 'overview, process, direct sale vs. listing comparison, FAQ')}
+${link('/how-it-works', 'How it works', 'process, walkthrough, how direct offers are figured, seller promise')}
 ${link('/about', `About ${site.agent}`, 'credentials, approach, profiles')}
+${link('/contact', 'Contact', `call or text ${site.phone}`)}
 ${link('/situations', 'Situations we help with')}
 ${link(family.path, 'Selling a parent’s house', family.answer)}
 
@@ -104,6 +108,22 @@ ${guides.map((g) => link(`/guides/${g.slug}`, g.title, g.answer)).join('\n')}
 ## FAQ
 ${faqs.map(([q, a]) => `- **${q}** ${a}`).join('\n')}
 `
+);
+
+writeFileSync(
+  join(out, 'site.webmanifest'),
+  JSON.stringify({
+    name: site.name,
+    short_name: 'Harbison',
+    start_url: '/',
+    display: 'browser',
+    background_color: '#f6f2e9',
+    theme_color: '#031f2b',
+    icons: [
+      { src: '/assets/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: '/assets/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+  }, null, 2)
 );
 
 console.log(`Built ${pages.length} pages into ./${out}`);
