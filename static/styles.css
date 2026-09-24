@@ -264,4 +264,4 @@
 @media(max-width:980px){.footer-bottom a{padding:14px 4px}}
 
 /* Phones: skip layout/paint of below-the-fold sections until they approach the viewport (cuts main-thread work). */
-main>section:not(:first-child),.local-band,.footer{content-visibility:auto;contain-intrinsic-size:auto 900px}
+main>section:not(:first-child),.local-band{content-visibility:auto;contain-intrinsic-size:auto 900px}
