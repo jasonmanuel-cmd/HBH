@@ -71,7 +71,7 @@ Until a destination is configured, leads are still accepted and written to Verce
 
 ## Lead form (options form)
 
-Three steps, per the site playbook: **situation → address (street, city, ZIP) → contact + consent**. The lead is created at step 3. Timeline, occupancy, condition, and goals are asked afterward on `/thank-you` and attached to the same lead (`{ kind: 'details' }` → `/api/leads`). Transactional consent (required) and marketing consent (optional) are stored separately. Run `supabase/migrations/003_options_form.sql` to store the new fields.
+Three steps, per the site playbook: **situation → address (street, city, ZIP) → contact + consent**. The lead is created at step 3. Timeline, occupancy, condition, and goals are asked afterward on `/thank-you` and attached to the same lead (`{ kind: 'details' }` → `/api/leads`). Transactional consent (required) and marketing consent (optional) are stored separately. The database lives in the Supabase project **harbison-buys-homes** (shared with the Lead Desk app; the website only adds `leads`, `partners`, `lead_events`, `ad_spend`, and `v_*` views). `schema.sql` and migrations 002–004 were applied on 2026-09-24 as `website_001`–`website_004`.
 
 Analytics events (GTM/GA4, no personal data): `phone_click`, `cta_click`, `lead_form_view`, `lead_form_start`, `lead_form_step_complete`, `lead_form_submit`, `lead_form_error`, `lead_form_success`, `generate_lead`, `guide_view`, `situation_page_view`, `location_page_view`.
 
