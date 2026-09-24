@@ -8,7 +8,7 @@ Page: `/sell-parents-house` · Partner short link: `/family?ref=<slug>` · Print
 3. Views: `v_funnel`, `v_cost_per_stage`, `v_partner_results`, `v_uncontacted`. Enter monthly spend in `ad_spend`.
 
 ## 2. Partner links
-Each partner gets `harbisonbuyshomes.com/family?ref=<slug>` (slugs seeded in `partners`). The site converts `ref` into
+Each partner gets `callharbison.com/family?ref=<slug>` (slugs seeded in `partners`). The site converts `ref` into
 `utm_source=<slug>&utm_medium=referral&utm_campaign=family_transition`, stores it 90 days, and the lead lands with `channel=partner`.
 **Resource relationships only — no per-referral payments** without California real-estate counsel / broker sign-off (DRE unlicensed-compensation rules, RESPA, and health-care anti-referral rules for care providers).
 

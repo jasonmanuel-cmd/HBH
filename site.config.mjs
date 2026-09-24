@@ -3,7 +3,7 @@ export default {
   name: 'Harbison Buys Homes',
   tagline: 'Property problem? Call Harbison.',
   // Production URL (used for canonical links, sitemap, social cards). Override with SITE_URL on Vercel.
-  url: (process.env.SITE_URL || 'https://www.harbisonbuyshomes.com').replace(/\/$/, ''),
+  url: (process.env.SITE_URL || 'https://www.callharbison.com').replace(/\/$/, ''),
 
   phone: '(661) 472-7499',
   phoneHref: '+16614727499',
