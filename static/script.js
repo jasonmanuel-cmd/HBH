@@ -242,7 +242,11 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
       const idx = [...form.querySelectorAll('.fstep')].findIndex((s) => names.some((f) => s.querySelector(`[name="${f}"]`)));
       if (idx >= 0) form.show(idx);
     }
-    names.forEach((f) => form.querySelector(`[name="${f}"]`)?.classList.add('invalid'));
+    names.forEach((f) => {
+      const el = form.querySelector(`[name="${f}"]`);
+      el?.classList.add('invalid');
+      el?.closest('.check')?.classList.add('invalid');
+    });
     form.querySelector('.invalid')?.focus();
     status.textContent =
       names.length === 1 && names[0] === 'consent_response' ? 'Please check the box so we can contact you about this property.'
