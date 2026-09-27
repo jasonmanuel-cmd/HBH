@@ -83,6 +83,14 @@ document.addEventListener('click', (e) => {
   }
 });
 
+// ---------- FAQ deep links: open the answer a link points to ----------
+const openFaq = () => {
+  const el = location.hash.length > 1 && document.getElementById(decodeURIComponent(location.hash.slice(1)));
+  if (el && el.tagName === 'DETAILS') el.open = true;
+};
+window.addEventListener('hashchange', openFaq);
+openFaq();
+
 // ---------- Click-to-load video ----------
 document.querySelectorAll('button[data-yt]').forEach((b) => {
   b.addEventListener('click', () => {

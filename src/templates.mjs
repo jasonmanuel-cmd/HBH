@@ -328,7 +328,7 @@ function leadForm({ situation = '', heading = 'Get Your Property Options', city 
 const answerBox = (text, label = 'Quick answer') => `<div class="answer-box"><p class="answer-label">${label}</p><p>${text}</p></div>`;
 
 const faqList = (list) => `<div class="faq-list">${list
-  .map(([q, a]) => `<details class="faq"><summary><h3>${esc(q)}</h3></summary><p>${esc(a)}</p></details>`)
+  .map(([q, a]) => `<details class="faq" id="${faqId(q)}"><summary><h3>${esc(q)}</h3></summary><p>${esc(a)}</p></details>`)
   .join('')}</div>`;
 
 const finalCta = (href = '#lead-form') => `<section class="section final-cta">
@@ -1078,10 +1078,14 @@ function familyLeadForm() {
     </aside>`;
 }
 
-// Click-to-load YouTube (no third-party JS until the viewer asks for it). Placeholder until an ID exists.
-const videoBlock = (v, { large = false } = {}) => v.id
+// Click-to-load YouTube (no third-party JS until the viewer asks for it). Renders nothing until a video ID
+// is set in src/family.mjs — no "coming soon" placeholders on the live site.
+const videoBlock = (v, { large = false } = {}) => (v.id
   ? `<figure class="video${large ? ' video-lg' : ''}"><button class="video-btn" type="button" data-yt="${esc(v.id)}" aria-label="Play video: ${esc(v.title || v.q)}" style="--thumb:url('https://i.ytimg.com/vi/${esc(v.id)}/hqdefault.jpg')"><span class="play" aria-hidden="true">▶</span></button><figcaption>${esc(v.title || v.q)}</figcaption></figure>`
-  : `<figure class="video video-pending${large ? ' video-lg' : ''}"><div class="video-btn"><span class="play" aria-hidden="true">▶</span><span class="soon">Video coming soon</span></div><figcaption>${esc(v.title || v.q)}</figcaption></figure>`;
+  : '');
+
+// FAQ anchor for a question, so the "questions families ask" list can jump to its answer.
+const faqId = (q) => `q-${q.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60)}`;
 
 const videoLd = (v, url) => (v.id ? [{
   '@type': 'VideoObject',
@@ -1121,7 +1125,7 @@ export function familyPage() {
 </section>
 
 <section class="section white">
-  <div class="container family-intro">
+  <div class="container family-intro${f.heroVideo.id ? '' : ' solo'}">
     <div>
       ${answerBox(esc(f.answer))}
       <p class="fam-note">Families usually call because they’re handling two things at once: helping a loved one through a major move, and suddenly being responsible for an entire house.</p>
@@ -1165,7 +1169,9 @@ export function familyPage() {
   <div class="container detail-grid">
     <div>
       <div class="section-head"><h2>Questions families <em>ask Nathanael.</em></h2></div>
-      <div class="video-grid">${f.videos.map((v) => videoBlock(v)).join('')}</div>
+      ${f.videos.some((v) => v.id)
+        ? `<div class="video-grid">${f.videos.map((v) => videoBlock(v)).join('')}</div>`
+        : `<ul class="question-links">${f.videos.map((v) => `<li><a href="#${faqId(v.q)}">${esc(v.q)}</a></li>`).join('')}</ul><p class="note-small">Short answers are in the questions below — or ask Nathanael directly.</p>`}
     </div>
     <aside class="help-card"><h2>How Harbison helps</h2><ul>${f.helps.map((h) => `<li>${esc(h)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="#lead-form">Talk With Nathanael →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}" data-track="call_click">Call ${esc(site.phone)}</a></aside>
   </div>

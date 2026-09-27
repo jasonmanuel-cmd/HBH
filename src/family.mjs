@@ -52,7 +52,7 @@ export const family = {
     { id: '', q: 'What happens to the house when a loved one moves into senior living?' },
     { id: '', q: 'Should we fix the house before selling it?' },
     { id: '', q: 'What if the house is still full of furniture and belongings?' },
-    { id: '', q: 'How do I sell a loved one’s Bakersfield home if I live in another state?' },
+    { id: '', q: 'Can I sell a loved one’s Bakersfield house if I live in another state?' },
   ],
 
   faqs: [
