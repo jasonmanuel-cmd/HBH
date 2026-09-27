@@ -1,9 +1,22 @@
 // Central business details. Edit here once — every page picks it up on the next build.
+
+// Canonical links, the sitemap, and structured data all need an absolute https URL on the final host.
+// Accepts sloppy input ("callharbison.com", "http://…/") and returns e.g. "https://www.callharbison.com".
+// A bare two-part domain gets "www." because Vercel redirects the apex to www — canonicals must not redirect.
+export function normalizeSiteUrl(raw) {
+  const value = (raw || '').trim() || 'https://www.callharbison.com';
+  const u = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
+  const local = u.hostname === 'localhost' || u.hostname.endsWith('.vercel.app');
+  if (!local && u.hostname.split('.').length === 2) u.hostname = `www.${u.hostname}`;
+  if (!local) u.protocol = 'https:';
+  return `${u.origin}${u.pathname}`.replace(/\/$/, '');
+}
+
 export default {
   name: 'Harbison Buys Homes',
   tagline: 'Property problem? Call Harbison.',
   // Production URL (used for canonical links, sitemap, social cards). Override with SITE_URL on Vercel.
-  url: (process.env.SITE_URL || 'https://www.callharbison.com').replace(/\/$/, ''),
+  url: normalizeSiteUrl(process.env.SITE_URL),
 
   phone: '(661) 472-7499',
   phoneHref: '+16614727499',
