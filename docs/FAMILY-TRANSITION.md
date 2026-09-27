@@ -1,6 +1,6 @@
 # Family Property Transition — Operator Runbook
 
-Page: `/sell-parents-house` · Partner short link: `/family?ref=<slug>` · Printable leave-behind: `/family-property-guide` (noindex)
+Page: `/sell-loved-ones-house` (old `/sell-parents-house` redirects here) · Partner short link: `/family?ref=<slug>` · Printable leave-behind: `/family-property-guide` (noindex)
 
 ## 1. Database (Supabase)
 1. Run `supabase/schema.sql` (if not already), then `supabase/migrations/002_family_transition.sql`.

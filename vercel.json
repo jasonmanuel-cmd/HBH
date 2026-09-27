@@ -7,8 +7,13 @@
   "redirects": [
     {
       "source": "/family",
-      "destination": "/sell-parents-house",
+      "destination": "/sell-loved-ones-house",
       "permanent": false
+    },
+    {
+      "source": "/sell-parents-house",
+      "destination": "/sell-loved-ones-house",
+      "permanent": true
     }
   ],
   "headers": [

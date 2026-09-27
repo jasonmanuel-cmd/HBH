@@ -7,6 +7,7 @@ import { execSync } from 'node:child_process';
 import handler from './api/leads.js';
 import hqHandler from './api/hq.js';
 import { installMockSupabase } from './dev/mock-supabase.mjs';
+import { family } from './src/family.mjs';
 
 if (process.argv.includes('--mock')) {
   installMockSupabase();
@@ -41,8 +42,8 @@ createServer(async (req, res) => {
   }
 
   // Mirror vercel.json redirects locally.
-  if (url.pathname === '/family') {
-    res.writeHead(307, { Location: `/sell-parents-house${url.search}` });
+  if (url.pathname === '/family' || url.pathname === family.oldPath) {
+    res.writeHead(url.pathname === '/family' ? 307 : 308, { Location: `${family.path}${url.search}` });
     return res.end();
   }
 

@@ -24,7 +24,7 @@ site.config.mjs          ← phone, email, service area, site URL (edit once, us
 src/content.mjs          ← original situations, areas, FAQs, images
 src/content-extra.mjs    ← About page, guides, testimonials, "at a glance" facts, California City page
 src/content-playbook.mjs ← site-playbook content: hero, 5 paths, seller promise, offer math, form options, new pages
-src/family.mjs           ← "Selling a parent's house" funnel content
+src/family.mjs           ← "Selling a loved one's house" funnel content
 src/templates.mjs        ← HTML layout, structured data, and page templates
 static/                  ← styles.css (inlined at build), script.js (fingerprinted), fonts, images, /hq panel
 api/leads.js             ← serverless function: website lead form

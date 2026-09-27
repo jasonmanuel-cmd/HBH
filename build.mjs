@@ -23,7 +23,7 @@ const pages = [
   ['about.html', aboutPage(), '/about'],
   ['how-it-works.html', howItWorksPage(), '/how-it-works'],
   ['contact.html', contactPage(), '/contact'],
-  ['sell-parents-house.html', familyPage(), '/sell-parents-house'],
+  [`${family.path.slice(1)}.html`, familyPage(), family.path],
   ['family-property-guide.html', partnerGuidePage(), null],
   ['situations/index.html', situationsIndexPage(), '/situations'],
   ...situations.map((s) => [`situations/${s.slug}.html`, situationPage(s), `/situations/${s.slug}`]),
@@ -108,7 +108,7 @@ ${link('/how-it-works', 'How it works', 'process, walkthrough, how direct offers
 ${link('/about', `About ${site.agent}`, 'credentials, approach, profiles')}
 ${link('/contact', 'Contact', `call or text ${site.phone}`)}
 ${link('/situations', 'Situations we help with')}
-${link(family.path, 'Selling a parent’s house', family.answer)}
+${link(family.path, 'Selling a loved one’s house', family.answer)}
 
 ## Situations
 ${situations.map((s) => link(`/situations/${s.slug}`, s.title, s.answer)).join('\n')}

@@ -223,7 +223,7 @@ function header(cta) {
     <nav class="nav" id="site-nav" aria-label="Main">
       <a href="/how-it-works">How It Works</a>
       <a href="/situations">Situations</a>
-      <a href="/sell-parents-house">Parent’s House</a>
+      <a href="${family.path}">Loved One’s Home</a>
       <a href="/guides">Guides</a>
       <a href="/about">About</a>
       <a href="/contact">Contact</a>
@@ -245,7 +245,7 @@ function footer(cta) {
   return `<footer class="footer" id="contact">
   <div class="container footer-grid">
     <div><img class="footer-logo" src="${logoReverse}" alt="${esc(site.name)}" width="243" height="48" loading="lazy"><p><strong class="footer-tag">${esc(site.tagline)}</strong><br>${esc(supportingPromise)}</p><p class="footer-social">${socials}</p></div>
-    <div><h2 class="footer-h">Explore</h2><a href="/how-it-works">How It Works</a><a href="/situations">Situations</a><a href="/sell-parents-house">Selling a Parent’s House</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
+    <div><h2 class="footer-h">Explore</h2><a href="/how-it-works">How It Works</a><a href="/situations">Situations</a><a href="${family.path}">Selling a Loved One’s House</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
     <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">Call or text ${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/contact">Contact page</a><a href="/#lead-form">Request property options</a></div>
     <div><h2 class="footer-h">Service Area</h2>${areas.map((a) => `<a href="/areas/${a.slug}">${esc(a.name)}</a>`).join('')}</div>
   </div>
@@ -613,7 +613,7 @@ export function situationPage(s) {
   const others = situations.filter((o) => o.slug !== s.slug);
   const url = `${site.url}/situations/${s.slug}`;
   const familyLink = ['life-change', 'inherited-property', 'relocation'].includes(s.slug)
-    ? `<h3>Helping a parent move?</h3><ul class="link-list"><li><a href="/sell-parents-house">Selling a parent’s house in Kern County — as-is vs. listing</a></li></ul>`
+    ? `<h3>Helping a loved one move?</h3><ul class="link-list"><li><a href="${family.path}">Selling a loved one’s house in Kern County — as-is vs. listing</a></li></ul>`
     : '';
   const extra = `${pathsBlock()}${familyLink}${guideLinks(relatedGuidesFor(s.slug))}
       <h3>Where we buy</h3><ul class="chip-list">${areas.map((a) => `<li><a href="/areas/${a.slug}">${esc(a.name)}</a></li>`).join('')}</ul>
@@ -1039,7 +1039,7 @@ const radios = (name, list, required = true) => `<div class="choice-grid" role="
 
 // Four-step form. Step 1 asks for the address only, so the first commitment is small.
 function familyLeadForm() {
-  return `<aside class="lead-card family-card" id="lead-form" aria-label="Talk with Nathanael about a parent's house">
+  return `<aside class="lead-card family-card" id="lead-form" aria-label="Talk with Nathanael about a loved one's house">
       <h2>What property are you trying to figure out?</h2>
       <form data-lead-form data-form-type="family_transition" data-steps novalidate>
         <input type="hidden" name="form_type" value="family_transition">
@@ -1096,8 +1096,8 @@ const videoLd = (v, url) => (v.id ? [{
 export function familyPage() {
   const f = family;
   const url = `${site.url}${f.path}`;
-  const title = pageTitle('Selling a Parent’s House in Kern County');
-  const crumbs = [['Home', '/'], ['Selling a Parent’s House', f.path]];
+  const title = pageTitle('Selling a Loved One’s House in Kern County');
+  const crumbs = [['Home', '/'], ['Selling a Loved One’s House', f.path]];
   const heroImg = f.image;
   const ogImg = sized(f.image, 1200, 630);
   const allFaqs = [...f.faqs, ...faqs.slice(0, 2)];
@@ -1124,7 +1124,7 @@ export function familyPage() {
   <div class="container family-intro">
     <div>
       ${answerBox(esc(f.answer))}
-      <p class="fam-note">Families usually call because they’re handling two things at once: helping a parent through a major move, and suddenly being responsible for an entire house.</p>
+      <p class="fam-note">Families usually call because they’re handling two things at once: helping a loved one through a major move, and suddenly being responsible for an entire house.</p>
     </div>
     ${videoBlock(f.heroVideo, { large: true })}
   </div>
@@ -1191,7 +1191,7 @@ export function partnerGuidePage() {
     { title: pageTitle('Family Property Guide'), description: g.intro, path: g.path, noindex: true, hasForm: false },
     `<section class="section cream page-top print-guide">
   <div class="container narrow prose">
-    <h1 class="page-title">What to do with <em>a parent’s house.</em></h1>
+    <h1 class="page-title">What to do with <em>a loved one’s house.</em></h1>
     <p class="lead">${esc(g.intro)}</p>
     <h2 class="prose-h">Five questions to answer first</h2>
     <ol>${g.questions.map((q) => `<li>${esc(q)}</li>`).join('')}</ol>
