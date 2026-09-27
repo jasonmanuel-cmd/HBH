@@ -20,16 +20,27 @@ Also: lead form API (`/api/leads`), `sitemap.xml`, `robots.txt` (AI crawlers exp
 ## Project layout
 
 ```
-site.config.mjs     ← phone, email, service area, site URL (edit once, used everywhere)
-src/content.mjs     ← situations, areas, FAQs, form options, images
-src/content-extra.mjs ← About page, guides, testimonials, "at a glance" facts, California City page
-src/content-playbook.mjs ← site-playbook content: hero, 5 paths, seller promise, offer explanation, form options, new pages
-src/templates.mjs   ← HTML layout and page templates
-static/             ← styles.css, script.js, logo, favicon (copied as-is)
-api/leads.js        ← Vercel serverless function that receives the form
-build.mjs           ← generates ./dist
-supabase/schema.sql ← optional leads table
+site.config.mjs          ← phone, email, service area, site URL (edit once, used everywhere)
+src/content.mjs          ← original situations, areas, FAQs, images
+src/content-extra.mjs    ← About page, guides, testimonials, "at a glance" facts, California City page
+src/content-playbook.mjs ← site-playbook content: hero, 5 paths, seller promise, offer math, form options, new pages
+src/family.mjs           ← "Selling a parent's house" funnel content
+src/templates.mjs        ← HTML layout, structured data, and page templates
+static/                  ← styles.css (inlined at build), script.js (fingerprinted), fonts, images, /hq panel
+api/leads.js             ← serverless function: website lead form
+api/hq.js                ← serverless function: HQ panel (dashboard + CRM)
+build.mjs                ← generates ./dist (pages, sitemap.xml, robots.txt, llms.txt)
+dev.mjs, dev/            ← local preview server and the HQ mock database
+supabase/                ← schema.sql + migrations (applied to the harbison-buys-homes project)
+test/                    ← `npm test`
+brand/                   ← logo originals (not deployed)
+docs/                    ← sitemap overview, family-funnel notes
+.github/workflows/ci.yml ← runs tests + build on every push
 ```
+
+## Branches
+
+`main` is the only long-lived branch and is what Vercel deploys to production. Do new work on a short-lived branch, open a pull request (CI runs automatically), merge, then delete the branch. Past feature branches are preserved as `archive/*` tags.
 
 ## Local development
 

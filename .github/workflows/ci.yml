@@ -1,0 +1,19 @@
+# Runs on every push and pull request: tests + a full build, so a broken change never reaches production.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm test
+      - run: npm run build
+      - name: Check every page was built
+        run: test "$(find dist -name '*.html' | wc -l)" -ge 35

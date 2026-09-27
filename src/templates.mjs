@@ -1103,15 +1103,9 @@ export function familyPage() {
   const allFaqs = [...f.faqs, ...faqs.slice(0, 2)];
   const service = serviceLd({ name: f.title, description: f.description, url, areaServed: areas.map(placeLd) });
   const vids = [f.heroVideo, ...f.videos].flatMap((v) => videoLd(v, url));
-  const howTo = {
-    '@type': 'HowTo',
-    '@id': `${url}#howto`,
-    name: 'How to sell a parent’s house in Kern County',
-    step: f.timeline.map(([n, t], i) => ({ '@type': 'HowToStep', position: i + 1, name: n, text: t })),
-  };
   const { direct, listing } = f.paths;
   return page(
-    { title, description: f.description, path: f.path, image: ogImg, preload: heroImg, pageType: 'family', ld: graph({ path: f.path, title, description: f.description, image: ogImg, crumbs, faq: allFaqs, extra: [service, howTo, ...vids] }) },
+    { title, description: f.description, path: f.path, image: ogImg, preload: heroImg, pageType: 'family', ld: graph({ path: f.path, title, description: f.description, image: ogImg, crumbs, faq: allFaqs, extra: [service, ...vids] }) },
     `<section class="hero hero-sub">
   ${heroPicture(heroImg)}
   <div class="container hero-grid">

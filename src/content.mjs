@@ -15,21 +15,6 @@ export const images = {
   valley: img('photo-1506744038136-46273834b3fb'),
 };
 
-export const situationOptions = [
-  'Inherited property',
-  'Needs major repairs',
-  'Vacant property',
-  'Problem tenants',
-  'Relocation',
-  'Life change (divorce, downsizing, etc.)',
-  'Fire / water damage',
-  'Unfinished remodel',
-  'Land or development opportunity',
-  'Something else',
-];
-
-export const timelineOptions = ['As soon as possible', 'Within 30 days', '1–3 months', '3+ months', 'Just exploring options'];
-
 export const situations = [
   {
     slug: 'inherited-property',
