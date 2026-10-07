@@ -12,6 +12,12 @@ export function normalizeSiteUrl(raw) {
   return `${u.origin}${u.pathname}`.replace(/\/$/, '');
 }
 
+// A GA4 measurement ID looks like G-XXXXXXXXXX. Anything else (an empty or placeholder env var) falls back to the default.
+export function resolveGaId(raw, fallback = 'G-SN1ZWS50M7') {
+  const value = (raw || '').trim();
+  return /^G-[A-Z0-9]{6,}$/.test(value) && !/^G-X+$/.test(value) ? value : fallback;
+}
+
 export default {
   name: 'Harbison Buys Homes',
   tagline: 'Property problem? Call Harbison.',
@@ -43,7 +49,7 @@ export default {
   serviceAreas: ['Bakersfield', 'Tehachapi', 'Kern County'],
 
   // Google Analytics 4 / Google tag ID. Defaults to the account's tag; override with GA_MEASUREMENT_ID on Vercel.
-  gaId: process.env.GA_MEASUREMENT_ID || 'G-SN1ZWS50M7',
+  gaId: resolveGaId(process.env.GA_MEASUREMENT_ID),
   // Optional Google Tag Manager container (GTM-XXXXXXX). Preferred for Ads conversions + call tracking. Set GTM_ID on Vercel.
   gtmId: process.env.GTM_ID || '',
 };
