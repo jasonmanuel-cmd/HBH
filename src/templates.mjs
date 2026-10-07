@@ -283,7 +283,7 @@ function leadForm({ situation = '', heading = 'Get Your Property Options', city 
   return `<aside class="lead-card" id="lead-form" aria-label="Request property options">
       <p class="eyebrow gold">Start Here · Free &amp; No Obligation</p>
       <h2>${esc(heading)}</h2>
-      <form data-lead-form data-steps data-form-type="options"${preset ? ' data-start="1"' : ''} novalidate>
+      <form data-lead-form data-steps data-form-type="options" method="post" action="/api/leads"${preset ? ' data-start="1"' : ''} novalidate>
         <input type="hidden" name="form_type" value="options">
         <input type="hidden" name="route_interest" value="">
         <input type="hidden" name="location_interest" value="${esc(location)}">
@@ -853,7 +853,7 @@ export function thankYouPage() {
     <aside class="lead-card details-card" aria-label="Optional property details">
       <p class="eyebrow gold">Optional · 30 seconds</p>
       <h2>Help us prepare for your call</h2>
-      <form data-details-form novalidate>
+      <form data-details-form method="post" action="/api/leads" novalidate>
         <fieldset><legend class="fstep-q">Timeline</legend>${detailRadios('timeline', detailOptions.timeline)}</fieldset>
         <fieldset><legend class="fstep-q">Who lives there now?</legend>${detailRadios('occupancy', detailOptions.occupancy)}</fieldset>
         <fieldset><legend class="fstep-q">Condition <span class="muted">(pick any)</span></legend>${detailChecks('condition', detailOptions.condition)}</fieldset>
@@ -1041,7 +1041,7 @@ const radios = (name, list, required = true) => `<div class="choice-grid" role="
 function familyLeadForm() {
   return `<aside class="lead-card family-card" id="lead-form" aria-label="Talk with Nathanael about a loved one's house">
       <h2>What property are you trying to figure out?</h2>
-      <form data-lead-form data-form-type="family_transition" data-steps novalidate>
+      <form data-lead-form data-form-type="family_transition" data-steps method="post" action="/api/leads" novalidate>
         <input type="hidden" name="form_type" value="family_transition">
         <ol class="step-dots" aria-hidden="true"><li class="on"></li><li></li><li></li><li></li></ol>
         <fieldset class="fstep" data-step="1">
