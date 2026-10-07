@@ -42,8 +42,8 @@ export default {
   region: 'Kern County',
   serviceAreas: ['Bakersfield', 'Tehachapi', 'Kern County'],
 
-  // Optional Google Analytics 4 ID (e.g. G-XXXXXXX). Set GA_MEASUREMENT_ID on Vercel to enable.
-  gaId: process.env.GA_MEASUREMENT_ID || '',
+  // Google Analytics 4 / Google tag ID. Defaults to the account's tag; override with GA_MEASUREMENT_ID on Vercel.
+  gaId: process.env.GA_MEASUREMENT_ID || 'G-SN1ZWS50M7',
   // Optional Google Tag Manager container (GTM-XXXXXXX). Preferred for Ads conversions + call tracking. Set GTM_ID on Vercel.
   gtmId: process.env.GTM_ID || '',
 };

@@ -173,6 +173,7 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   return `<!doctype html>
 <html lang="en-US">
 <head>
+  ${ga}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>${esc(title)}</title>
@@ -207,7 +208,6 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   <link rel="preload" as="font" type="font/woff2" href="/fonts/playfair-italic-latin.woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
   ${gtm}
-  ${ga}
   <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
   <script defer src="/_vercel/insights/script.js"></script>
   ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>` : ''}
