@@ -181,21 +181,27 @@ export async function deliver(lead, env = process.env) {
   if (env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM) tasks.push(['sms', textLeadAndTeam(lead, env)]);
 
   if (!tasks.length) {
-    console.warn('[leads] No delivery configured — set RESEND/SUPABASE/WEBHOOK env vars. Lead:', JSON.stringify(lead));
-    return { ok: true, delivered: [] };
+    // Previously returned ok:true here, which reported success while the lead was only
+    // written to the log and lost. A misconfigured deployment must fail loudly.
+    console.error('[leads] No delivery configured — set RESEND/SUPABASE/WEBHOOK env vars. Lead:', JSON.stringify(lead));
+    return { ok: false, delivered: [], error: 'no_delivery_configured' };
   }
 
   const results = await Promise.allSettled(tasks.map(([, p]) => p));
   const delivered = [];
+  const failures = [];
   results.forEach((r, i) => {
     if (r.status === 'fulfilled') delivered.push(tasks[i][0]);
-    else console.error(`[leads] ${tasks[i][0]} failed:`, r.reason?.message || r.reason);
+    else {
+      failures.push({ channel: tasks[i][0], reason: r.reason?.message || String(r.reason) });
+      console.error(`[leads] ${tasks[i][0]} failed:`, r.reason?.message || r.reason);
+    }
   });
   if (!delivered.length) console.error('[leads] All deliveries failed. Lead:', JSON.stringify(lead));
   // A text alone isn't a record of the lead — require at least one storing destination.
   const stored = delivered.some((d) => d !== 'sms');
   if (!stored) console.error('[leads] No storing destination succeeded. Lead:', JSON.stringify(lead));
-  return { ok: stored, delivered };
+  return { ok: stored, delivered, failures };
 }
 
 // ---------- Optional details from the thank-you page ----------
@@ -242,12 +248,19 @@ export async function deliverDetails(d, env = process.env) {
   if (env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) tasks.push(patchSupabase(d, env));
   if (env.LEAD_WEBHOOK_URL) tasks.push(fetch(env.LEAD_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ kind: 'details', ...d, submitted_at: new Date().toISOString() }) }).then((r) => { if (!r.ok) throw new Error(`Webhook ${r.status}`); }));
   if (!tasks.length) {
-    console.warn('[leads] Details received with no delivery configured:', JSON.stringify(d));
-    return { ok: true };
+    // Same silent-loss bug as deliver(): report failure so a misconfiguration is visible.
+    console.error('[leads] Details received with no delivery configured:', JSON.stringify(d));
+    return { ok: false, delivered: [], error: 'no_delivery_configured' };
   }
   const results = await Promise.allSettled(tasks);
-  results.filter((r) => r.status === 'rejected').forEach((r) => console.error('[leads] details delivery failed:', r.reason?.message || r.reason));
-  return { ok: results.some((r) => r.status === 'fulfilled') };
+  const failures = [];
+  results.forEach((r, i) => {
+    if (r.status === 'rejected') {
+      failures.push({ channel: i, reason: r.reason?.message || String(r.reason) });
+      console.error('[leads] details delivery failed:', r.reason?.message || r.reason);
+    }
+  });
+  return { ok: results.some((r) => r.status === 'fulfilled'), failures };
 }
 
 export default async function handler(req, res) {
@@ -262,20 +275,20 @@ export default async function handler(req, res) {
   }
   body = body && typeof body === 'object' ? body : {};
 
-  // Honeypot: bots fill the hidden "company" field. Pretend success.
+  // Honeypot: bots fill the hidden "company" field. Pretend success so they learn nothing.
   if (body.company) return res.status(200).json({ ok: true });
 
   if (body.kind === 'details') {
     const d = parseDetails(body);
     if (d.phone.replace(/\D/g, '').length < 10 || d.address.length < 5) return res.status(400).json({ ok: false, error: 'Missing lead reference.' });
     const r = await deliverDetails(d);
-    return res.status(r.ok ? 200 : 502).json({ ok: r.ok });
+    return res.status(r.ok ? 200 : 502).json({ ok: r.ok, delivered: r.delivered || [], error: r.error, failures: r.failures || [] });
   }
 
   const { lead, errors } = parseLead(body);
   if (errors.length) return res.status(400).json({ ok: false, error: 'Please check the highlighted fields.', fields: errors });
 
   const result = await deliver(lead);
-  if (!result.ok) return res.status(502).json({ ok: false, error: 'We could not send your request. Please call us instead.' });
-  return res.status(200).json({ ok: true });
+  if (!result.ok) return res.status(502).json({ ok: false, error: 'We could not send your request. Please call us instead.', failures: result.failures || [] });
+  return res.status(200).json({ ok: true, delivered: result.delivered });
 }
