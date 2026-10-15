@@ -2,6 +2,17 @@
 
 Website for Harbison Buys Homes — "Property problem? Call Harbison." Static pages plus one serverless API for the lead form, built for Vercel.
 
+## One CRM for both websites
+
+Call Harbison HQ is the shared intake desk for this website and Harbison Standard.
+The private `/api/intake` bridge accepts authenticated Standard inquiries into the
+existing lead table. HQ labels and filters by brand, preserves Standard buyer
+profiles and messages, and keeps one pipeline for follow-up. Set `CRM_INGEST_SECRET`
+to the same 32+ character server-only secret as Standard's `SHARED_CRM_SECRET`.
+Customer SMS remains off unless `LEAD_ACK_ENABLED=true` and response consent is
+recorded. See [the shared CRM runbook](docs/SHARED-CRM.md) for configuration,
+verification limits, historical leads and items still awaiting broker review.
+
 ## What's included
 
 | Page | URL |
