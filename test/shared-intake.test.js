@@ -76,6 +76,10 @@ test('both website inquiries appear in one HQ; filters, retries, details and sta
     assert.equal(detail.body.events.filter((event) => event.actor === 'Harbison Standard intake').length, 1);
     const stats = computeStats(all.body.leads);
     assert.deepEqual(stats.byBrand, { harbison_standard: 1, call_harbison: 1 });
+    const verification = await call(intake, { method: 'POST', headers: request.headers, body: { kind: 'verify', submission_id: body.submission_id } });
+    assert.deepEqual(verification.body, { ok: true, verified: true, cleaned: true });
+    const preserved = await read(`action=lead&id=${body.submission_id}`);
+    assert.equal(preserved.body.lead.id, body.submission_id); // caller cannot redirect diagnostic deletion
   } finally { globalThis.fetch = realFetch; }
 });
 

@@ -124,6 +124,11 @@ async function handle(url, init = {}) {
     }
     return reply(out);
   }
+  if (method === 'DELETE') {
+    const out = db[table].filter(hit);
+    db[table] = db[table].filter((row) => !hit(row));
+    return reply(out);
+  }
   rows = rows.filter(hit);
   const order = u.searchParams.get('order');
   if (order) {

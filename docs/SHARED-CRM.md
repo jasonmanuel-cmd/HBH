@@ -22,6 +22,8 @@ For schema compatibility, Standard's buyer profile and original message are pres
 4. Keep Standard's current `SUPABASE_*` values for analytics. Do not replace them with HBH credentials.
 5. Verify authenticated storage through the private bridge, then confirm a controlled inquiry from each public website in HQ. Public submissions may send real staff notifications, so use a coordinated test.
 
+An authenticated POST of `{ "kind": "verify" }` to the private bridge inserts a server-generated, clearly marked test inquiry as spam, reads it back, and deletes that exact test record. It sends no notifications and cannot accept a caller-specified deletion target. Success requires `verified: true` and `cleaned: true`.
+
 Only production should use production intake credentials. Use separate secrets and a test database for preview/development. Requests with missing or wrong credentials are rejected. The bridge does not return the secret, service key or customer data.
 
 Submission UUIDs make Standard bridge retries idempotent: duplicate retries cannot overwrite staff edits. If the shared CRM fails, Standard reports partial email-only delivery or its existing fallback; it does not silently write a second CRM. No durable retry queue is introduced by this change. Both existing notification providers remain separate delivery paths.
