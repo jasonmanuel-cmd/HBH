@@ -6,6 +6,7 @@
 //      HQ_SESSION_SECRET (optional — otherwise derived from the password + service key, so changing
 //      the password signs everyone out).
 import { createHmac, createHash, timingSafeEqual } from 'node:crypto';
+import { brandOf, brandFilter } from '../lib/shared-intake.js';
 
 export const STATUSES = ['new', 'contact_attempted', 'connected', 'qualified', 'appointment_set', 'property_reviewed', 'options_presented', 'nurture', 'under_contract', 'closed_won', 'closed_lost', 'not_a_fit', 'spam'];
 const CLOSED = ['closed_won', 'closed_lost', 'not_a_fit', 'spam'];
@@ -14,7 +15,7 @@ const EVENT_KINDS = ['note', 'call', 'text', 'email', 'appointment', 'offer'];
 const SESSION_HOURS = 12;
 const COOKIE = 'hq_session';
 
-const LIST_COLS = 'id,created_at,name,phone,email,address,situation,status,channel,route_interest,next_followup,appointment_at,assigned_to,do_not_contact,form_type';
+const LIST_COLS = 'id,created_at,name,phone,email,address,situation,status,channel,source,route_interest,next_followup,appointment_at,assigned_to,do_not_contact,form_type';
 
 // ---------- field validation for edits ----------
 const text = (max) => (v) => (v == null || v === '' ? null : typeof v === 'string' ? v.trim().slice(0, max) : undefined);
@@ -165,6 +166,7 @@ export function computeStats(leads, now = Date.now()) {
     grossProfit90: won90.reduce((s, l) => s + (Number(l.gross_profit) || 0), 0),
     byStatus: count(open, 'status'),
     byChannel: count(last30, 'channel'),
+    byBrand: last30.reduce((counts, lead) => { const brand = brandOf(lead); counts[brand] = (counts[brand] || 0) + 1; return counts; }, {}),
     byRoute: count(last30.filter((l) => l.route_interest), 'route_interest'),
     bySituation: count(last30.filter((l) => l.situation), 'situation'),
     weekly: weeks,
@@ -213,7 +215,7 @@ export default async function handler(req, res, env = process.env) {
 
     if (action === 'stats' && req.method === 'GET') {
       const since = new Date(Date.now() - 365 * 864e5).toISOString();
-      const rows = await sb(env, `leads?select=id,created_at,status,channel,route_interest,situation,first_contact_at,appointment_at,next_followup,gross_profit,closed_at&created_at=gte.${since}&limit=5000`);
+      const rows = await sb(env, `leads?select=id,created_at,status,channel,form_type,route_interest,situation,first_contact_at,appointment_at,next_followup,gross_profit,closed_at&created_at=gte.${since}&limit=5000&order=created_at.desc`);
       const waiting = await sb(env, 'v_uncontacted?select=id,created_at,name,phone,address,channel,minutes_waiting&limit=8');
       const upcoming = await sb(env, `leads?select=id,name,address,appointment_at&appointment_at=gte.${new Date().toISOString()}&order=appointment_at.asc&limit=6`);
       return res.status(200).json({ ok: true, stats: computeStats(rows), waiting, upcoming });
@@ -233,7 +235,11 @@ export default async function handler(req, res, env = process.env) {
       else if (view === 'followups') { p.set('next_followup', `lte.${new Date().toISOString()}`); p.set('status', `not.in.(${CLOSED.join(',')})`); p.set('order', 'next_followup.asc'); }
       else if (view === 'new') p.set('status', 'eq.new');
       const q = (url.searchParams.get('q') || '').replace(/[^\p{L}\p{N} @.+\-#]/gu, '').trim().slice(0, 60);
-      if (q) p.set('or', `(${['name', 'phone', 'address', 'email'].map((c) => `${c}.ilike."*${q}*"`).join(',')})`);
+      const conditions = [];
+      const brand = brandFilter(url.searchParams.get('brand'));
+      if (brand) conditions.push(brand);
+      if (q) conditions.push(`or(${['name', 'phone', 'address', 'email'].map((c) => `${c}.ilike."*${q}*"`).join(',')})`);
+      if (conditions.length) p.set('and', `(${conditions.join(',')})`);
       const leads = await sb(env, `leads?${p}`);
       return res.status(200).json({ ok: true, leads, limit, offset });
     }

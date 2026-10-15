@@ -9,6 +9,8 @@ const STAGES = {
   not_a_fit: 'Not a fit', spam: 'Spam',
 };
 const ROUTES = { direct: 'Sell direct', listing: 'List', renovate: 'Renovate then sell', development: 'Development', not_ready: 'Not ready yet' };
+const BRANDS = { harbison_standard: 'Harbison Standard', call_harbison: 'Call Harbison' };
+const brandOf = (l) => l.form_type === 'harbison_standard' ? 'harbison_standard' : 'call_harbison';
 const pillClass = (s) => (s === 'new' ? 'new' : s === 'closed_won' ? 'won' : ['closed_lost', 'not_a_fit', 'spam'].includes(s) ? 'lost' : ['appointment_set', 'options_presented', 'under_contract'].includes(s) ? 'hot' : '');
 const pill = (s) => `<span class="pill ${pillClass(s)}">${esc(STAGES[s] || s)}</span>`;
 const money = (n) => (n == null ? '—' : `$${Number(n).toLocaleString('en-US', { maximumFractionDigits: 0 })}`);
@@ -132,6 +134,7 @@ async function loadDash() {
   bars($('#by-status'), s.byStatus, STAGES);
   bars($('#by-channel'), s.byChannel);
   bars($('#by-route'), s.byRoute, ROUTES);
+  bars($('#by-brand'), s.byBrand, BRANDS);
 }
 ['#waiting', '#upcoming'].forEach((sel) => $(sel).addEventListener('click', (e) => {
   const li = e.target.closest('li[data-id]');
@@ -139,7 +142,7 @@ async function loadDash() {
 }));
 
 // ---------- lead list ----------
-const list = { view: 'open', q: '', offset: 0, items: [] };
+const list = { view: 'open', q: '', brand: '', offset: 0, items: [] };
 function setView(v) {
   list.view = v;
   document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
@@ -152,12 +155,13 @@ $('#q').addEventListener('input', (e) => {
   searchTimer = setTimeout(() => { list.q = e.target.value; loadLeads(true); }, 250);
 });
 $('#more').addEventListener('click', () => loadLeads(false));
+$('#brand').addEventListener('change', (e) => { list.brand = e.target.value; loadLeads(true); });
 
 async function loadLeads(reset) {
   if (reset) { list.offset = 0; list.items = []; }
   let r;
   try {
-    r = await api('leads', { params: { view: list.view, q: list.q, offset: String(list.offset), limit: '50' } });
+    r = await api('leads', { params: { view: list.view, q: list.q, brand: list.brand, offset: String(list.offset), limit: '50' } });
   } catch (e) {
     $('#rows').innerHTML = `<tr><td colspan="7" class="empty">${esc(e.message)}</td></tr>`;
     return;
@@ -169,15 +173,15 @@ async function loadLeads(reset) {
   const due = (l) => l.next_followup && Date.parse(l.next_followup) <= Date.now();
   $('#rows').innerHTML = list.items.map((l) => `<tr data-id="${esc(l.id)}">
       <td>${esc(when(l.created_at))}<span class="sub">${esc(ago(l.created_at))}</span></td>
-      <td><strong>${esc(l.name)}</strong><span class="sub">${esc(l.phone)}</span></td>
-      <td>${esc(l.address)}</td>
+      <td><strong>${esc(l.name)}</strong><span class="sub">${esc(l.phone || l.email)}</span></td>
+      <td>${esc(l.address || 'Not supplied')}</td>
       <td>${esc(l.situation || '—')}${l.route_interest ? `<span class="sub">Path: ${esc(ROUTES[l.route_interest] || l.route_interest)}</span>` : ''}</td>
       <td>${pill(l.status)}${l.do_not_contact ? '<span class="sub due">Do not contact</span>' : ''}</td>
       <td class="${due(l) ? 'due' : ''}">${esc(when(l.next_followup))}</td>
-      <td>${esc(l.channel || '—')}</td></tr>`).join('');
+      <td>${esc(BRANDS[brandOf(l)])}<span class="sub">${esc(l.channel || '—')}</span></td></tr>`).join('');
   $('#cards').innerHTML = list.items.map((l) => `<div class="lead-card" data-id="${esc(l.id)}" role="button" tabindex="0">
       <div class="row"><strong>${esc(l.name)}</strong>${pill(l.status)}</div>
-      <span class="muted">${esc(l.address)}</span>
+      <span class="muted">${esc(BRANDS[brandOf(l)])} · ${esc(l.address || l.email || 'General inquiry')}</span>
       <div class="row"><span class="muted">${esc(l.situation || '')}</span><span class="${due(l) ? 'due' : 'muted'}">${l.next_followup ? `Follow up ${esc(when(l.next_followup))}` : esc(ago(l.created_at))}</span></div></div>`).join('');
 }
 ['#rows', '#cards'].forEach((sel) => {
@@ -216,25 +220,29 @@ const alertMsg = (m) => { $('#d-save-msg').textContent = m; };
 
 function renderLead(l, events) {
   $('#d-name').textContent = l.name;
-  $('#d-sub').textContent = `${l.address} · received ${when(l.created_at)}`;
+  $('#d-sub').textContent = `${BRANDS[brandOf(l)]} · ${l.address || 'Property not supplied'} · received ${when(l.created_at)}`;
   $('#d-dnc').hidden = !l.do_not_contact;
   const tel = digits(l.phone);
   $('#d-actions').innerHTML = l.do_not_contact ? '' : [
     tel && `<a class="btn" href="tel:${esc(tel)}">Call ${esc(l.phone)}</a>`,
     tel && `<a class="btn ghost" href="sms:${esc(tel)}">Text</a>`,
     l.email && `<a class="btn ghost" href="mailto:${esc(l.email)}">Email</a>`,
-    `<a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.address)}" target="_blank" rel="noopener">Map</a>`,
+    l.address && `<a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.address)}" target="_blank" rel="noopener">Map</a>`,
   ].filter(Boolean).join('');
 
   const consent = [l.consent_response && 'contact about property', l.consent_marketing && 'marketing'].filter(Boolean).join(' + ');
+  const snapshot = events.find((event) => event.actor === 'Harbison Standard intake');
+  $('#d-original').hidden = brandOf(l) !== 'harbison_standard';
+  $('#d-original-text').textContent = snapshot?.detail || l.notes || '';
   const facts = [
+    ['Brand', BRANDS[brandOf(l)]], ['Assigned to', l.assigned_to || 'Nathanael'],
     ['Phone', l.phone], ['Email', l.email], ['Property', l.address],
     ['Situation', l.situation], ['Path of interest', ROUTES[l.route_interest] || l.route_interest],
     ['Timeline', l.timeline], ['Occupancy', l.occupancy],
     ['Condition', Array.isArray(l.condition_flags) ? l.condition_flags.join(', ') : ''],
     ['Goal', l.desired_outcome], ['Relationship', l.relationship], ['Help needed', l.help_needed],
-    ['Prefers', l.contact_pref], ['Consent', consent || (l.form_type === 'options' ? 'none recorded' : 'form notice')],
-    ['Source', [l.channel, l.utm_source, l.utm_campaign].filter(Boolean).join(' · ')],
+    ['Prefers', l.contact_pref], ['Consent', consent || (l.form_type === 'harbison_standard' ? 'Inquiry only; no marketing opt-in recorded' : l.form_type === 'options' ? 'none recorded' : 'form notice')],
+    ['Source', [l.channel, l.utm_source, l.utm_campaign].filter(Boolean).join(' · ')], ['Submitted from', l.source],
     ['Landing page', l.landing_page], ['Form', l.form_type],
   ].filter(([, v]) => v);
   $('#d-facts').innerHTML = facts.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('');

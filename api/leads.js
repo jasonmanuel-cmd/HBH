@@ -48,7 +48,8 @@ export function parseLead(body) {
     ref_partner: clean(body.ref, MAX.short).toLowerCase().replace(/[^a-z0-9_-]/g, ''),
     landing_page: clean(body.landing_page, MAX.source),
     referrer: clean(body.referrer, MAX.source),
-    form_type: clean(body.form_type, MAX.short) || 'standard',
+    // Do not let public submissions impersonate the authenticated Standard bridge.
+    form_type: ['options', 'family_transition', 'standard'].includes(body.form_type) ? body.form_type : 'standard',
     relationship: clean(body.relationship, MAX.short),
     help_needed: clean(body.help_needed, MAX.short),
     contact_pref: clean(body.contact_pref, MAX.short),
@@ -154,8 +155,8 @@ async function sendSms(to, body, env) {
 async function textLeadAndTeam(lead, env) {
   const jobs = [];
   const to = e164(lead.phone);
-  if (to && lead.contact_pref !== 'Email' && (lead.form_type !== 'options' || lead.consent_response)) {
-    jobs.push(sendSms(to, `Hi ${firstName(lead.name)}, this is Nathanael Harbison's team. We got your note about ${street(lead.address)} and will reach out shortly. If texting is easier, just reply here. Reply STOP to opt out.`, env));
+  if (env.LEAD_ACK_ENABLED === 'true' && to && lead.contact_pref !== 'Email' && lead.consent_response) {
+    jobs.push(sendSms(to, 'Thank you for contacting Call Harbison. We received your inquiry and will forward it to Nathanael Harbison for follow-up. This is an automated acknowledgment. Reply STOP to opt out.', env));
   }
   if (env.LEAD_ALERT_SMS) {
     const alert = `NEW LEAD (${lead.channel}${lead.ref_partner ? `:${lead.ref_partner}` : ''}) ${lead.name} ${lead.phone} — ${street(lead.address)}. ${lead.situation || ''} ${lead.relationship ? `| ${lead.relationship}` : ''}${lead.route_interest ? ` | path: ${lead.route_interest}` : ''} | prefers ${lead.contact_pref || 'call'}`.slice(0, 320);

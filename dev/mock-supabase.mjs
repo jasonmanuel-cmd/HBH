@@ -41,7 +41,26 @@ export const db = {
 };
 
 const parseVal = (v) => (v === 'null' ? null : v === 'true' ? true : v === 'false' ? false : v);
+function splitConditions(value) {
+  let depth = 0;
+  let start = 0;
+  const parts = [];
+  for (let i = 0; i < value.length; i++) {
+    if (value[i] === '(') depth++;
+    if (value[i] === ')') depth--;
+    if (value[i] === ',' && depth === 0) { parts.push(value.slice(start, i)); start = i + 1; }
+  }
+  return [...parts, value.slice(start)];
+}
 function matches(row, key, expr) {
+  if (key === 'and' || key === 'or') {
+    const results = splitConditions(expr.slice(1, -1)).map((condition) => {
+      if (condition.startsWith('or(')) return matches(row, 'or', condition.slice(2));
+      const dot = condition.indexOf('.');
+      return matches(row, condition.slice(0, dot), condition.slice(dot + 1));
+    });
+    return key === 'and' ? results.every(Boolean) : results.some(Boolean);
+  }
   if (key === 'or') {
     const parts = expr.slice(1, -1).split(',');
     return parts.some((p) => {
@@ -55,6 +74,9 @@ function matches(row, key, expr) {
   const cell = row[key];
   const cmp = (a, b) => (Date.parse(a) && Date.parse(b) ? Date.parse(a) - Date.parse(b) : a < b ? -1 : a > b ? 1 : 0);
   if (op === 'eq') return String(cell) === String(parseVal(val));
+  if (op === 'neq') return cell != null && String(cell) !== String(parseVal(val));
+  if (op === 'is' && val === 'null') return cell == null;
+  if (op === 'ilike') return String(cell ?? '').toLowerCase().includes(val.replace(/^"|"$/g, '').replace(/\*/g, '').toLowerCase());
   if (op === 'gte') return cell != null && cmp(cell, val) >= 0;
   if (op === 'lte') return cell != null && cmp(cell, val) <= 0;
   if (op === 'in') return val.slice(1, -1).split(',').includes(String(cell));
@@ -84,6 +106,7 @@ async function handle(url, init = {}) {
   const hit = (r) => filters.every(([k, v]) => matches(r, k, v));
 
   if (method === 'POST') {
+    if (body.id && db[table].some((row) => row.id === body.id)) return reply({ message: 'duplicate key' }, 409);
     const row = { id: table === 'lead_events' ? db.lead_events.length + 1 : uuid(), created_at: new Date().toISOString(), at: new Date().toISOString(), status: 'new', ...body };
     db[table].push(row);
     return reply([row], 201);
