@@ -7,6 +7,7 @@
 //      the password signs everyone out).
 import { createHmac, createHash, timingSafeEqual } from 'node:crypto';
 import { brandOf, brandFilter } from '../lib/shared-intake.js';
+import { demoLeadReason } from '../lib/demo-leads.js';
 
 export const STATUSES = ['new', 'contact_attempted', 'connected', 'qualified', 'appointment_set', 'property_reviewed', 'options_presented', 'nurture', 'under_contract', 'closed_won', 'closed_lost', 'not_a_fit', 'spam'];
 const CLOSED = ['closed_won', 'closed_lost', 'not_a_fit', 'spam'];
@@ -212,6 +213,42 @@ export default async function handler(req, res, env = process.env) {
 
   try {
     if (action === 'me') return res.status(200).json({ ok: true, name: session.n });
+
+    if (action === 'analytics' && req.method === 'GET') {
+      if (!env.CRM_INGEST_SECRET) return res.status(503).json({ ok: false, error: 'Website analytics connection is not configured.' });
+      const days = Math.min(Math.max(Math.floor(Number(url.searchParams.get('days')) || 30), 1), 365);
+      const response = await fetch(`https://www.harbisonstandard.com/api/hq/analytics?days=${days}`, {
+        headers: { Authorization: `Bearer ${env.CRM_INGEST_SECRET}` }, signal: AbortSignal.timeout(25000), redirect: 'error',
+      });
+      if (!response.ok) return res.status(502).json({ ok: false, error: 'Harbison Standard website analytics are temporarily unavailable.' });
+      const analytics = await response.json();
+      if (!analytics.totals || !Array.isArray(analytics.daily)) throw new Error('Invalid analytics response');
+      return res.status(200).json({ ok: true, site: 'Harbison Standard', analytics });
+    }
+
+    if (action === 'demo-leads' && req.method === 'GET') {
+      const rows = await sb(env, 'leads?select=id,name,email,phone,address,form_type&order=created_at.desc&limit=5000');
+      return res.status(200).json({ ok: true, candidates: rows.filter(demoLeadReason).map((lead) => ({ id: lead.id, name: lead.name, reason: demoLeadReason(lead) })) });
+    }
+    if (action === 'demo-leads' && req.method === 'DELETE') {
+      const ids = body.ids;
+      if (!Array.isArray(ids) || !ids.length || ids.length > 100 || !ids.every(isUuid) || new Set(ids).size !== ids.length) return res.status(400).json({ ok: false, error: 'Supply explicit, unique test-record IDs (maximum 100).' });
+      const rows = [];
+      for (const id of ids) {
+        const [lead] = await sb(env, `leads?id=eq.${id}&select=id,name,email,phone,address,form_type,updated_at`);
+        // Validate the entire selection before removing anything. Real customer records are not eligible.
+        if (!lead || !demoLeadReason(lead)) return res.status(409).json({ ok: false, error: 'A selected record is missing or is not a recognized demo/test record. Nothing was deleted.' });
+        rows.push(lead);
+      }
+      const deleted = [];
+      for (const lead of rows) {
+        const filter = new URLSearchParams({ id: `eq.${lead.id}` });
+        if (lead.updated_at) filter.set('updated_at', `eq.${lead.updated_at}`);
+        const result = await sb(env, `leads?${filter}`, { method: 'DELETE', prefer: 'return=representation' });
+        if (result?.[0]?.id === lead.id) deleted.push(lead.id);
+      }
+      return res.status(200).json({ ok: true, deleted, skipped: ids.filter((id) => !deleted.includes(id)) });
+    }
 
     if (action === 'stats' && req.method === 'GET') {
       const since = new Date(Date.now() - 365 * 864e5).toISOString();
