@@ -66,7 +66,7 @@ h3{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--go
 .bars{display:grid;gap:8px}
 .bar{display:grid;grid-template-columns:minmax(90px,150px) 1fr 34px;gap:10px;align-items:center;font-size:.85rem}
 .bar .track{height:10px;background:rgba(3,31,43,.07);border-radius:5px;overflow:hidden}
-.bar .fill{height:100%;background:var(--navy);border-radius:5px}
+.bar .fill{display:block;height:100%;background:var(--navy);border-radius:5px}
 .bar .n{text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
 .spark{display:flex;align-items:flex-end;gap:5px;height:120px;padding-top:6px}
 .spark div{flex:1;background:var(--navy);border-radius:3px 3px 0 0;min-height:2px;position:relative}
@@ -99,6 +99,12 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .due{color:var(--bad);font-weight:700}
 .more{display:flex;justify-content:center;padding:14px}
 .cards{display:none}
+.analytics-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:18px}
+.analytics-controls select{min-height:44px;padding:0 12px;background:#fff;border:1px solid var(--line);border-radius:4px}
+.analytics-chart{display:flex;align-items:flex-end;gap:3px;height:150px}
+.analytics-chart>div{flex:1;background:var(--navy);min-width:1px;border-radius:3px 3px 0 0}
+#analytics-groups .bars{max-height:380px;overflow:auto}
+#analytics-error{color:var(--bad);padding:12px 0}
 
 /* Drawer */
 .scrim{position:fixed;inset:0;background:rgba(3,31,43,.45);z-index:30}
@@ -165,6 +171,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
       <nav class="tabs" role="tablist" aria-label="HQ sections">
         <button role="tab" aria-selected="true" data-tab="dash" id="tab-dash">Dashboard</button>
         <button role="tab" aria-selected="false" data-tab="leads" id="tab-leads">Leads</button>
+        <button role="tab" aria-selected="false" data-tab="analytics" id="tab-analytics">Website stats</button>
       </nav>
       <span class="who" id="who"></span>
       <button class="linkbtn" id="logout" type="button">Sign out</button>
@@ -184,6 +191,24 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
         <div class="card"><h3>Brand · last 30 days</h3><div class="bars" id="by-brand"></div><h3 style="margin-top:18px">Source · last 30 days</h3><div class="bars" id="by-channel"></div></div>
         <div class="card"><h3>Upcoming appointments</h3><ul class="mini" id="upcoming"></ul><h3 style="margin-top:18px">Path of interest · 30 days</h3><div class="bars" id="by-route"></div></div>
       </div>
+    </section>
+
+    <section id="analytics" role="tabpanel" aria-labelledby="tab-analytics" hidden>
+      <h2>Website stats</h2>
+      <p class="muted">Harbison Standard · live first-party analytics. Lead and pipeline totals for both brands are on the Dashboard.</p>
+      <div class="analytics-controls">
+        <label for="analytics-days">Date range</label>
+        <select id="analytics-days"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
+        <button class="btn ghost" type="button" id="analytics-refresh">Refresh stats</button>
+        <span class="muted" id="analytics-status" role="status"></span>
+      </div>
+      <p id="analytics-error" role="alert" hidden></p>
+      <div id="analytics-content" hidden>
+        <div class="kpis" id="analytics-kpis"></div>
+        <div class="card" style="margin-bottom:16px"><h3>Traffic · sessions per day (UTC)</h3><div id="analytics-traffic"></div></div>
+        <div class="grid3" id="analytics-groups"></div>
+      </div>
+      <p class="muted" style="font-size:.82rem;margin-top:24px">Raw IP addresses are not stored. Daily visitor hashes rotate, so unique visitors are daily estimates. Do Not Track, Global Privacy Control and the site's analytics opt-out are honored. Hourly and daily buckets use UTC.</p>
     </section>
 
     <section id="leads" role="tabpanel" aria-labelledby="tab-leads" hidden>
@@ -256,5 +281,6 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 </aside>
 
 <script src="/hq/app.js" defer></script>
+<script src="/hq/analytics.js" defer></script>
 </body>
 </html>

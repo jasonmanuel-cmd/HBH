@@ -86,8 +86,10 @@ function openTab(name) {
   document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
   $('#dash').hidden = name !== 'dash';
   $('#leads').hidden = name !== 'leads';
+  $('#analytics').hidden = name !== 'analytics';
   if (name === 'dash') loadDash();
   if (name === 'leads') loadLeads(true);
+  if (name === 'analytics') loadAnalytics();
 }
 document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => openTab(b.dataset.tab)));
 
