@@ -17,6 +17,37 @@ test('parseLead validates required fields', () => {
   assert.deepEqual(parseLead({ address: 'x', name: '', phone: '123', email: 'bad' }).errors, ['address', 'name', 'phone', 'email']);
 });
 
+test('email alerts target both staff addresses when recipients are not overridden', async () => {
+  const original = globalThis.fetch;
+  const calls = [];
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url, body: JSON.parse(options.body) });
+    return { ok: true };
+  };
+  try {
+    const result = await deliver(parseLead(valid).lead, { RESEND_API_KEY: 'test-key' });
+    assert.equal(result.ok, true);
+    assert.deepEqual(calls[0].body.to, ['nate85.realtor@gmail.com', 'coaiebay@gmail.com']);
+  } finally { globalThis.fetch = original; }
+});
+
+test('email success cannot hide a failure to save in the configured HQ CRM', async () => {
+  const original = globalThis.fetch;
+  const originalError = console.error;
+  console.error = () => {};
+  globalThis.fetch = async (url) => String(url).includes('resend.com')
+    ? { ok: true }
+    : { ok: false, status: 503, text: async () => 'Database unavailable' };
+  try {
+    const result = await deliver(parseLead(valid).lead, {
+      RESEND_API_KEY: 'test-key', SUPABASE_URL: 'https://db.test', SUPABASE_SERVICE_ROLE_KEY: 'test-key',
+    });
+    assert.equal(result.ok, false);
+    assert.deepEqual(result.delivered, ['email']);
+    assert.equal(result.failures[0].channel, 'supabase');
+  } finally { globalThis.fetch = original; console.error = originalError; }
+});
+
 test('rejects non-POST', async () => {
   const res = mockRes();
   await handler({ method: 'GET' }, res);

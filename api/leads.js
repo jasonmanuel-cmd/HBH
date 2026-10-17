@@ -5,7 +5,7 @@
 //   LEAD_WEBHOOK_URL                                                 -> JSON POST (Zapier, Make, GoHighLevel, etc.)
 //   TWILIO_ACCOUNT_SID + TWILIO_AUTH_TOKEN + TWILIO_FROM             -> instant text to the lead (+ LEAD_ALERT_SMS for staff)
 // A second request type, { kind: 'details' }, adds the optional thank-you-page answers to a lead created minutes earlier.
-// If none are configured the lead is written to the function logs so nothing is lost during setup.
+// A configured HQ database must accept the lead before the visitor sees success.
 
 const MAX = { address: 200, name: 120, phone: 40, email: 160, situation: 80, timeline: 60, source: 300, utm: 200, short: 80, id: 256 };
 
@@ -94,6 +94,11 @@ const e164 = (p) => {
   return d.length === 10 ? `+1${d}` : d.length === 11 && d[0] === '1' ? `+${d}` : null;
 };
 
+const notificationRecipients = (env) => [...new Set(
+  (env.LEAD_NOTIFY_EMAIL || 'nate85.realtor@gmail.com,coaiebay@gmail.com')
+    .split(',').map((value) => value.trim()).filter(Boolean)
+)];
+
 async function sendEmail(lead, env) {
   const rows = Object.entries(lead)
     .filter(([, v]) => v)
@@ -104,7 +109,7 @@ async function sendEmail(lead, env) {
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
       from: env.LEAD_FROM_EMAIL || 'Harbison Leads <onboarding@resend.dev>',
-      to: env.LEAD_NOTIFY_EMAIL.split(',').map((s) => s.trim()),
+      to: notificationRecipients(env),
       reply_to: lead.email || undefined,
       subject: `New ${lead.form_type === 'family_transition' ? 'family property' : 'property'} lead [${lead.channel}]: ${lead.address}`,
       html: `<h2 style="font-family:Georgia,serif;color:#031f2b">New property lead</h2><table>${rows}</table><p><a href="tel:${escapeHtml(lead.phone)}">Call ${escapeHtml(lead.name)}</a></p>`,
@@ -176,7 +181,7 @@ async function postWebhook(lead, env) {
 
 export async function deliver(lead, env = process.env) {
   const tasks = [];
-  if (env.RESEND_API_KEY && env.LEAD_NOTIFY_EMAIL) tasks.push(['email', sendEmail(lead, env)]);
+  if (env.RESEND_API_KEY) tasks.push(['email', sendEmail(lead, env)]);
   if (env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) tasks.push(['supabase', saveToSupabase(lead, env)]);
   if (env.LEAD_WEBHOOK_URL) tasks.push(['webhook', postWebhook(lead, env)]);
   if (env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM) tasks.push(['sms', textLeadAndTeam(lead, env)]);
@@ -200,7 +205,8 @@ export async function deliver(lead, env = process.env) {
   });
   if (!delivered.length) console.error('[leads] All deliveries failed. Lead:', JSON.stringify(lead));
   // A text alone isn't a record of the lead — require at least one storing destination.
-  const stored = delivered.some((d) => d !== 'sms');
+  const crmConfigured = Boolean(env.SUPABASE_URL || env.SUPABASE_SERVICE_ROLE_KEY);
+  const stored = crmConfigured ? delivered.includes('supabase') : delivered.some((d) => d !== 'sms');
   if (!stored) console.error('[leads] No storing destination succeeded. Lead:', JSON.stringify(lead));
   return { ok: stored, delivered, failures };
 }
@@ -234,13 +240,13 @@ async function patchSupabase(d, env) {
 export async function deliverDetails(d, env = process.env) {
   const summary = [d.timeline && `Timeline: ${d.timeline}`, d.occupancy && `Occupancy: ${d.occupancy}`, d.condition_flags.length && `Condition: ${d.condition_flags.join(', ')}`, d.desired_outcome && `Goal: ${d.desired_outcome}`].filter(Boolean);
   const tasks = [];
-  if (env.RESEND_API_KEY && env.LEAD_NOTIFY_EMAIL) {
+  if (env.RESEND_API_KEY) {
     tasks.push(fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from: env.LEAD_FROM_EMAIL || 'Harbison Leads <onboarding@resend.dev>',
-        to: env.LEAD_NOTIFY_EMAIL.split(',').map((s) => s.trim()),
+        to: notificationRecipients(env),
         subject: `Lead details added: ${d.address}`,
         html: `<p><strong>${escapeHtml(d.address)}</strong> · ${escapeHtml(d.phone)}</p><ul>${summary.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ul>`,
       }),
