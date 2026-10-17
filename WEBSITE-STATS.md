@@ -18,3 +18,11 @@ Daily visitor hashes rotate; the total is the sum of daily estimates, not distin
 Call Harbison first-party history starts with this release on October 17, 2026. Existing GA4 history is not imported or presented as first-party records. Historic Standard bots remain stored but are excluded from reports; no historical customer records are deleted.
 
 Regression coverage checks authenticated reads, site isolation, bot/admin/orphan exclusion, query stripping, the private visitor hash, privacy controls, and explicit error states. Live verification should compare a report before/after an actual public browser visit, confirm the other site's report is unchanged, and refresh the deep links to confirm routing and authentication.
+
+## Live verification — October 17, 2026
+
+Both builds and all 51 tests across the two repositories passed. Standard's type check returned zero errors/warnings (two pre-existing hints). Both production deployments became Ready.
+
+The new Call Harbison report initially showed zero sessions and views. An actual browser visit to `/how-it-works` then produced one session and one view, with the matching page, Chrome/Windows device context and coarse Bakersfield location. The Standard report stayed at 234 sessions and 347 views during that check, confirming the new visit did not leak into it. These numbers are verification snapshots, not fixed dashboard values. The operator verification visit remains part of the recorded traffic.
+
+The previous Standard report included 252 sessions explicitly classified as bots. The new read-time filters remove known bots, admin pages and session-start records with no matching public page view; historical source rows were not deleted or fabricated. Bookmarkable site-specific HQ URLs loaded with the existing authenticated session.
