@@ -7,6 +7,7 @@ import { execSync } from 'node:child_process';
 import handler from './api/leads.js';
 import hqHandler from './api/hq.js';
 import intakeHandler from './api/intake.js';
+import trackHandler from './api/track.js';
 import { installMockSupabase } from './dev/mock-supabase.mjs';
 import { family } from './src/family.mjs';
 
@@ -33,13 +34,13 @@ async function findFile(pathname) {
 createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
-  if (['/api/leads', '/api/hq', '/api/intake'].includes(url.pathname)) {
+  if (['/api/leads', '/api/hq', '/api/intake', '/api/track'].includes(url.pathname)) {
     let raw = '';
     for await (const chunk of req) raw += chunk;
     req.body = raw;
     res.status = (c) => ((res.statusCode = c), res);
     res.json = (b) => (res.setHeader('Content-Type', 'application/json'), res.end(JSON.stringify(b)));
-    return url.pathname === '/api/hq' ? hqHandler(req, res) : url.pathname === '/api/intake' ? intakeHandler(req, res) : handler(req, res);
+    return url.pathname === '/api/hq' ? hqHandler(req, res) : url.pathname === '/api/track' ? trackHandler(req,res) : url.pathname === '/api/intake' ? intakeHandler(req, res) : handler(req, res);
   }
 
   // Mirror vercel.json redirects locally.

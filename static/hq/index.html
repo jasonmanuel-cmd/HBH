@@ -171,7 +171,8 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
       <nav class="tabs" role="tablist" aria-label="HQ sections">
         <button role="tab" aria-selected="true" data-tab="dash" id="tab-dash">Dashboard</button>
         <button role="tab" aria-selected="false" data-tab="leads" id="tab-leads">Leads</button>
-        <button role="tab" aria-selected="false" data-tab="analytics" id="tab-analytics">Website stats</button>
+        <button role="tab" aria-selected="false" data-tab="analytics-standard" id="tab-analytics">Harbison Standard stats</button>
+        <button role="tab" aria-selected="false" data-tab="analytics-call" id="tab-analytics-call">Call Harbison stats</button>
       </nav>
       <span class="who" id="who"></span>
       <button class="linkbtn" id="logout" type="button">Sign out</button>
@@ -194,8 +195,8 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
     </section>
 
     <section id="analytics" role="tabpanel" aria-labelledby="tab-analytics" hidden>
-      <h2>Website stats</h2>
-      <p class="muted">Harbison Standard · live first-party analytics. Lead and pipeline totals for both brands are on the Dashboard.</p>
+      <h2 id="analytics-title">Website stats</h2>
+      <p class="muted" id="analytics-source"></p>
       <div class="analytics-controls">
         <label for="analytics-days">Date range</label>
         <select id="analytics-days"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
@@ -208,7 +209,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
         <div class="card" style="margin-bottom:16px"><h3>Traffic · sessions per day (UTC)</h3><div id="analytics-traffic"></div></div>
         <div class="grid3" id="analytics-groups"></div>
       </div>
-      <p class="muted" style="font-size:.82rem;margin-top:24px">Raw IP addresses are not stored. Daily visitor hashes rotate, so unique visitors are daily estimates. Do Not Track, Global Privacy Control and the site's analytics opt-out are honored. Hourly and daily buckets use UTC.</p>
+      <p class="muted" style="font-size:.82rem;margin-top:24px">Recorded first-party traffic, not sample data. Known bots and HQ pages are excluded. Visitor hashes rotate daily; the visitor total sums daily estimates, not distinct people across the date range. Active time is an estimate. Privacy choices, blocked scripts and network failures can reduce recorded traffic. Daily buckets use UTC. Call Harbison collection starts with this release; earlier GA4 history is not imported.</p>
     </section>
 
     <section id="leads" role="tabpanel" aria-labelledby="tab-leads" hidden>

@@ -252,7 +252,7 @@ function footer(cta) {
   <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/accessibility">Accessibility</a></span></div>
 </footer>
 <div class="mobile-bar"><a href="tel:${site.phoneHref}" class="btn btn-outline">Call or Text</a><a href="${cta}" class="btn btn-gold" data-cta="mobile_bar">Get My Options</a></div>
-<script src="/script.js" defer></script>`;
+<script src="/script.js" defer></script><script src="/analytics.js" defer></script>`;
 }
 
 function page(opts, body) {
@@ -990,6 +990,8 @@ export function privacyPage() {
     <p>${esc(site.name)} (“we,” “us”) respects your privacy. This policy explains what information we collect through this website and how we use it.</p>
     <h2 class="prose-h">Information we collect</h2>
     <p>When you submit a form, we collect the information you provide, such as your name, phone number, email address, property address, and details about your situation. We also collect standard technical data (such as browser type, pages visited, and referring site) through cookies and analytics tools.</p>
+    <p>Our first-party website statistics record page views and estimated active time, separately from your form details. Raw IP addresses are not retained. Daily visitor hashes rotate, and browser Do Not Track and Global Privacy Control choices are honored for this first-party tracking.</p>
+    <p><button type="button" class="btn btn-ghost" data-analytics-optout>Disable first-party analytics in this browser</button></p>
     <h2 class="prose-h">How we use it</h2>
     <ul>
       <li>To respond to your inquiry and evaluate your property</li>

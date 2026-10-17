@@ -14,6 +14,8 @@ const out = 'dist';
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 cpSync('static', out, { recursive: true });
+mkdirSync(join(out, 'hq/stats'), { recursive: true });
+for (const site of ['harbison-standard', 'call-harbison']) cpSync('static/hq/index.html', join(out, `hq/stats/${site}.html`));
 
 const today = new Date().toISOString().slice(0, 10);
 

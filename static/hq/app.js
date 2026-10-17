@@ -59,7 +59,7 @@ function showApp(name) {
   $('#app').hidden = false;
   $('#who').textContent = name;
   try { localStorage.setItem('hq_name', name); } catch {}
-  loadDash();
+  openTab(location.pathname.endsWith('/call-harbison') ? 'analytics-call' : location.pathname.endsWith('/harbison-standard') ? 'analytics-standard' : 'dash', false);
 }
 $('#login-form').addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -82,15 +82,22 @@ $('#logout').addEventListener('click', async () => {
 });
 
 // ---------- tabs ----------
-function openTab(name) {
+function openTab(name, navigate = true) {
+  const analytics = name.startsWith('analytics-');
+  if (navigate) history.pushState({}, '', analytics ? `/hq/stats/${name === 'analytics-call' ? 'call-harbison' : 'harbison-standard'}` : '/hq');
   document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
   $('#dash').hidden = name !== 'dash';
   $('#leads').hidden = name !== 'leads';
-  $('#analytics').hidden = name !== 'analytics';
+  $('#analytics').hidden = !analytics;
   if (name === 'dash') loadDash();
   if (name === 'leads') loadLeads(true);
-  if (name === 'analytics') loadAnalytics();
+  if (analytics) {
+    $('#analytics').dataset.site = name === 'analytics-call' ? 'call_harbison' : 'harbison_standard';
+    $('#analytics').setAttribute('aria-labelledby', name === 'analytics-call' ? 'tab-analytics-call' : 'tab-analytics');
+    loadAnalytics();
+  }
 }
+window.addEventListener('popstate', () => openTab(location.pathname.endsWith('/call-harbison') ? 'analytics-call' : location.pathname.endsWith('/harbison-standard') ? 'analytics-standard' : 'dash', false));
 document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => openTab(b.dataset.tab)));
 
 // ---------- dashboard ----------

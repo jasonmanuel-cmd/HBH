@@ -32,10 +32,10 @@ test('website analytics requires HQ login, stays server-side, clamps the range, 
     globalThis.fetch = async () => { throw new Error('Unauthenticated requests must not fetch anything'); };
     assert.equal((await call({ method: 'GET', url: '/api/hq?action=analytics' })).statusCode, 401);
     globalThis.fetch = async (url, init) => {
-      assert.equal(String(url), 'https://www.harbisonstandard.com/api/hq/analytics?days=365');
+      assert.equal(String(url), 'https://www.harbisonstandard.com/api/hq/analytics?days=365&site=harbison_standard');
       assert.equal(init.headers.Authorization, `Bearer ${env.CRM_INGEST_SECRET}`);
       assert.equal(init.redirect, 'error');
-      return Response.json({ totals: { sessions: 12, pageViews: 23 }, daily: [] });
+      return Response.json({ site: 'harbison_standard', totals: { sessions: 12, pageViews: 23 }, daily: [] });
     };
     const stats = await call({ method: 'GET', url: '/api/hq?action=analytics&days=9999', headers: headers() });
     assert.equal(stats.statusCode, 200);

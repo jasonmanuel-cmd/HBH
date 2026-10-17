@@ -217,13 +217,15 @@ export default async function handler(req, res, env = process.env) {
     if (action === 'analytics' && req.method === 'GET') {
       if (!env.CRM_INGEST_SECRET) return res.status(503).json({ ok: false, error: 'Website analytics connection is not configured.' });
       const days = Math.min(Math.max(Math.floor(Number(url.searchParams.get('days')) || 30), 1), 365);
-      const response = await fetch(`https://www.harbisonstandard.com/api/hq/analytics?days=${days}`, {
+      const site = url.searchParams.get('site') || 'harbison_standard';
+      if (!['harbison_standard', 'call_harbison'].includes(site)) return res.status(400).json({ ok: false, error: 'Unknown website.' });
+      const response = await fetch(`https://www.harbisonstandard.com/api/hq/analytics?days=${days}&site=${site}`, {
         headers: { Authorization: `Bearer ${env.CRM_INGEST_SECRET}` }, signal: AbortSignal.timeout(25000), redirect: 'error',
       });
-      if (!response.ok) return res.status(502).json({ ok: false, error: 'Harbison Standard website analytics are temporarily unavailable.' });
+      if (!response.ok) return res.status(502).json({ ok: false, error: 'Website analytics are temporarily unavailable.' });
       const analytics = await response.json();
-      if (!analytics.totals || !Array.isArray(analytics.daily)) throw new Error('Invalid analytics response');
-      return res.status(200).json({ ok: true, site: 'Harbison Standard', analytics });
+      if (analytics.site !== site || !analytics.totals || !Array.isArray(analytics.daily)) throw new Error('Invalid analytics response');
+      return res.status(200).json({ ok: true, site, analytics });
     }
 
     if (action === 'demo-leads' && req.method === 'GET') {

@@ -8,17 +8,21 @@ const duration = (value) => {
 async function loadAnalytics() {
   const request = ++analyticsRequest;
   const days = $('#analytics-days').value;
+  const site = $('#analytics').dataset.site || 'harbison_standard';
+  const label = site === 'call_harbison' ? 'Call Harbison' : 'Harbison Standard';
+  $('#analytics-title').textContent = `${label} website stats`;
+  $('#analytics-source').textContent = `${site === 'call_harbison' ? 'www.callharbison.com' : 'www.harbisonstandard.com'} · recorded first-party analytics`;
   $('#analytics-status').textContent = 'Loading…';
   $('#analytics-error').hidden = true;
   $('#analytics-content').hidden = true;
   try {
-    const result = await api('analytics', { params: { days } });
-    if (request !== analyticsRequest) return;
+    const result = await api('analytics', { params: { days, site } });
+    if (request !== analyticsRequest || $('#analytics').hidden || $('#analytics').dataset.site !== site) return;
     const data = result.analytics;
     const totals = data.totals;
     const number = (value) => Number(value || 0).toLocaleString('en-US');
     const cards = [
-      ['Sessions', number(totals.sessions)], ['Unique visitors (daily)', number(totals.uniqueVisitors)],
+      ['Sessions', number(totals.sessions)], ['Daily visitor estimates (sum)', number(totals.uniqueVisitors)],
       ['Page views', number(totals.pageViews)], ['Pages per session', Number(totals.pagesPerSession || 0).toFixed(2)],
       ['Average time on site', duration(totals.avgDurationSeconds)], ['Median time on site', duration(totals.medianDurationSeconds)],
       ['Total time on site', duration(totals.totalDurationSeconds)],
@@ -39,7 +43,7 @@ async function loadAnalytics() {
       bars($(`#analytics-group-${i}`), values);
     });
     $('#analytics-content').hidden = false;
-    $('#analytics-status').textContent = `Updated ${new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+    $('#analytics-status').textContent = `Updated ${new Date(data.generatedAt || Date.now()).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
   } catch (error) {
     if (request !== analyticsRequest) return;
     $('#analytics-status').textContent = '';
