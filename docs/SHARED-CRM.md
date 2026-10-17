@@ -30,7 +30,7 @@ Harbison Standard form → Standard `/api/lead` → authenticated HTTPS POST to 
 
 Call Harbison forms → existing `/api/leads` → the same Supabase `leads` → the same HQ.
 
-Standard keeps its current email notification and analytics database. When the bridge is configured, new Standard leads are **not** written to its old lead table. Its analytics dashboard links to the shared CRM, and its old lead mutation APIs reject edits. Historical Standard leads are retained in their original database; this change does not migrate them.
+Standard keeps its current email notification and analytics database. When the bridge is configured, new Standard leads are **not** written to its old lead table. Its HQ pages redirect to the shared CRM, and its old lead mutation APIs reject edits. Historical Standard leads are retained in their original database; this change does not migrate them.
 
 The trusted Standard bridge assigns `form_type=harbison_standard`. Other existing form types belong to Call Harbison. HQ uses this marker for brand labels, brand filters and counts. Public Call Harbison submissions cannot choose the trusted marker.
 
@@ -70,4 +70,4 @@ Broker review still covers brand/brokerage identification, personal-platform mar
 - `npm run build`: generated public pages and HQ assets.
 - In Standard: `npm test`, `npm run check`, `npm run build`.
 
-The integration test uses a local mock database and no real notifications. Deployed secrets, live provider delivery, old-lead migration and broker approval must be recorded separately before describing them as verified.
+The integration test uses a local mock database and no real notifications. Live storage and analytics were verified separately; provider notification receipt, historical-lead migration and broker approval remain unverified or pending. See [the project record](PROJECT-RECORD.md).
