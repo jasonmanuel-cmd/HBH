@@ -20,6 +20,7 @@ const year = new Date().getFullYear();
 // Brand assets cut from the Harbison Buys Homes logo sheet (see static/assets).
 const logo = '/assets/logo-horizontal-v2.png'; // full color, transparent, 1172×231
 const logoReverse = '/assets/logo-header-reverse-v2.png'; // ivory + gold for navy grounds, 487×96
+const heroMark = '/assets/h-house-mark-v2.png'; // round house-H mark, transparent, 192×192
 const ogDefault = '/assets/og-default.jpg'; // 1200×630
 const headshot = '/assets/nathanael-harbison.jpg'; // 325×325
 const BUILD_DATE = new Date().toISOString().slice(0, 10);
@@ -419,11 +420,11 @@ export function homePage() {
   ${heroPicture(heroImg)}
   <div class="container hero-grid">
     <div class="hero-copy">
-      <p class="eyebrow">${esc(heroCopy.eyebrow)}</p>
+      <div class="hero-brand"><img class="hero-mark" src="${heroMark}" alt="" width="96" height="96" decoding="async"><p class="eyebrow">${esc(heroCopy.eyebrow)}</p></div>
       <h1><span class="h1-kicker">We buy houses in Bakersfield &amp; Kern County</span>Property<br>Problem?<br><em>Call Harbison.</em></h1>
       <p class="hero-lead">${esc(heroCopy.sub)}</p>
       <div class="hero-actions"><a class="btn btn-gold" href="#lead-form" data-cta="hero">Get My Property Options</a><a class="btn btn-outline" href="tel:${site.phoneHref}">Call or Text ${esc(site.phone)}</a></div>
-      <ul class="hero-benefits">
+      <ul class="hero-benefits" aria-label="Why owners choose Harbison">
         ${heroCopy.trust.map(([s, t]) => `<li><strong>${esc(s)}</strong><span>${esc(t)}</span></li>`).join('\n        ')}
       </ul>
     </div>
