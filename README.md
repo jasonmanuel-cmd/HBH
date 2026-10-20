@@ -99,7 +99,7 @@ Analytics events (GTM/GA4, no personal data): `phone_click`, `cta_click`, `lead_
 
 ## Brand assets
 
-`static/assets/` holds the logo cut from the brand sheet: `logo-horizontal.png` (full color, transparent), `logo-header-reverse.png` (ivory + gold for navy), `logo-symbol-gold.png`, app/favicon icons, and `og-default.jpg`. For the sharpest icons, replace them with exports from the original vector logo file when available.
+`static/assets/` holds the logo cut from the brand sheet: `logo-horizontal-v2.png` (full color, transparent), `logo-header-reverse-v2.png` (ivory + gold for navy), `logo-symbol-gold.png`, app/favicon icons, and `og-default.jpg`. For the sharpest icons, replace them with exports from the original vector logo file when available.
 
 ## HQ panel (dashboard + CRM) — `/hq`
 

@@ -18,8 +18,8 @@ const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').r
 const strip = (s = '') => String(s).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 const year = new Date().getFullYear();
 // Brand assets cut from the Harbison Buys Homes logo sheet (see static/assets).
-const logo = '/assets/logo-horizontal.png'; // full color, transparent, 1172×231
-const logoReverse = '/assets/logo-header-reverse.png'; // ivory + gold for navy grounds, 487×96
+const logo = '/assets/logo-horizontal-v2.png'; // full color, transparent, 1172×231
+const logoReverse = '/assets/logo-header-reverse-v2.png'; // ivory + gold for navy grounds, 487×96
 const ogDefault = '/assets/og-default.jpg'; // 1200×630
 const headshot = '/assets/nathanael-harbison.jpg'; // 325×325
 const BUILD_DATE = new Date().toISOString().slice(0, 10);
