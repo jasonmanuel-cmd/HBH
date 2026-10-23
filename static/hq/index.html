@@ -35,12 +35,13 @@ a{color:var(--gold-dark)}
 
 /* Shell */
 .top{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;padding:0 16px;padding-top:env(safe-area-inset-top,0px)}
-.top-in{max-width:1280px;margin:auto;display:flex;align-items:center;gap:18px;min-height:60px}
+.top-in{max-width:1280px;margin:auto;display:flex;align-items:center;gap:14px;min-height:60px}
 .top img{height:30px;width:auto}
 .hq-tag{font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--gold);border:1px solid rgba(240,207,132,.5);padding:2px 7px;border-radius:3px}
 .tabs{display:flex;gap:4px;margin-left:auto}
-.tabs button{background:none;border:0;color:rgba(255,255,255,.75);font-weight:600;padding:0 14px;min-height:44px;border-radius:4px;cursor:pointer}
+.tabs button{background:none;border:0;color:rgba(255,255,255,.75);font-weight:600;padding:0 12px;min-height:44px;border-radius:4px;cursor:pointer;font-size:.88rem;white-space:nowrap}
 .tabs button[aria-selected=true]{color:var(--navy);background:var(--gold)}
+.top-actions{display:flex;align-items:center;gap:10px}
 .who{font-size:.82rem;color:rgba(255,255,255,.7);white-space:nowrap}
 .linkbtn{background:none;border:0;color:var(--gold);cursor:pointer;font-weight:600;padding:8px 4px;min-height:44px}
 main{max-width:1280px;margin:auto;padding:22px 16px 60px}
@@ -48,11 +49,15 @@ h2{font:600 1.5rem/1.15 "Playfair Display",Georgia,serif;margin:0 0 14px;color:v
 h3{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-dark);margin:0 0 10px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
 .muted{color:var(--muted)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:4px;border:0;background:var(--gold);color:var(--navy);font-weight:700;cursor:pointer;text-decoration:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 16px;border-radius:4px;border:0;background:var(--gold);color:var(--navy);font-weight:700;cursor:pointer;text-decoration:none;white-space:nowrap}
+.btn.sm{min-height:36px;padding:0 11px;font-size:.82rem}
 .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--navy)}
+.btn.top-add{min-height:38px;padding:0 12px;font-size:.82rem}
 .btn:disabled{opacity:.6;cursor:wait}
 
 /* Dashboard */
+.dash-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.dash-head p{margin:0;max-width:820px}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;cursor:default}
 .kpi[data-go]{cursor:pointer}
@@ -80,16 +85,19 @@ h3{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--go
 
 /* Leads */
 .toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:14px}
+.toolbar select{min-height:42px;padding:0 10px;background:#fff;border:1px solid var(--line);border-radius:4px;font-size:.88rem}
+.toolbar-filter{display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--muted)}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chips button{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:0 14px;min-height:40px;font-weight:600;font-size:.86rem;cursor:pointer}
 .chips button[aria-pressed=true]{background:var(--navy);color:#fff;border-color:var(--navy)}
-.search{flex:1;min-width:200px;min-height:44px;border:1px solid var(--line);border-radius:4px;padding:0 12px;background:#fff}
+.search{flex:1;min-width:200px;min-height:42px;border:1px solid var(--line);border-radius:4px;padding:0 12px;background:#fff}
+.toolbar-right{display:flex;gap:8px;margin-left:auto}
 .table-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);overflow-x:auto}
 table{width:100%;border-collapse:collapse;min-width:760px}
 th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);font-size:.9rem;vertical-align:top}
 th{font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:#fbf9f4}
-tbody tr{cursor:pointer}
-tbody tr:hover{background:#fbf8f0}
+tbody tr[data-id]{cursor:pointer}
+tbody tr[data-id]:hover{background:#fbf8f0}
 td .sub{display:block;color:var(--muted);font-size:.8rem}
 .pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.76rem;font-weight:700;white-space:nowrap;background:#eef1f2;color:var(--navy)}
 .pill.new{background:#fde8e6;color:var(--bad)}
@@ -97,6 +105,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .pill.won{background:#e3f3ea;color:var(--ok)}
 .pill.lost{background:#eceeef;color:#5a6a73}
 .due{color:var(--bad);font-weight:700}
+.num-col{text-align:right;font-variant-numeric:tabular-nums}
 .more{display:flex;justify-content:center;padding:14px}
 .cards{display:none}
 .analytics-controls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:18px}
@@ -108,7 +117,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 
 /* Drawer */
 .scrim{position:fixed;inset:0;background:rgba(3,31,43,.45);z-index:30}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:var(--cream);z-index:31;overflow-y:auto;box-shadow:-10px 0 40px rgba(0,0,0,.2);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(660px,100%);background:var(--cream);z-index:31;overflow-y:auto;box-shadow:-10px 0 40px rgba(0,0,0,.2);padding-bottom:env(safe-area-inset-bottom,0px)}
 .d-head{position:sticky;top:0;background:var(--navy);color:#fff;padding:16px 18px;display:flex;gap:12px;align-items:flex-start;z-index:2}
 .d-head h2{color:#fff;margin:0 0 2px;font-size:1.35rem}
 .d-head p{margin:0;color:rgba(255,255,255,.75);font-size:.88rem}
@@ -122,11 +131,12 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .form label{display:grid;gap:5px;font-size:.8rem;font-weight:600;color:var(--muted)}
 .form .full{grid-column:1/-1}
+.form .sep{grid-column:1/-1;border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
 .form input,.form select,.form textarea{min-height:44px;border:1px solid var(--line);border-radius:4px;padding:8px 10px;background:#fff;color:var(--ink);font-weight:400}
 .form textarea{min-height:90px;resize:vertical}
 .check{display:flex!important;align-items:center;gap:8px;font-size:.9rem!important;color:var(--ink)!important}
 .check input{width:20px;height:20px;min-height:0}
-.savebar{display:flex;gap:10px;align-items:center}
+.savebar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
 .status-msg{font-size:.88rem}
 .status-msg.ok{color:var(--ok)}
 .status-msg.bad{color:var(--bad)}
@@ -137,17 +147,23 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .note-row{display:grid;grid-template-columns:120px 1fr auto;gap:8px}
 .note-row select,.note-row input{min-height:44px;border:1px solid var(--line);border-radius:4px;padding:0 10px;background:#fff}
 
+@media(max-width:1180px){
+  .top-in{flex-wrap:wrap;gap:8px 12px;padding:8px 0}
+  .tabs{margin-left:0;order:3;width:100%;min-width:0;overflow-x:auto}
+  .tabs button{flex:1;min-width:max-content;padding:6px 10px}
+  .top-actions{margin-left:auto}
+}
 @media(max-width:980px){.kpis{grid-template-columns:1fr 1fr}.grid2,.grid3{grid-template-columns:1fr}}
-@media(max-width:1100px){.top-in{flex-wrap:wrap;gap:8px 12px;padding:8px 0}.tabs{margin-left:0;order:3;width:100%;min-width:0}.tabs button{flex:1;min-width:0;padding:6px 8px}.who{margin-left:auto}}
-@media(max-width:480px){.hq-tag{display:none}.tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){
-  .top-in{flex-wrap:wrap;gap:8px 12px;padding:8px 0}.tabs{margin-left:0;order:3;width:100%}.tabs button{flex:1}.who{margin-left:auto}
-  .table-wrap{display:none}.cards{display:grid;gap:10px}
+  .table-wrap.leads-table{display:none}.cards{display:grid;gap:10px}
   .lead-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;cursor:pointer;display:grid;gap:4px}
   .lead-card .row{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
   .form{grid-template-columns:1fr}.facts{grid-template-columns:1fr;gap:0 0}.facts dt{margin-top:8px}
   .note-row{grid-template-columns:1fr}
+  .toolbar-right{width:100%;margin-left:0}
+  .toolbar-right .btn{flex:1}
 }
+@media(max-width:480px){.hq-tag,.who{display:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -173,17 +189,23 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
       <nav class="tabs" role="tablist" aria-label="HQ sections">
         <button role="tab" aria-selected="true" data-tab="dash" id="tab-dash">Dashboard</button>
         <button role="tab" aria-selected="false" data-tab="leads" id="tab-leads">Leads</button>
+        <button role="tab" aria-selected="false" data-tab="partners" id="tab-partners">Partners &amp; ROI</button>
         <button role="tab" aria-selected="false" data-tab="analytics-standard" id="tab-analytics">Harbison Standard stats</button>
         <button role="tab" aria-selected="false" data-tab="analytics-call" id="tab-analytics-call">Call Harbison stats</button>
       </nav>
-      <span class="who" id="who"></span>
-      <button class="linkbtn" id="logout" type="button">Sign out</button>
+      <div class="top-actions">
+        <button class="btn top-add" id="top-new-lead" type="button">+ New lead</button>
+        <span class="who" id="who"></span>
+        <button class="linkbtn" id="logout" type="button">Sign out</button>
+      </div>
     </div>
   </header>
 
   <main>
     <section id="dash" role="tabpanel" aria-labelledby="tab-dash">
-      <p class="muted">One intake desk for both brands. Marketing staff organize inquiries and coordinate follow-up. Real estate advice, pricing, negotiations and contracts go to Nathanael Harbison.</p>
+      <div class="dash-head">
+        <p class="muted">One intake desk for both brands. Marketing staff organize inquiries and coordinate follow-up. Real estate advice, pricing, negotiations and contracts go to Nathanael Harbison.</p>
+      </div>
       <div class="kpis" id="kpis"></div>
       <div class="grid2">
         <div class="card"><h3>Leads per week</h3><div class="spark" id="spark"></div><div class="spark-l" id="spark-l"></div></div>
@@ -193,6 +215,82 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
         <div class="card"><h3>Open pipeline by stage</h3><div class="bars" id="by-status"></div></div>
         <div class="card"><h3>Brand · last 30 days</h3><div class="bars" id="by-brand"></div><h3 style="margin-top:18px">Source · last 30 days</h3><div class="bars" id="by-channel"></div></div>
         <div class="card"><h3>Upcoming appointments</h3><ul class="mini" id="upcoming"></ul><h3 style="margin-top:18px">Path of interest · 30 days</h3><div class="bars" id="by-route"></div></div>
+      </div>
+      <div class="card" id="health-card">
+        <div style="display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px">
+          <h3 style="margin:0">Delivery &amp; integration readiness</h3>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <button class="btn ghost sm" id="test-alert-btn" type="button">Send test email alert</button>
+            <span class="status-msg" id="test-alert-msg" role="status"></span>
+          </div>
+        </div>
+        <div id="health-items" class="muted" style="display:flex;flex-wrap:wrap;gap:8px 18px;font-size:.86rem">Checking integrations…</div>
+      </div>
+    </section>
+
+    <section id="partners" role="tabpanel" aria-labelledby="tab-partners" hidden>
+      <h2>Referral partners &amp; channel ROI</h2>
+      <p class="muted" style="margin-top:0">Shareable family-transition resource links (<code>callharbison.com/family?ref=&lt;slug&gt;</code>) and monthly channel cost-per-acquisition / ROAS. Resource relationships only — no per-referral fees without broker/counsel approval.</p>
+      <div class="grid2">
+        <div class="card">
+          <h3>Partner scoreboard</h3>
+          <div class="table-wrap" style="border:0">
+            <table style="min-width:520px">
+              <thead><tr><th>Partner</th><th>Status</th><th class="num-col">Inquiries</th><th class="num-col">Appts</th><th class="num-col">Closed</th><th class="num-col">Profit</th><th>Link</th></tr></thead>
+              <tbody id="partner-rows"></tbody>
+            </table>
+          </div>
+        </div>
+        <form class="card form" id="partner-form" novalidate>
+          <h3 class="full">Add or update partner</h3>
+          <label>Short-link slug<input id="p-slug" name="slug" placeholder="rosewood" maxlength="40" required></label>
+          <label>Partner name<input id="p-name" name="name" placeholder="Rosewood Senior Living" maxlength="120" required></label>
+          <label>Category<select id="p-category" name="category">
+            <option value="placement">Senior placement</option>
+            <option value="senior_community">Senior community</option>
+            <option value="estate_sale">Estate sale</option>
+            <option value="fiduciary">Fiduciary</option>
+            <option value="elder_law">Elder law / estate attorney</option>
+            <option value="move_manager">Move manager</option>
+            <option value="other">Other</option>
+          </select></label>
+          <label>Status<select id="p-status" name="status">
+            <option value="prospect">Prospect</option>
+            <option value="contacted">Contacted</option>
+            <option value="meeting_set">Meeting set</option>
+            <option value="active">Active</option>
+            <option value="paused">Paused</option>
+            <option value="declined">Declined</option>
+          </select></label>
+          <label>Contact person<input id="p-contact_name" name="contact_name" maxlength="120"></label>
+          <label>Phone<input id="p-contact_phone" name="contact_phone" type="tel" maxlength="40"></label>
+          <div class="savebar full"><button class="btn" type="submit">Save partner</button><span class="status-msg" id="p-msg" role="status"></span></div>
+        </form>
+      </div>
+
+      <div class="grid2">
+        <div class="card">
+          <h3>Monthly funnel &amp; ROAS by channel</h3>
+          <div class="table-wrap" style="border:0">
+            <table style="min-width:580px">
+              <thead><tr><th>Month</th><th>Channel</th><th class="num-col">Leads</th><th class="num-col">Qual.</th><th class="num-col">Closed</th><th class="num-col">Spend</th><th class="num-col">CPL</th><th class="num-col">ROAS</th></tr></thead>
+              <tbody id="funnel-rows"></tbody>
+            </table>
+          </div>
+        </div>
+        <form class="card form" id="spend-form" novalidate>
+          <h3 class="full">Record monthly ad spend</h3>
+          <label>Month<input id="s-month" name="month" type="month" required></label>
+          <label>Channel<select id="s-channel" name="channel">
+            <option value="google_ads">google_ads</option>
+            <option value="social">social</option>
+            <option value="youtube">youtube</option>
+            <option value="campaign">campaign</option>
+          </select></label>
+          <label>Campaign<input id="s-campaign" name="campaign" value="all" maxlength="80"></label>
+          <label>Spend ($)<input id="s-spend" name="spend" inputmode="decimal" placeholder="1200" required></label>
+          <div class="savebar full"><button class="btn" type="submit">Save spend</button><span class="status-msg" id="s-msg" role="status"></span></div>
+        </form>
       </div>
     </section>
 
@@ -221,13 +319,20 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
           <button type="button" data-view="new" aria-pressed="false">New</button>
           <button type="button" data-view="followups" aria-pressed="false">Follow-ups due</button>
           <button type="button" data-view="closed" aria-pressed="false">Closed</button>
+          <button type="button" data-view="spam" aria-pressed="false">Spam</button>
           <button type="button" data-view="all" aria-pressed="false">All</button>
         </div>
+        <label class="toolbar-filter" for="brand">Brand <select id="brand"><option value="">Both brands</option><option value="harbison_standard">Harbison Standard</option><option value="call_harbison">Call Harbison</option></select></label>
+        <label class="toolbar-filter" for="stage-filter">Stage <select id="stage-filter"><option value="">Any stage</option></select></label>
         <label class="sr-only" for="q">Search leads</label>
-        <label for="brand">Brand <select id="brand"><option value="">Both brands</option><option value="harbison_standard">Harbison Standard</option><option value="call_harbison">Call Harbison</option></select></label>
         <input class="search" id="q" type="search" placeholder="Search name, phone, address, email">
+        <div class="toolbar-right">
+          <button class="btn ghost" id="import-btn" type="button">Import</button>
+          <button class="btn ghost" id="export-csv" type="button">Export CSV</button>
+          <button class="btn" id="leads-new-btn" type="button">+ New lead</button>
+        </div>
       </div>
-      <div class="table-wrap">
+      <div class="table-wrap leads-table">
         <table>
           <thead><tr><th>Received</th><th>Contact</th><th>Property</th><th>Inquiry</th><th>Stage</th><th>Next follow-up</th><th>Brand / source</th></tr></thead>
           <tbody id="rows"></tbody>
@@ -241,6 +346,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
+
 <aside class="drawer" id="drawer" hidden aria-modal="true" role="dialog" aria-labelledby="d-name">
   <div class="d-head">
     <div><h2 id="d-name"></h2><p id="d-sub"></p></div>
@@ -252,18 +358,40 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
     <div class="card"><h3>What they told us</h3><dl class="facts" id="d-facts"></dl></div>
     <div class="card" id="d-original" hidden><h3>Original website inquiry</h3><p id="d-original-text" style="white-space:pre-wrap;overflow-wrap:anywhere"></p></div>
     <form class="card form" id="d-form" novalidate>
-      <h3 class="full">Pipeline</h3>
+      <h3 class="full">Contact &amp; property</h3>
+      <label>Name<input id="f-name" name="name" maxlength="120" required></label>
+      <label>Phone<input id="f-phone" name="phone" type="tel" maxlength="40"></label>
+      <label>Email<input id="f-email" name="email" type="email" maxlength="160"></label>
+      <label>Property address<input id="f-address" name="address" maxlength="200" placeholder="Optional for buyer inquiries"></label>
+      <label>Inquiry / situation<input id="f-situation" name="situation" maxlength="120"></label>
+      <label>Path of interest<select id="f-route_interest" name="route_interest">
+        <option value="">—</option>
+        <option value="direct">Sell direct</option>
+        <option value="listing">List</option>
+        <option value="renovate">Renovate then sell</option>
+        <option value="development">Development</option>
+        <option value="not_ready">Not ready yet</option>
+      </select></label>
+
+      <h3 class="sep">Pipeline</h3>
       <label>Stage<select id="f-status" name="status"></select></label>
       <label>Assigned to<input id="f-assigned_to" name="assigned_to" maxlength="60"></label>
       <label>Next follow-up<input id="f-next_followup" name="next_followup" type="datetime-local"></label>
       <label>Appointment<input id="f-appointment_at" name="appointment_at" type="datetime-local"></label>
       <label>Estimated value ($)<input id="f-estimated_value" name="estimated_value" inputmode="decimal"></label>
       <label>Offer amount ($)<input id="f-offer_amount" name="offer_amount" inputmode="decimal"></label>
-      <label>Outcome path<select id="f-outcome_path" name="outcome_path"><option value="">—</option><option value="direct_purchase">Direct purchase</option><option value="listing">Listing</option><option value="referral_out">Referred out</option><option value="none">None</option></select></label>
+      <label>Outcome path<select id="f-outcome_path" name="outcome_path">
+        <option value="">—</option>
+        <option value="direct_purchase">Direct purchase</option>
+        <option value="listing">Listing</option>
+        <option value="buyer_purchase">Buyer representation</option>
+        <option value="referral_out">Referred out</option>
+        <option value="none">None</option>
+      </select></label>
       <label>Closed value ($)<input id="f-closed_value" name="closed_value" inputmode="decimal"></label>
       <label>Gross profit ($)<input id="f-gross_profit" name="gross_profit" inputmode="decimal"></label>
       <label>Lost reason<input id="f-lost_reason" name="lost_reason" maxlength="300"></label>
-      <label class="full">Notes<textarea id="f-notes" name="notes" maxlength="5000"></textarea></label>
+      <label class="full">Team notes<textarea id="f-notes" name="notes" maxlength="5000"></textarea></label>
       <label class="check full"><input id="f-authority_confirmed" name="authority_confirmed" type="checkbox">Authority to sell confirmed (title, POA, trust, or court)</label>
       <label class="check full"><input id="f-do_not_contact" name="do_not_contact" type="checkbox">Do not contact</label>
       <div class="savebar full"><button class="btn" type="submit">Save changes</button><span class="status-msg" id="d-save-msg" role="status"></span></div>
@@ -280,6 +408,66 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
       <h3 style="margin-top:16px">Timeline</h3>
       <ul class="timeline" id="d-timeline"></ul>
     </div>
+  </div>
+</aside>
+
+<aside class="drawer" id="new-drawer" hidden aria-modal="true" role="dialog" aria-labelledby="new-title">
+  <div class="d-head">
+    <div><h2 id="new-title">New lead</h2><p>Add a phone call, walk-in, or referral directly to the shared pipeline.</p></div>
+    <button class="x" id="new-close" type="button" aria-label="Close">×</button>
+  </div>
+  <div class="d-body">
+    <form class="card form" id="new-form" novalidate>
+      <label>Brand<select id="nl-brand" name="brand"><option value="call_harbison">Call Harbison</option><option value="harbison_standard">Harbison Standard</option></select></label>
+      <label>Source channel<select id="nl-channel" name="channel">
+        <option value="phone_call">Phone / text inbound</option>
+        <option value="partner">Referral partner</option>
+        <option value="other_referral">Client / personal referral</option>
+        <option value="direct">Walk-in / direct</option>
+        <option value="social">Social</option>
+      </select></label>
+      <label>Contact name *<input id="nl-name" name="name" maxlength="120" required></label>
+      <label>Phone<input id="nl-phone" name="phone" type="tel" maxlength="40" placeholder="(661) 555-0100"></label>
+      <label>Email<input id="nl-email" name="email" type="email" maxlength="160" placeholder="Optional if phone is given"></label>
+      <label>Property address<input id="nl-address" name="address" maxlength="200" placeholder="Optional for buyer inquiries"></label>
+      <label>Inquiry / situation<input id="nl-situation" name="situation" maxlength="120" placeholder="Inherited house, Buying in Tehachapi…"></label>
+      <label>Path of interest<select id="nl-route_interest" name="route_interest">
+        <option value="">—</option>
+        <option value="direct">Sell direct</option>
+        <option value="listing">List</option>
+        <option value="renovate">Renovate then sell</option>
+        <option value="development">Development</option>
+        <option value="not_ready">Not ready yet</option>
+      </select></label>
+      <label>Initial stage<select id="nl-status" name="status"></select></label>
+      <label>Assigned to<input id="nl-assigned_to" name="assigned_to" value="nathanael" maxlength="60"></label>
+      <label class="full">Notes<textarea id="nl-notes" name="notes" maxlength="5000" placeholder="Context from the call…"></textarea></label>
+      <label class="check full"><input id="nl-consent_response" name="consent_response" type="checkbox" checked>Caller requested follow-up about this inquiry</label>
+      <div class="savebar full"><button class="btn" type="submit">Create lead</button><span class="status-msg" id="nl-msg" role="status"></span></div>
+    </form>
+  </div>
+</aside>
+
+<aside class="drawer" id="import-drawer" hidden aria-modal="true" role="dialog" aria-labelledby="import-title">
+  <div class="d-head">
+    <div><h2 id="import-title">Import historical leads</h2><p>Duplicate-aware CSV or JSON import preserving original timestamps, notes, stages, and brand provenance.</p></div>
+    <button class="x" id="import-close" type="button" aria-label="Close">×</button>
+  </div>
+  <div class="d-body">
+    <form class="card form" id="import-form" novalidate>
+      <label>Default brand (if row has none)<select id="imp-brand" name="default_brand">
+        <option value="harbison_standard">Harbison Standard</option>
+        <option value="call_harbison">Call Harbison</option>
+      </select></label>
+      <label>Upload .csv or .json file<input id="imp-file" type="file" accept=".csv,.json,text/csv,application/json" style="padding:7px"></label>
+      <label class="full">Or paste CSV / JSON rows<textarea id="imp-raw" rows="7" placeholder="name,email,phone,created_at,goal,message&#10;Jane Seller,jane@example.com,661-555-0140,2026-08-12T18:20:00Z,Buying,Looking in Tehachapi"></textarea></label>
+      <div class="savebar full">
+        <button class="btn ghost" id="imp-preview-btn" type="button">Preview import</button>
+        <button class="btn" id="imp-run-btn" type="submit">Import non-duplicates</button>
+        <span class="status-msg" id="imp-msg" role="status"></span>
+      </div>
+      <div class="full" id="imp-summary" hidden style="font-size:.86rem;border-top:1px solid var(--line);padding-top:10px"></div>
+    </form>
   </div>
 </aside>
 

@@ -1,5 +1,6 @@
 // Private server-to-server bridge. Public visitors continue using /api/leads.
 import { authorized, normalizeStandard } from '../lib/shared-intake.js';
+import { fetchWithRetry } from '../lib/fetch-retry.js';
 import { randomUUID } from 'node:crypto';
 
 export default async function handler(req, res, env = process.env) {
@@ -24,9 +25,9 @@ export default async function handler(req, res, env = process.env) {
   const headers = { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json' };
   try {
     // An explicit UUID makes retries idempotent; conflicts never overwrite staff edits.
-    const saved = await fetch(`${base}/leads`, {
-      method: 'POST', headers: { ...headers, Prefer: 'return=representation' }, body: JSON.stringify(row), signal: AbortSignal.timeout(10000),
-    });
+    const saved = await fetchWithRetry(`${base}/leads`, {
+      method: 'POST', headers: { ...headers, Prefer: 'return=representation' }, body: JSON.stringify(row),
+    }, { retries: 1, timeoutMs: 10000 });
     if (saved.status === 409) {
       const check = await fetch(`${base}/leads?id=eq.${row.id}&form_type=eq.harbison_standard&select=id,email`, { headers, signal: AbortSignal.timeout(10000) });
       const existing = check.ok ? await check.json() : [];

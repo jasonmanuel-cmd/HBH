@@ -18,6 +18,12 @@ export function resolveGaId(raw, fallback = 'G-SN1ZWS50M7') {
   return /^G-[A-Z0-9]{6,}$/.test(value) && !/^G-X+$/.test(value) ? value : fallback;
 }
 
+// A GTM container ID looks like GTM-XXXXXXX. Empty or placeholder values are ignored.
+export function resolveGtmId(raw) {
+  const value = (raw || '').trim();
+  return /^GTM-[A-Z0-9]{4,}$/.test(value) && !/^GTM-X+$/.test(value) ? value : '';
+}
+
 export default {
   name: 'Harbison Buys Homes',
   tagline: 'Property problem? Call Harbison.',
@@ -46,10 +52,10 @@ export default {
   city: 'Bakersfield',
   state: 'CA',
   region: 'Kern County',
-  serviceAreas: ['Bakersfield', 'Tehachapi', 'Kern County'],
+  serviceAreas: ['Bakersfield', 'Tehachapi', 'California City', 'Stallion Springs', 'Kern County'],
 
   // Google Analytics 4 / Google tag ID. Defaults to the account's tag; override with GA_MEASUREMENT_ID on Vercel.
   gaId: resolveGaId(process.env.GA_MEASUREMENT_ID),
   // Optional Google Tag Manager container (GTM-XXXXXXX). Preferred for Ads conversions + call tracking. Set GTM_ID on Vercel.
-  gtmId: process.env.GTM_ID || '',
+  gtmId: resolveGtmId(process.env.GTM_ID),
 };
