@@ -1,3 +1,14 @@
+// ---------- Language ----------
+// Spanish pages live under /es and set <html lang="es-US">. Messages written here pick the right language.
+const spanish = document.documentElement.lang.toLowerCase().startsWith('es');
+const say = (english, es) => (spanish ? es : english);
+// Remember the language the visitor picks with the header switch (the English pages read this and redirect).
+document.addEventListener('click', (e) => {
+  const pick = e.target.closest('[data-lang-pref]');
+  if (!pick) return;
+  try { localStorage.setItem('hbh-lang', pick.dataset.langPref); } catch {}
+});
+
 // Mobile menu
 const menu = document.querySelector('.menu-toggle');
 const nav = document.querySelector('.nav');
@@ -122,6 +133,7 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
   const steps = [...form.querySelectorAll('.fstep')];
   const dots = [...form.querySelectorAll('.step-dots li')];
   const status = form.querySelector('.form-status');
+  const firstHeading = form.closest('.lead-card')?.querySelector('h2')?.textContent;
   let current = 0;
   let started = false;
   form.show = (i, focus = true) => {
@@ -129,7 +141,7 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
     steps.forEach((s, n) => (s.hidden = n !== current));
     dots.forEach((d, n) => d.classList.toggle('on', n <= current));
     const h = form.closest('.lead-card')?.querySelector('h2');
-    if (h && current === 0 && form.dataset.formType === 'family_transition') h.textContent = 'What property are you trying to figure out?';
+    if (h && current === 0 && form.dataset.formType === 'family_transition' && firstHeading) h.textContent = firstHeading;
     if (focus) steps[current].querySelector('input:not([type=hidden]):not([type=radio]):not([type=checkbox]),select,input[type=radio]')?.focus({ preventScroll: true });
   };
   if (form.dataset.start) form.show(Number(form.dataset.start), false);
@@ -158,7 +170,11 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
       if (bad.length) {
         bad.forEach((el) => el.classList.add('invalid'));
         const typed = bad.some((el) => el.tagName === 'INPUT');
-        status.textContent = typed ? (form.querySelector('[name=street]') ? 'Please enter the street, city, and 5-digit ZIP code.' : 'Please enter the property address.') : 'Please choose the closest option.';
+        status.textContent = typed
+          ? (form.querySelector('[name=street]')
+            ? say('Please enter the street, city, and 5-digit ZIP code.', 'Por favor, escriba la calle, la ciudad y el código postal (ZIP) de 5 dígitos.')
+            : say('Please enter the property address.', 'Por favor, escriba la dirección de la propiedad.'))
+          : say('Please choose the closest option.', 'Por favor, elija la opción que más se acerque.');
         status.classList.add('error');
         track('lead_form_error', { ...formProps(form), step: current + 1 });
         return;
@@ -196,6 +212,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
 
     const data = Object.fromEntries(new FormData(form).entries());
     data.source = location.pathname;
+    data.language = spanish ? 'es' : 'en';
     Object.assign(data, attribution());
     // Options form: split fields → the combined values the CRM and alerts use.
     if (data.street !== undefined) data.address = [data.street, data.city, `${data.state || 'CA'} ${data.zip || ''}`.trim()].map((s) => (s || '').trim()).filter(Boolean).join(', ');
@@ -213,7 +230,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     track('lead_form_submit', formProps(form));
     button.disabled = true;
     const label = button.textContent;
-    button.textContent = 'Sending…';
+    button.textContent = say('Sending…', 'Enviando…');
 
     try {
       const res = await fetch('/api/leads', {
@@ -226,7 +243,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
         track('lead_form_success', formProps(form));
         track('generate_lead', { form_type: data.form_type || 'standard' });
         store.set('hbh_lead', { phone: data.phone, address: data.address }, sessionStorage);
-        location.href = '/thank-you';
+        location.href = spanish ? '/es/thank-you' : '/thank-you';
         return;
       }
       if (json.fields) return showErrors(json.fields);
@@ -234,7 +251,9 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     } catch {
       track('lead_form_error', { ...formProps(form), step: 'submit' });
       const phone = document.querySelector('.nav-phone');
-      status.textContent = `Something went wrong sending your request — nothing you typed was lost. Please try again${phone ? `, or call or text ${phone.textContent}` : ''}.`;
+      status.textContent = spanish
+        ? `Algo salió mal al enviar su solicitud; no se perdió nada de lo que escribió. Por favor, inténtelo de nuevo${phone ? `, o llame o envíe un texto al ${phone.textContent}` : ''}.`
+        : `Something went wrong sending your request — nothing you typed was lost. Please try again${phone ? `, or call or text ${phone.textContent}` : ''}.`;
       status.classList.add('error');
     } finally {
       button.disabled = false;
@@ -257,9 +276,9 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     });
     form.querySelector('.invalid')?.focus();
     status.textContent =
-      names.length === 1 && names[0] === 'consent_response' ? 'Please check the box so we can contact you about this property.'
-      : fields.includes('relationship') && fields.length === 1 ? 'Please tell us your relationship to the property.'
-      : 'Please check the highlighted fields — we need the property address, your name, and a valid phone number.';
+      names.length === 1 && names[0] === 'consent_response' ? say('Please check the box so we can contact you about this property.', 'Por favor, marque la casilla para que podamos comunicarnos con usted sobre esta propiedad.')
+      : fields.includes('relationship') && fields.length === 1 ? say('Please tell us your relationship to the property.', 'Por favor, indíquenos su relación con la propiedad.')
+      : say('Please check the highlighted fields — we need the property address, your name, and a valid phone number.', 'Por favor, revise los campos resaltados: necesitamos la dirección de la propiedad, su nombre y un número de teléfono válido.');
     status.classList.add('error');
   }
 });
@@ -280,12 +299,12 @@ document.querySelectorAll('form[data-details-form]').forEach((form) => {
       desired_outcome: fd.get('desired_outcome') || '',
     };
     if (!payload.timeline && !payload.occupancy && !payload.condition_flags.length && !payload.desired_outcome) {
-      status.textContent = 'Choose at least one answer, or skip this — it’s optional.';
+      status.textContent = say('Choose at least one answer, or skip this — it’s optional.', 'Elija al menos una respuesta, o sáltese este paso: es opcional.');
       status.className = 'form-status error';
       return;
     }
     if (!payload.phone) {
-      status.textContent = 'Thanks — please mention these details when we call.';
+      status.textContent = say('Thanks — please mention these details when we call.', 'Gracias. Por favor, mencione estos detalles cuando le llamemos.');
       status.className = 'form-status';
       return;
     }
@@ -293,13 +312,13 @@ document.querySelectorAll('form[data-details-form]').forEach((form) => {
     try {
       const res = await fetch('/api/leads', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!res.ok) throw new Error();
-      status.textContent = 'Added to your request. Thank you.';
+      status.textContent = say('Added to your request. Thank you.', 'Se agregó a su solicitud. Gracias.');
       status.className = 'form-status ok';
-      button.textContent = 'Added';
+      button.textContent = say('Added', 'Agregado');
       track('lead_details_added', { fields: ['timeline', 'occupancy', 'desired_outcome'].filter((k) => payload[k]).concat(payload.condition_flags.length ? ['condition'] : []).join(',') });
     } catch {
       button.disabled = false;
-      status.textContent = 'That didn’t go through. Please mention these details when we call.';
+      status.textContent = say('That didn’t go through. Please mention these details when we call.', 'No se pudo enviar. Por favor, mencione estos detalles cuando le llamemos.');
       status.className = 'form-status error';
     }
   });

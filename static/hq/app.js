@@ -180,9 +180,11 @@ async function loadLeads(reset) {
   $('#more').hidden = r.leads.length < r.limit;
   $('#leads-empty').hidden = list.items.length > 0;
   const due = (l) => l.next_followup && Date.parse(l.next_followup) <= Date.now();
+  // Leads that came in through the Spanish pages (/es/...) are marked so the team replies in Spanish.
+  const spanishTag = (l) => (/^\/es(\/|$)/.test(l.source || '') ? ' · Spanish' : '');
   $('#rows').innerHTML = list.items.map((l) => `<tr data-id="${esc(l.id)}">
       <td>${esc(when(l.created_at))}<span class="sub">${esc(ago(l.created_at))}</span></td>
-      <td><strong>${esc(l.name)}</strong><span class="sub">${esc(l.phone || l.email)}</span></td>
+      <td><strong>${esc(l.name)}</strong><span class="sub">${esc(l.phone || l.email)}${spanishTag(l)}</span></td>
       <td>${esc(l.address || 'Not supplied')}</td>
       <td>${esc(l.situation || '—')}${l.route_interest ? `<span class="sub">Path: ${esc(ROUTES[l.route_interest] || l.route_interest)}</span>` : ''}</td>
       <td>${pill(l.status)}${l.do_not_contact ? '<span class="sub due">Do not contact</span>' : ''}</td>
@@ -190,7 +192,7 @@ async function loadLeads(reset) {
       <td>${esc(BRANDS[brandOf(l)])}<span class="sub">${esc(l.channel || '—')}</span></td></tr>`).join('');
   $('#cards').innerHTML = list.items.map((l) => `<div class="lead-card" data-id="${esc(l.id)}" role="button" tabindex="0">
       <div class="row"><strong>${esc(l.name)}</strong>${pill(l.status)}</div>
-      <span class="muted">${esc(BRANDS[brandOf(l)])} · ${esc(l.address || l.email || 'General inquiry')}</span>
+      <span class="muted">${esc(BRANDS[brandOf(l)])} · ${esc(l.address || l.email || 'General inquiry')}${spanishTag(l)}</span>
       <div class="row"><span class="muted">${esc(l.situation || '')}</span><span class="${due(l) ? 'due' : 'muted'}">${l.next_followup ? `Follow up ${esc(when(l.next_followup))}` : esc(ago(l.created_at))}</span></div></div>`).join('');
 }
 ['#rows', '#cards'].forEach((sel) => {

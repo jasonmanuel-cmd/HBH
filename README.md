@@ -110,3 +110,12 @@ Private, password-protected team panel at **https://www.callharbison.com/hq**.
 - **Setup:** in Vercel set `HQ_PASSWORD` (long and unique) plus `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, then redeploy. Changing the password signs everyone out.
 - **Security:** one `/api/hq` function; signed HttpOnly/Secure/SameSite=Strict session cookie (12 hours); failed-login throttling; writes require the panel's own header; edits are whitelisted and validated; the database key never reaches the browser; `/hq` is noindex and blocked in robots.txt.
 - **Try it locally with sample data:** `npm run dev -- --mock`, open http://localhost:3000/hq, password `demo`.
+
+## Spanish version — `/es`
+
+Every page is also built in Spanish under `/es` (home, how it works, situations, areas, guides, the family page, contact, the forms, the thank-you page and the legal pages). English stays the source of truth: the build reads each finished English page and swaps every visitor-facing text for its entry in `src/i18n/es/*.json` (keyed by the English text). Links, form values and structured data are handled automatically, and a header switch (English / Español) remembers the visitor's choice.
+
+- **Edited English copy?** Run `node scripts/i18n.mjs extract --out todo.json` to list the texts that now need a Spanish entry, add them to a new file in `src/i18n/es/`, then `node scripts/i18n.mjs check`. `npm test` fails while any text is untranslated; until then the Spanish page simply shows that one text in English.
+- **Form values stay English** (what HQ and the CRM read). Only the visible labels change.
+- **Spanish leads** are recognised by the page they were submitted from (`/es/...`): the alert email subject gets `[ES]`, the text-message alert says `[SPANISH]`, the automatic acknowledgement text goes out in Spanish, and HQ shows "Spanish" beside the contact.
+- **Have a native speaker review the Spanish**, especially the privacy, terms and consent wording. The legal pages carry a note that the English version governs.

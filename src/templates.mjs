@@ -78,7 +78,7 @@ const orgLd = () => ({
   areaServed: areas.map(placeLd),
   founder: { '@id': ids.person },
   employee: { '@id': ids.person },
-  contactPoint: { '@type': 'ContactPoint', telephone: site.phoneHref, email: site.email, contactType: 'customer service', areaServed: 'US-CA', availableLanguage: 'English' },
+  contactPoint: { '@type': 'ContactPoint', telephone: site.phoneHref, email: site.email, contactType: 'customer service', areaServed: 'US-CA', availableLanguage: ['English', 'Spanish'] },
   knowsAbout: ['Selling a house as-is', 'Cash home buying', 'Inherited and probate property', 'Real estate listing', 'Home renovation', 'Land development', 'Kern County real estate'],
   hasOfferCatalog: {
     '@type': 'OfferCatalog',

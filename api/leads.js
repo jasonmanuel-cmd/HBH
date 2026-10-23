@@ -87,6 +87,14 @@ export function classifyChannel(l) {
   return ref ? 'other_referral' : 'direct';
 }
 
+// A lead from a Spanish page (/es/...) is answered in Spanish. Derived from the page the form was on, so no database column is needed.
+export const wantsSpanish = (lead) => /^\/es(\/|$)/.test(lead.source || '');
+
+export const ACK_SMS = {
+  en: 'Thank you for contacting Call Harbison. We received your inquiry and will forward it to Nathanael Harbison for follow-up. This is an automated acknowledgment. Reply STOP to opt out.',
+  es: 'Gracias por comunicarse con Call Harbison. Recibimos su consulta y la enviaremos a Nathanael Harbison para su seguimiento. Este es un mensaje automático. Responda STOP para cancelar.',
+};
+
 const firstName = (n) => n.split(/\s+/)[0];
 const street = (a) => a.split(',')[0];
 const e164 = (p) => {
@@ -100,7 +108,7 @@ const notificationRecipients = (env) => [...new Set(
 )];
 
 async function sendEmail(lead, env) {
-  const rows = Object.entries(lead)
+  const rows = [...Object.entries(lead), ...(wantsSpanish(lead) ? [['language', 'Spanish: please reply in Spanish']] : [])]
     .filter(([, v]) => v)
     .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#62717a">${k}</td><td style="padding:4px 0"><strong>${escapeHtml(v)}</strong></td></tr>`)
     .join('');
@@ -111,7 +119,7 @@ async function sendEmail(lead, env) {
       from: env.LEAD_FROM_EMAIL || 'Harbison Leads <onboarding@resend.dev>',
       to: notificationRecipients(env),
       reply_to: lead.email || undefined,
-      subject: `New ${lead.form_type === 'family_transition' ? 'family property' : 'property'} lead [${lead.channel}]: ${lead.address}`,
+      subject: `New ${lead.form_type === 'family_transition' ? 'family property' : 'property'} lead [${lead.channel}]${wantsSpanish(lead) ? ' [ES]' : ''}: ${lead.address}`,
       html: `<h2 style="font-family:Georgia,serif;color:#031f2b">New property lead</h2><table>${rows}</table><p><a href="tel:${escapeHtml(lead.phone)}">Call ${escapeHtml(lead.name)}</a></p>`,
     }),
   });
@@ -161,10 +169,10 @@ async function textLeadAndTeam(lead, env) {
   const jobs = [];
   const to = e164(lead.phone);
   if (env.LEAD_ACK_ENABLED === 'true' && to && lead.contact_pref !== 'Email' && lead.consent_response) {
-    jobs.push(sendSms(to, 'Thank you for contacting Call Harbison. We received your inquiry and will forward it to Nathanael Harbison for follow-up. This is an automated acknowledgment. Reply STOP to opt out.', env));
+    jobs.push(sendSms(to, ACK_SMS[wantsSpanish(lead) ? 'es' : 'en'], env));
   }
   if (env.LEAD_ALERT_SMS) {
-    const alert = `NEW LEAD (${lead.channel}${lead.ref_partner ? `:${lead.ref_partner}` : ''}) ${lead.name} ${lead.phone} — ${street(lead.address)}. ${lead.situation || ''} ${lead.relationship ? `| ${lead.relationship}` : ''}${lead.route_interest ? ` | path: ${lead.route_interest}` : ''} | prefers ${lead.contact_pref || 'call'}`.slice(0, 320);
+    const alert = `NEW LEAD${wantsSpanish(lead) ? ' [SPANISH]' : ''} (${lead.channel}${lead.ref_partner ? `:${lead.ref_partner}` : ''}) ${lead.name} ${lead.phone} — ${street(lead.address)}. ${lead.situation || ''} ${lead.relationship ? `| ${lead.relationship}` : ''}${lead.route_interest ? ` | path: ${lead.route_interest}` : ''} | prefers ${lead.contact_pref || 'call'}`.slice(0, 320);
     env.LEAD_ALERT_SMS.split(',').map((n) => e164(n.trim())).filter(Boolean).forEach((n) => jobs.push(sendSms(n, alert, env)));
   }
   await Promise.all(jobs);
@@ -293,9 +301,10 @@ export default async function handler(req, res) {
   }
 
   const { lead, errors } = parseLead(body);
-  if (errors.length) return res.status(400).json({ ok: false, error: 'Please check the highlighted fields.', fields: errors });
+  const es = wantsSpanish(lead) || body.language === 'es';
+  if (errors.length) return res.status(400).json({ ok: false, error: es ? 'Por favor, revise los campos resaltados.' : 'Please check the highlighted fields.', fields: errors });
 
   const result = await deliver(lead);
-  if (!result.ok) return res.status(502).json({ ok: false, error: 'We could not send your request. Please call us instead.', failures: result.failures || [] });
+  if (!result.ok) return res.status(502).json({ ok: false, error: es ? 'No pudimos enviar su solicitud. Por favor, llámenos.' : 'We could not send your request. Please call us instead.', failures: result.failures || [] });
   return res.status(200).json({ ok: true, delivered: result.delivered });
 }

@@ -3,11 +3,9 @@ import { rmSync, mkdirSync, writeFileSync, cpSync, readFileSync, renameSync } fr
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import site from './site.config.mjs';
-import {
-  areas, guides, faqs, situations,
-  homePage, howItWorksPage, contactPage, accessibilityPage, situationPage, areaPage, situationsIndexPage, aboutPage, guidesIndexPage, guidePage,
-  thankYouPage, notFoundPage, privacyPage, termsPage, familyPage, partnerGuidePage,
-} from './src/templates.mjs';
+import { areas, guides, faqs, situations } from './src/templates.mjs';
+import { buildPages } from './src/pages.mjs';
+import { decoratePage, esPath, loadDictionary, pathOfFile, translatePage } from './src/i18n/translate.mjs';
 import { family } from './src/family.mjs';
 
 const out = 'dist';
@@ -20,24 +18,21 @@ for (const site of ['harbison-standard', 'call-harbison']) cpSync('static/hq/ind
 const today = new Date().toISOString().slice(0, 10);
 
 // [output file, html, url path for sitemap (null = exclude), lastmod]
-const pages = [
-  ['index.html', homePage(), '/'],
-  ['about.html', aboutPage(), '/about'],
-  ['how-it-works.html', howItWorksPage(), '/how-it-works'],
-  ['contact.html', contactPage(), '/contact'],
-  [`${family.path.slice(1)}.html`, familyPage(), family.path],
-  ['family-property-guide.html', partnerGuidePage(), null],
-  ['situations/index.html', situationsIndexPage(), '/situations'],
-  ...situations.map((s) => [`situations/${s.slug}.html`, situationPage(s), `/situations/${s.slug}`]),
-  ...areas.map((a) => [`areas/${a.slug}.html`, areaPage(a), `/areas/${a.slug}`]),
-  ['guides/index.html', guidesIndexPage(), '/guides'],
-  ...guides.map((g) => [`guides/${g.slug}.html`, guidePage(g), `/guides/${g.slug}`, g.updated]),
-  ['privacy.html', privacyPage(), '/privacy'],
-  ['terms.html', termsPage(), '/terms'],
-  ['accessibility.html', accessibilityPage(), '/accessibility'],
-  ['thank-you.html', thankYouPage(), null],
-  ['404.html', notFoundPage(), null],
-];
+// Every page is built in English and again in Spanish (under /es), then each gets its language switch and hreflang links.
+const { dict, problems: dictionaryProblems } = loadDictionary();
+for (const problem of dictionaryProblems) console.warn(`[i18n] ${problem}`);
+const translation = { dict, siteUrl: site.url, report: { missing: new Set() } };
+const englishPages = buildPages();
+const pages = englishPages.flatMap(([file, html, path, mod]) => {
+  if (file === '404.html') return [[file, html, path, mod]];
+  const english = decoratePage(html, { lang: 'en', filePath: file, siteUrl: site.url });
+  const spanish = decoratePage(translatePage(html, { ...translation, filePath: file }), { lang: 'es', filePath: file, siteUrl: site.url });
+  return [
+    [file, english, path, mod],
+    [`es/${file}`, spanish, path ? esPath(path) : null, mod],
+  ];
+});
+if (translation.report.missing.size) console.warn(`[i18n] ${translation.report.missing.size} English texts have no Spanish entry and stay in English on /es pages. Run: node scripts/i18n.mjs extract --out todo.json`);
 
 // Mobile performance: inline the (small) stylesheet so first paint doesn't wait on a second request,
 // and fingerprint script.js so it can be cached for a year.
@@ -60,10 +55,15 @@ for (const [file, html] of pages) {
 writeFileSync(
   join(out, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${pages
-  .filter(([, , p]) => p)
-  .map(([, , p, mod]) => `  <url><loc>${site.url}${p}</loc><lastmod>${mod || today}</lastmod></url>`)
+  .filter(([file, , p]) => p && !file.startsWith('es/'))
+  .flatMap(([, , p, mod]) => {
+    const en = `${site.url}${p === '/' ? '/' : p}`;
+    const es = `${site.url}${esPath(p)}`;
+    const alternates = `<xhtml:link rel="alternate" hreflang="en" href="${en}"/><xhtml:link rel="alternate" hreflang="es" href="${es}"/><xhtml:link rel="alternate" hreflang="x-default" href="${en}"/>`;
+    return [en, es].map((loc) => `  <url><loc>${loc}</loc><lastmod>${mod || today}</lastmod>${alternates}</url>`);
+  })
   .join('\n')}
 </urlset>
 `
@@ -78,6 +78,8 @@ Allow: /
 Disallow: /api/
 Disallow: /thank-you
 Disallow: /family-property-guide
+Disallow: /es/thank-you
+Disallow: /es/family-property-guide
 Disallow: /hq
 
 ${aiBots.map((b) => `User-agent: ${b}`).join('\n')}
@@ -101,6 +103,7 @@ Key facts:
 - Email: ${site.email}
 - Service area: ${areas.map((a) => a.name).join(', ')}
 - Response time: typically within 24 hours
+- Languages: English and Spanish. The whole site is also available in Spanish under /es
 - Cost to request options: free, no obligation; no commission paid to Harbison on a direct sale
 - Licensed agent: ${site.agent}, DRE #${site.dre} (${site.brokerageUrl})
 
