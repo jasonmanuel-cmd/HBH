@@ -265,7 +265,7 @@ export const areas = [
       'Whether your property is in a smaller community or on a rural parcel, we can evaluate it and give you a clear, honest set of options.',
       'Not sure if your location qualifies? Send the address. If it is not a fit for us, we will tell you quickly.',
     ],
-    places: ['California City', 'Stallion Springs', 'Arvin', 'Delano', 'Lamont', 'McFarland', 'Shafter', 'Wasco', 'Taft', 'Ridgecrest', 'Lake Isabella', 'California City'],
+    places: ['Bakersfield', 'Tehachapi', 'California City', 'Stallion Springs', 'Arvin', 'Delano', 'Lamont', 'McFarland', 'Shafter', 'Wasco', 'Taft', 'Ridgecrest', 'Lake Isabella'],
   },
 ];
 

@@ -2,22 +2,35 @@
 const menu = document.querySelector('.menu-toggle');
 const nav = document.querySelector('.nav');
 
-menu.addEventListener('click', () => {
+const closeMenu = (returnFocus = false) => {
+  if (!nav || !menu || !nav.classList.contains('open')) return;
+  nav.classList.remove('open');
+  menu.setAttribute('aria-expanded', 'false');
+  if (returnFocus) menu.focus();
+};
+
+menu?.addEventListener('click', () => {
   const open = nav.classList.toggle('open');
   menu.setAttribute('aria-expanded', String(open));
 });
 
-nav.querySelectorAll('a').forEach((a) => {
-  a.addEventListener('click', () => {
-    nav.classList.remove('open');
-    menu.setAttribute('aria-expanded', 'false');
-  });
+nav?.querySelectorAll('a').forEach((a) => {
+  a.addEventListener('click', () => closeMenu(false));
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeMenu(true);
+});
+
+document.addEventListener('click', (e) => {
+  if (nav?.classList.contains('open') && !e.target.closest('.site-header')) closeMenu(false);
 });
 
 // ---------- Attribution ----------
 // First touch is kept 90 days (Google's gclid window) so a seller who returns weeks later is still credited
-// to the ad or partner that found them. Last-touch UTMs are kept for the session.
+// to the ad or partner that found them. Session UTMs are preserved when no ad/partner click overrides them.
 const ATTR_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'gbraid', 'wbraid', 'ref'];
+const CLICK_KEYS = ['gclid', 'gbraid', 'wbraid', 'ref'];
 const FIRST_KEY = 'hbh_first_touch';
 const TTL = 90 * 864e5;
 const params = new URLSearchParams(location.search);
@@ -32,7 +45,7 @@ const store = {
   const first = store.get(FIRST_KEY);
   if (!first || Date.now() - first.t > TTL) {
     store.set(FIRST_KEY, { t: Date.now(), landing_page: location.pathname, referrer: document.referrer.slice(0, 300), ...incoming });
-  } else if (incoming.gclid || incoming.gbraid || incoming.wbraid || incoming.ref) {
+  } else if (CLICK_KEYS.some((k) => incoming[k])) {
     // A new ad click or partner visit is a stronger signal than an old organic visit.
     store.set(FIRST_KEY, { ...first, ...incoming, t: Date.now() });
   }
@@ -41,8 +54,11 @@ const store = {
 const attribution = () => {
   const first = store.get(FIRST_KEY) || {};
   const last = store.get('hbh_last_touch', sessionStorage) || {};
+  const hasStickyClick = CLICK_KEYS.some((k) => first[k]);
   const out = { landing_page: first.landing_page || location.pathname, referrer: first.referrer || document.referrer };
-  ATTR_KEYS.forEach((k) => (out[k] = first[k] || last[k] || ''));
+  ATTR_KEYS.forEach((k) => {
+    out[k] = CLICK_KEYS.includes(k) || hasStickyClick ? (first[k] || last[k] || '') : (last[k] || first[k] || '');
+  });
   return out;
 };
 
@@ -72,6 +88,8 @@ if (PAGE_VIEW_EVENTS[pageType]) track(PAGE_VIEW_EVENTS[pageType]);
 
 document.addEventListener('click', (e) => {
   if (e.target.closest('a[href^="tel:"]')) track('phone_click');
+  const tracked = e.target.closest('[data-track]');
+  if (tracked) track(tracked.dataset.track);
   const cta = e.target.closest('[data-cta]');
   if (cta) track('cta_click', { cta: cta.dataset.cta });
   // Path cards pre-fill route_interest on the page's form.
@@ -104,6 +122,62 @@ document.querySelectorAll('button[data-yt]').forEach((b) => {
   });
 });
 
+// ---------- Interactive Net Proceeds Estimator ----------
+document.querySelectorAll('[data-net-estimator]').forEach((box) => {
+  const arvInput = box.querySelector('[data-est-arv]');
+  const repairsSelect = box.querySelector('[data-est-repairs]');
+  const monthsInput = box.querySelector('[data-est-months]');
+  const fmt = (n) => `$${Math.round(n).toLocaleString('en-US')}`;
+  let trackedOnce = false;
+
+  const update = (isUserAction = false) => {
+    const arv = Number(arvInput?.value) || 350000;
+    const repairs = Number(repairsSelect?.value) || 0;
+    const months = Number(monthsInput?.value) || 5;
+
+    const set = (sel, txt) => { const el = box.querySelector(sel); if (el) el.textContent = txt; };
+    set('[data-est-arv-out]', fmt(arv));
+    set('[data-est-months-out]', `${months} months`);
+
+    const listRepairs = Math.round(repairs * 1.1);
+    const listComm = Math.round(arv * 0.05);
+    const listClose = Math.round(arv * 0.015);
+    const listHold = Math.round(arv * 0.0045 * months);
+    const listNet = Math.max(0, arv - listRepairs - listComm - listClose - listHold);
+
+    // Illustrative direct-buyer math: ARV minus repairs, resale/carry/risk costs, presented as a realistic range.
+    const buyerCarryAndResale = Math.round(arv * 0.085);
+    const buyerMarginLow = Math.round(arv * 0.085 + repairs * 0.15);
+    const buyerMarginHigh = Math.round(arv * 0.12 + repairs * 0.22);
+    const directHigh = Math.max(25000, Math.round((arv - repairs - buyerCarryAndResale - buyerMarginLow) / 1000) * 1000);
+    const directLow = Math.max(20000, Math.min(directHigh - 5000, Math.round((arv - repairs - buyerCarryAndResale - buyerMarginHigh) / 1000) * 1000));
+    const directClose = Math.round(Math.max(1000, arv * 0.004));
+    const directHold = Math.round(Math.max(600, arv * 0.0025));
+
+    set('[data-out-list-gross]', fmt(arv));
+    set('[data-out-list-repairs]', listRepairs ? `−${fmt(listRepairs)}` : '$0');
+    set('[data-out-list-comm]', `−${fmt(listComm)}`);
+    set('[data-out-list-close]', `−${fmt(listClose)}`);
+    set('[data-out-list-hold]', `−${fmt(listHold)}`);
+    set('[data-out-list-net]', `≈ ${fmt(listNet)}`);
+    set('[data-out-list-time]', `~${months} months`);
+
+    set('[data-out-direct-gross]', `${fmt(directLow)} – ${fmt(directHigh)}`);
+    set('[data-out-direct-close]', `−${fmt(directClose)}`);
+    set('[data-out-direct-hold]', `−${fmt(directHold)}`);
+    set('[data-out-direct-net]', `${fmt(Math.max(0, directLow - directClose - directHold))} – ${fmt(Math.max(0, directHigh - directClose - directHold))}`);
+
+    if (isUserAction && !trackedOnce) {
+      trackedOnce = true;
+      track('estimator_interact');
+    }
+  };
+
+  [arvInput, repairsSelect, monthsInput].forEach((el) => el?.addEventListener('input', () => update(true)));
+  repairsSelect?.addEventListener('change', () => update(true));
+  update(false);
+});
+
 const formProps = (form) => {
   const v = (n) => form.querySelector(`[name="${n}"]:checked, input[type=hidden][name="${n}"], select[name="${n}"]`)?.value || '';
   return { form_type: form.dataset.formType || 'standard', situation_type: v('situation'), route_interest: v('route_interest'), location_interest: v('location_interest') };
@@ -124,13 +198,19 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
   const status = form.querySelector('.form-status');
   let current = 0;
   let started = false;
+  let lastPointerDown = 0;
+
+  form.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.choice')) lastPointerDown = Date.now();
+  });
+
   form.show = (i, focus = true) => {
     current = Math.max(0, Math.min(i, steps.length - 1));
     steps.forEach((s, n) => (s.hidden = n !== current));
     dots.forEach((d, n) => d.classList.toggle('on', n <= current));
     const h = form.closest('.lead-card')?.querySelector('h2');
     if (h && current === 0 && form.dataset.formType === 'family_transition') h.textContent = 'What property are you trying to figure out?';
-    if (focus) steps[current].querySelector('input:not([type=hidden]):not([type=radio]):not([type=checkbox]),select,input[type=radio]')?.focus({ preventScroll: true });
+    if (focus) steps[current].querySelector('input:not([type=hidden]):not([type=radio]):not([type=checkbox]),select,input[type=radio]:checked,input[type=radio]')?.focus({ preventScroll: true });
   };
   if (form.dataset.start) form.show(Number(form.dataset.start), false);
 
@@ -176,8 +256,9 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
       form.querySelector('.fstep:not([hidden]) [data-next]')?.click();
     }
   });
-  // Auto-advance when a radio is picked — one tap per step on mobile.
+  // Auto-advance only on pointer/touch taps — never on keyboard arrow navigation inside a radiogroup.
   form.addEventListener('change', (e) => {
+    if (Date.now() - lastPointerDown > 500) return;
     if (e.target.type === 'radio' && steps[current].querySelectorAll('.choice-grid').length === 1 && !steps[current].querySelector('select')) {
       setTimeout(() => form.querySelector('.fstep:not([hidden]) [data-next]')?.click(), 180);
     }
@@ -201,13 +282,16 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     if (data.street !== undefined) data.address = [data.street, data.city, `${data.state || 'CA'} ${data.zip || ''}`.trim()].map((s) => (s || '').trim()).filter(Boolean).join(', ');
     if (data.first_name !== undefined) data.name = `${data.first_name || ''} ${data.last_name || ''}`.trim();
 
+    const hasConsentCheckbox = Boolean(form.querySelector('[name="consent_response"]'));
+    if (hasConsentCheckbox && !data.consent_response) data.consent_response = '';
+
     const missing = [];
     if ((data.address || '').trim().length < 5) missing.push('address');
     if ((data.name || '').trim().length < 2 || (data.first_name !== undefined && !(data.first_name || '').trim())) missing.push('name');
     if ((data.phone || '').replace(/\D/g, '').length < 10) missing.push('phone');
     if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) missing.push('email');
     if (form.dataset.formType === 'family_transition' && !data.relationship) missing.push('relationship');
-    if (form.dataset.formType === 'options' && data.consent_response !== 'yes') missing.push('consent_response');
+    if (hasConsentCheckbox && data.consent_response !== 'yes') missing.push('consent_response');
     if (missing.length) return showErrors(missing);
 
     track('lead_form_submit', formProps(form));
@@ -225,16 +309,19 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
       if (res.ok && json.ok) {
         track('lead_form_success', formProps(form));
         track('generate_lead', { form_type: data.form_type || 'standard' });
-        store.set('hbh_lead', { phone: data.phone, address: data.address }, sessionStorage);
+        store.set('hbh_lead', { id: json.id || null, phone: data.phone, address: data.address, details_token: json.details_token || '' }, sessionStorage);
         location.href = '/thank-you';
         return;
       }
       if (json.fields) return showErrors(json.fields);
       throw new Error(json.error || 'Request failed');
-    } catch {
+    } catch (err) {
       track('lead_form_error', { ...formProps(form), step: 'submit' });
       const phone = document.querySelector('.nav-phone');
-      status.textContent = `Something went wrong sending your request — nothing you typed was lost. Please try again${phone ? `, or call or text ${phone.textContent}` : ''}.`;
+      status.textContent = err?.message && /Too many|already received/i.test(err.message)
+        ? err.message
+        : `Something went wrong sending your request — nothing you typed was lost. Please try again${phone ? `, or call or text ${phone.textContent}` : ''}.`;
+      status.textContent = status.textContent.trim();
       status.classList.add('error');
     } finally {
       button.disabled = false;
@@ -271,9 +358,10 @@ document.querySelectorAll('form[data-details-form]').forEach((form) => {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
+    const savedLead = store.get('hbh_lead', sessionStorage) || {};
     const payload = {
       kind: 'details',
-      ...(store.get('hbh_lead', sessionStorage) || {}),
+      ...savedLead,
       timeline: fd.get('timeline') || '',
       occupancy: fd.get('occupancy') || '',
       condition_flags: fd.getAll('condition'),

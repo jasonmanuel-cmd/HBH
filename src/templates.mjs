@@ -20,9 +20,19 @@ const year = new Date().getFullYear();
 // Brand assets cut from the Harbison Buys Homes logo sheet (see static/assets).
 const logo = '/assets/logo-horizontal-v2.png'; // full color, transparent, 1172×231
 const logoReverse = '/assets/logo-header-reverse-v2.png'; // ivory + gold for navy grounds, 487×96
+const heroMark = '/assets/h-house-mark-v2.png'; // round house-H mark, transparent, 192×192
 const ogDefault = '/assets/og-default.jpg'; // 1200×630
 const headshot = '/assets/nathanael-harbison.jpg'; // 325×325
-const BUILD_DATE = new Date().toISOString().slice(0, 10);
+const BUILD_DATE = '2026-09-24';
+export const PAGE_DATES = {
+  '/': '2026-10-23',
+  '/how-it-works': '2026-10-23',
+  '/sell-loved-ones-house': '2026-10-23',
+  '/areas/kern-county': '2026-10-23',
+  '/guides/cash-offer-vs-listing': '2026-10-23',
+  '/privacy': '2026-10-17',
+};
+export const contentDate = (path, fallback = BUILD_DATE) => PAGE_DATES[path] || fallback;
 const niceDate = (d) => new Date(`${d}T12:00:00`).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
 // Resize an Unsplash URL to exact dimensions (keeps width/height attributes honest → no layout shift).
@@ -122,7 +132,8 @@ const faqLd = (url, list) => ({
   mainEntity: list.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: strip(a) } })),
 });
 
-function graph({ path, title, description, image, type = 'WebPage', crumbs, extra = [], faq, modified = BUILD_DATE }) {
+function graph({ path, title, description, image, type = 'WebPage', crumbs, extra = [], faq, modified }) {
+  const modDate = modified || contentDate(path);
   const url = `${site.url}${path === '/' ? '/' : path}`;
   const webpage = {
     '@type': type,
@@ -133,7 +144,7 @@ function graph({ path, title, description, image, type = 'WebPage', crumbs, extr
     isPartOf: { '@id': ids.website },
     about: { '@id': type === 'ProfilePage' ? ids.person : ids.org },
     inLanguage: 'en-US',
-    dateModified: modified,
+    dateModified: modDate,
     primaryImageOfPage: { '@type': 'ImageObject', url: image },
     speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.answer-box'] },
     ...(type === 'ProfilePage' ? { mainEntity: { '@id': ids.person } } : {}),
@@ -205,7 +216,6 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   ${preload ? (preload.startsWith('https://images.unsplash.com') ? heroPreload(preload) : `<link rel="preload" as="image" href="${preload}" fetchpriority="high">`) : ''}
   <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-latin.woff2" crossorigin>
   <link rel="preload" as="font" type="font/woff2" href="/fonts/playfair-latin.woff2" crossorigin>
-  <link rel="preload" as="font" type="font/woff2" href="/fonts/playfair-italic-latin.woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
   ${gtm}
   <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)};</script>
@@ -290,7 +300,7 @@ function leadForm({ situation = '', heading = 'Get Your Property Options', city 
         <input type="hidden" name="route_interest" value="">
         <input type="hidden" name="location_interest" value="${esc(location)}">
         <input type="hidden" name="page_type" value="${esc(pageType)}">
-        <ol class="step-dots" aria-hidden="true">${Array.from({ length: 3 }, (_, i) => `<li${i === 0 ? ' class="on"' : ''}></li>`).join('')}</ol>
+        <ol class="step-dots" aria-hidden="true">${Array.from({ length: 3 }, (_, i) => `<li${i <= (preset ? 1 : 0) ? ' class="on"' : ''}></li>`).join('')}</ol>
         <fieldset class="fstep" data-step="1"${preset ? ' hidden' : ''}>
           <legend class="fstep-q">What would you like help with?</legend>
           <div class="choice-grid choice-list" role="radiogroup">${choice}</div>
@@ -305,7 +315,7 @@ function leadForm({ situation = '', heading = 'Get Your Property Options', city 
           </div>
           <input type="hidden" name="state" value="CA">
           <p class="form-hint">California · Kern County and nearby</p>
-          <div class="fstep-nav">${preset ? '' : '<button class="btn btn-ghost" type="button" data-back>Back</button>'}<button class="btn btn-gold" type="button" data-next>Continue →</button></div>
+          <div class="fstep-nav"><button class="btn btn-ghost" type="button" data-back>Back</button><button class="btn btn-gold" type="button" data-next>Continue →</button></div>
         </fieldset>
         <fieldset class="fstep" data-step="3" hidden>
           <legend class="fstep-q">How can we reach you?</legend>
@@ -369,6 +379,51 @@ const compareTable = () => `<div class="compare-wrap">
     </div>
     <p class="disclosure">${esc(compareDisclosure)}</p>`;
 
+const netEstimator = (ctaHref = '#lead-form') => `<div class="estimator" id="estimator" data-net-estimator>
+      <p class="eyebrow gold-dark">Interactive Net Proceeds Estimator</p>
+      <h3 class="est-title">Test rough numbers: fix &amp; list vs. direct as-is sale</h3>
+      <p class="est-sub">Slide the values below to see how repair costs, holding time, and selling expenses affect what you actually walk away with.</p>
+      <div class="est-controls">
+        <label class="est-field">
+          <span>Estimated fixed-up value: <strong data-est-arv-out>$350,000</strong></span>
+          <input type="range" min="150000" max="900000" step="10000" value="350000" data-est-arv>
+        </label>
+        <label class="est-field">
+          <span>Condition &amp; repair scope</span>
+          <select data-est-repairs>
+            <option value="0">Move-in ready (~$0 repairs)</option>
+            <option value="15000">Light cosmetic updates (~$15,000)</option>
+            <option value="40000" selected>Moderate updates / systems (~$40,000)</option>
+            <option value="75000">Major roof, foundation, or plumbing (~$75,000)</option>
+            <option value="115000">Full rehab or heavy damage (~$115,000)</option>
+          </select>
+        </label>
+        <label class="est-field">
+          <span>Months to renovate &amp; close on market: <strong data-est-months-out>5 months</strong></span>
+          <input type="range" min="2" max="9" step="1" value="5" data-est-months>
+        </label>
+      </div>
+      <div class="compare-wrap">
+        <table class="compare offer-table">
+          <caption class="sr-only">Illustrative net proceeds comparison</caption>
+          <thead><tr><th scope="col">Illustrative line item</th><th scope="col">Direct As-Is Sale</th><th scope="col">Fix &amp; List</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Gross sale price</th><td data-out-direct-gross>$256,000 – $268,000</td><td data-out-list-gross>$350,000</td></tr>
+            <tr><th scope="row">Out-of-pocket repairs (+10% buffer)</th><td>$0</td><td data-out-list-repairs>−$44,000</td></tr>
+            <tr><th scope="row">Agent commissions (illustrative 5%)</th><td>$0</td><td data-out-list-comm>−$17,500</td></tr>
+            <tr><th scope="row">Seller closing &amp; transfer costs</th><td data-out-direct-close>−$1,500</td><td data-out-list-close>−$5,250</td></tr>
+            <tr><th scope="row">Holding costs (taxes, utilities, carry)</th><td data-out-direct-hold>−$1,000</td><td data-out-list-hold>−$7,875</td></tr>
+            <tr class="total"><th scope="row">Illustrative net before loan payoff</th><td data-out-direct-net>$253,500 – $265,500</td><td data-out-list-net>≈ $275,375</td></tr>
+            <tr><th scope="row">Typical timeline</th><td>2–4 weeks</td><td data-out-list-time>~5 months</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="est-foot">
+        <p class="note-small">Illustrative estimate only — not an appraisal, formula, or offer. Actual offers and listing results depend on neighborhood comps, exact repair scope, title, and market demand.</p>
+        <a class="btn btn-gold" href="${ctaHref}" data-cta="estimator">Get Real Numbers for My Property →</a>
+      </div>
+    </div>`;
+
 const transparencyList = () => `<ul class="promise-list">${transparency.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`;
 
 // Shown on every situation page: the realistic paths for this kind of property.
@@ -421,11 +476,11 @@ export function homePage() {
   ${heroPicture(heroImg)}
   <div class="container hero-grid">
     <div class="hero-copy">
-      <p class="eyebrow">${esc(heroCopy.eyebrow)}</p>
+      <div class="hero-brand"><img class="hero-mark" src="${heroMark}" alt="" width="96" height="96" decoding="async"><p class="eyebrow">${esc(heroCopy.eyebrow)}</p></div>
       <h1><span class="h1-kicker">We buy houses in Bakersfield &amp; Kern County</span>Property<br>Problem?<br><em>Call Harbison.</em></h1>
       <p class="hero-lead">${esc(heroCopy.sub)}</p>
       <div class="hero-actions"><a class="btn btn-gold" href="#lead-form" data-cta="hero">Get My Property Options</a><a class="btn btn-outline" href="tel:${site.phoneHref}">Call or Text ${esc(site.phone)}</a></div>
-      <ul class="hero-benefits">
+      <ul class="hero-benefits" aria-label="Why owners choose Harbison">
         ${heroCopy.trust.map(([s, t]) => `<li><strong>${esc(s)}</strong><span>${esc(t)}</span></li>`).join('\n        ')}
       </ul>
     </div>
@@ -478,7 +533,7 @@ ${reassuranceStrip()}
     <div class="section-head center">
       <p class="eyebrow gold-dark">Side by Side</p>
       <h2>Direct sale vs. <em>traditional listing.</em></h2>
-      <p>Both can be the right answer. <a class="link" href="/guides/cash-offer-vs-listing">See a worked example →</a></p>
+      <p>Both can be the right answer. <a class="link" href="/how-it-works#estimator">Try the interactive net estimator →</a></p>
     </div>
     ${compareTable()}
   </div>
@@ -580,7 +635,7 @@ function detailPage({ item, path, crumbs, eyebrow, extra = '', form = {}, pageTy
       <h2 class="prose-h">${esc(item.title)}</h2>
       ${item.body.map((p) => `<p>${esc(p)}</p>`).join('\n      ')}
       ${extra}
-      <p class="updated">Last updated ${niceDate(BUILD_DATE)} · Reviewed by the ${esc(site.name)} team</p>
+      <p class="updated">Last updated ${niceDate(contentDate(path))} · Reviewed by the ${esc(site.name)} team</p>
     </article>
     <aside class="help-card"><h2>How Harbison helps</h2><ul>${item.helps.map((h) => `<li>${esc(h)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="#lead-form" data-cta="help_card">Get Options for This Property →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a></aside>
   </div>
@@ -635,7 +690,11 @@ export function situationPage(s) {
 export function areaPage(a) {
   const url = `${site.url}/areas/${a.slug}`;
   const otherAreas = areas.filter((o) => o.slug !== a.slug);
-  const extra = `<h3>Communities we cover near ${esc(a.name)}</h3><ul class="chip-list">${a.places.map((p) => `<li><span>${esc(p)}</span></li>`).join('')}</ul>
+  const placeChip = (p) => {
+    const match = otherAreas.find((o) => o.name.toLowerCase() === p.toLowerCase());
+    return match ? `<a href="/areas/${match.slug}">${esc(p)}</a>` : `<span>${esc(p)}</span>`;
+  };
+  const extra = `<h3>Communities we cover near ${esc(a.name)}</h3><ul class="chip-list">${a.places.map((p) => `<li>${placeChip(p)}</li>`).join('')}</ul>
       <h3>Situations we help with in ${esc(a.name)}</h3><ul class="chip-list">${situations.map((o) => `<li><a href="/situations/${o.slug}">${esc(o.name)}</a></li>`).join('')}</ul>
       ${guideLinks(guides)}
       <h3>Other areas we serve</h3><ul class="chip-list">${otherAreas.map((o) => `<li><a href="/areas/${o.slug}">${esc(o.name)}</a></li>`).join('')}</ul>`;
@@ -803,10 +862,11 @@ export function guidePage(g) {
       ${crumbNav(crumbs)}
       <p class="eyebrow gold-dark">Seller Guide</p>
       <h1 class="page-title guide-title">${esc(g.title)}</h1>
-      <p class="updated">By the ${esc(site.name)} team · Published <time datetime="${g.updated}">${niceDate(g.updated)}</time> · Last reviewed <time datetime="${BUILD_DATE}">${niceDate(BUILD_DATE)}</time></p>
+      <p class="updated">By the ${esc(site.name)} team · Published <time datetime="${g.updated}">${niceDate(g.updated)}</time> · Last reviewed <time datetime="${contentDate(path, g.updated)}">${niceDate(contentDate(path, g.updated))}</time></p>
       ${answerBox(esc(g.answer), 'The short answer')}
       <nav class="toc" aria-label="In this guide"><p class="answer-label">In this guide</p><ol>${toc}</ol></nav>
       ${g.sections.map(([h, paras], i) => `<section id="s${i + 1}"><h2 class="prose-h">${esc(h)}</h2>${paras.map((p) => (p.startsWith('<ul') || p.startsWith('<div') ? p : `<p>${p}</p>`)).join('')}</section>`).join('\n      ')}
+      ${g.slug === 'cash-offer-vs-listing' ? netEstimator('#lead-form') : ''}
       ${g.meaning ? `<aside class="meaning"><h2>What this means for your property</h2><p>${esc(g.meaning)}</p><a class="btn btn-gold" href="#lead-form" data-cta="guide_meaning">Get Options for My Property →</a></aside>` : ''}
       <aside class="author-box"><img class="author-photo" src="${headshot}" alt="${esc(site.agent)}" width="64" height="64" loading="lazy"><div><p class="answer-label">About the author</p><p>Written by the ${esc(site.name)} team, led by ${esc(site.agent)}, California-licensed REALTOR® (DRE #${esc(site.dre)}) with ${esc(site.brokerage)}. <a class="link" href="/about">About Nathanael →</a></p></div></aside>
       <p class="disclaimer">This guide is educational and does not replace legal, tax, or financial advice. Laws and thresholds change — consult a qualified attorney, CPA, or your agent about your specific situation.</p>
@@ -902,6 +962,7 @@ export function howItWorksPage() {
 
       <h2 class="prose-h">Direct sale or listing?</h2>
       ${compareTable()}
+      ${netEstimator('/#lead-form')}
 
       <h2 class="prose-h" id="promise">Our seller promise</h2>
       ${transparencyList()}
@@ -954,7 +1015,7 @@ export function accessibilityPage() {
     path: '/accessibility',
     pageType: 'accessibility',
     heading: 'Accessibility',
-    body: `<p class="muted-note">Last updated: ${niceDate(BUILD_DATE)}</p>
+    body: `<p class="muted-note">Last updated: ${niceDate(contentDate('/accessibility'))}</p>
     <p>${esc(site.name)} wants everyone to be able to learn about their options and reach us, including people who use screen readers, keyboard navigation, magnification, or voice control.</p>
     <h2 class="prose-h">What we do</h2>
     <ul>
@@ -980,15 +1041,13 @@ export function notFoundPage() {
   });
 }
 
-const lastUpdated = niceDate(BUILD_DATE);
-
 export function privacyPage() {
   return simplePage({
     title: 'Privacy Policy',
     description: `How ${site.name} collects, uses, and protects information submitted through this website.`,
     path: '/privacy',
     heading: 'Privacy Policy',
-    body: `<p class="muted-note">Last updated: ${lastUpdated}</p>
+    body: `<p class="muted-note">Last updated: ${niceDate(contentDate('/privacy'))}</p>
     <p>${esc(site.name)} (“we,” “us”) respects your privacy. This policy explains what information we collect through this website and how we use it.</p>
     <h2 class="prose-h">Information we collect</h2>
     <p>When you submit a form, we collect the information you provide, such as your name, phone number, email address, property address, and details about your situation. We also collect standard technical data (such as browser type, pages visited, and referring site) through cookies and analytics tools.</p>
@@ -1018,7 +1077,7 @@ export function termsPage() {
     description: `Terms of use for the ${site.name} website, including our no-offer disclaimer and California real estate license disclosure.`,
     path: '/terms',
     heading: 'Terms of Use',
-    body: `<p class="muted-note">Last updated: ${lastUpdated}</p>
+    body: `<p class="muted-note">Last updated: ${niceDate(contentDate('/terms'))}</p>
     <p>By using this website you agree to these terms.</p>
     <h2 class="prose-h">No offer or advice</h2>
     <p>Content on this site is for general information only. Nothing here is an offer to purchase any property, and no binding agreement exists until a written purchase agreement is signed by all parties. We do not provide legal, tax, or financial advice — please consult a qualified professional about your situation.</p>
@@ -1073,9 +1132,11 @@ function familyLeadForm() {
           <label>Email <span class="muted">(optional)</span><input name="email" type="email" autocomplete="email"></label>
           <label>Your relationship to the property<select name="relationship" required><option value="">Select one</option>${familyForm.relationships.map((t) => `<option>${esc(t)}</option>`).join('')}</select></label>
           <label>Best way to reach you<select name="contact_pref">${familyForm.contactPrefs.map((t) => `<option>${esc(t)}</option>`).join('')}</select></label>
+          <label class="check"><input type="checkbox" name="consent_response" value="yes" required><span>${esc(site.name)} may contact me by phone, text, or email about this property.</span></label>
+          <label class="check"><input type="checkbox" name="consent_marketing" value="yes"><span>Also send me occasional family-property guides and updates. <span class="muted">(optional)</span></span></label>
           <label class="hp" aria-hidden="true">Company<input name="company" tabindex="-1" autocomplete="off"></label>
           <div class="fstep-nav"><button class="btn btn-ghost" type="button" data-back>Back</button><button class="btn btn-gold" type="submit">Talk With Nathanael →</button></div>
-          <p class="form-note">By submitting, you agree ${esc(site.name)} may contact you by phone, text, or email about this property. Consent is not a condition of any sale. Msg &amp; data rates may apply; reply STOP to opt out. We never ask for medical information. See our <a href="/privacy">Privacy Policy</a>.</p>
+          <p class="form-note">Consent is not a condition of any sale. Msg &amp; data rates may apply; reply STOP to opt out. We never ask for medical information. See our <a href="/privacy">Privacy Policy</a>.</p>
         </fieldset>
         <p class="form-status" role="status" aria-live="polite"></p>
       </form>
