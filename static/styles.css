@@ -467,3 +467,14 @@ main>section:not(:first-child),.local-band{content-visibility:auto;contain-intri
   html[lang^="es"] .hero h1{font-size:clamp(3.4rem,5.6vw,5.8rem)}
   html[lang^="es"] .hero h1.h1-sub{font-size:clamp(2.6rem,4.4vw,4rem)}
 }
+/* ---------- Header: the logo never squeezes; the button and nav stay on one line ---------- */
+.brand{flex:none}
+.brand img{flex:none;max-width:none}
+.header-cta{white-space:nowrap}
+@media (min-width:981px) and (max-width:1360px){
+  .nav-wrap{gap:18px}
+  .nav{gap:14px}
+  .nav a{font-size:.82rem}
+  .header-cta{padding-inline:16px}
+  .lang-switch{margin-left:4px;padding:0 12px}
+}

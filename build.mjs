@@ -152,8 +152,8 @@ writeFileSync(
     background_color: '#f6f2e9',
     theme_color: '#031f2b',
     icons: [
-      { src: '/assets/icon-192.png', sizes: '192x192', type: 'image/png' },
-      { src: '/assets/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { src: '/assets/icon-192.png?v=2', sizes: '192x192', type: 'image/png' },
+      { src: '/assets/icon-512.png?v=2', sizes: '512x512', type: 'image/png' },
     ],
   }, null, 2)
 );
