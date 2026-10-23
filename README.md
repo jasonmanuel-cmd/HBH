@@ -23,29 +23,34 @@ verification limits, historical leads and items still awaiting broker review.
 | Service-area pages | `/areas/bakersfield`, `/areas/tehachapi`, `/areas/stallion-springs`, `/areas/california-city`, `/areas/kern-county` |
 | About Nathanael Harbison (credentials, E-E-A-T) | `/about` |
 | Seller guides (as-is sales, cash vs. listing, inherited homes, renovate vs. as-is, what affects a cash offer, the walkthrough) | `/guides`, `/guides/<slug>` |
-| How it works (process, walkthrough, offer math, seller promise), Contact, Accessibility | `/how-it-works`, `/contact`, `/accessibility` |
+| How it works (process, walkthrough, interactive net estimator, offer math, seller promise), Contact, Accessibility | `/how-it-works`, `/contact`, `/accessibility` |
+| Selling a loved one's house (family transition funnel + printable partner guide) | `/sell-loved-ones-house`, `/family-property-guide` |
 | Thank-you (post-submit), Privacy, Terms, 404 | `/thank-you`, `/privacy`, `/terms` |
+| Shared HQ CRM (dashboard, leads, partners & ROI, first-party website stats) | `/hq`, `/hq/leads`, `/hq/partners`, `/hq/stats/*` |
 
-Also: lead form API (`/api/leads`), `sitemap.xml`, `robots.txt` (AI crawlers explicitly allowed), `llms.txt`, favicon, Open Graph/Twitter tags, a connected Schema.org `@graph` on every page (RealEstateAgent, Person with DRE license credential, WebSite, WebPage, Service, Article, BreadcrumbList, FAQPage), answer-first "Quick answer" blocks, an "At a glance" facts section, optional GA4, a sticky mobile call bar, a spam honeypot, and UTM tracking on leads.
+Also: lead form API (`/api/leads`), private Harbison Standard intake bridge (`/api/intake`), first-party privacy-preserving analytics collector (`/api/track`), Vercel Web Analytics & Speed Insights, `sitemap.xml`, `robots.txt` (AI crawlers explicitly allowed on public pages; `/hq` and `/thank-you` disallowed), `llms.txt`, favicon, Open Graph/Twitter tags, a connected Schema.org `@graph` on every page (RealEstateAgent, Person with DRE license credential, WebSite, WebPage, Service, Article, BreadcrumbList, FAQPage), answer-first "Quick answer" blocks, an "At a glance" facts section, GA4/GTM support, a sticky mobile call bar, spam honeypot + IP/phone rate limiting, signed thank-you detail tokens, and UTM tracking on leads.
 
 ## Project layout
 
 ```
-site.config.mjs          ← phone, email, service area, site URL (edit once, used everywhere)
+site.config.mjs          ← phone, email, service area, site URL, GA4/GTM validation (edit once, used everywhere)
 src/content.mjs          ← original situations, areas, FAQs, images
 src/content-extra.mjs    ← About page, guides, testimonials, "at a glance" facts, California City page
 src/content-playbook.mjs ← site-playbook content: hero, 5 paths, seller promise, offer math, form options, new pages
 src/family.mjs           ← "Selling a loved one's house" funnel content
-src/templates.mjs        ← HTML layout, structured data, and page templates
-static/                  ← styles.css (inlined at build), script.js (fingerprinted), fonts, images, /hq panel
-api/leads.js             ← serverless function: website lead form
-api/hq.js                ← serverless function: HQ panel (dashboard + CRM)
-build.mjs                ← generates ./dist (pages, sitemap.xml, robots.txt, llms.txt)
+src/templates.mjs        ← HTML layout, structured data, interactive net estimator, and page templates
+static/                  ← fingerprinted styles.css / script.js / analytics.js, self-hosted fonts, images, /hq panel
+api/leads.js             ← serverless function: public website lead form + signed thank-you details
+api/hq.js                ← serverless function: shared HQ CRM, CSV import/export, partners/spend, health check
+api/intake.js            ← serverless function: authenticated server-to-server bridge from Harbison Standard
+api/track.js             ← serverless function: first-party analytics forwarder + CSP report sink
+lib/                     ← shared intake normalizer, IP/rate-limit helper, transient retry helper, CSV/JSON importer
+build.mjs                ← generates ./dist (pages, fingerprinted assets, sitemap.xml, robots.txt, llms.txt)
 dev.mjs, dev/            ← local preview server and the HQ mock database
-supabase/                ← schema.sql + migrations (applied to the harbison-buys-homes project)
+supabase/                ← schema.sql + migrations 002–005 (applied to the harbison-buys-homes project)
 test/                    ← `npm test`
 brand/                   ← logo originals (not deployed)
-docs/                    ← sitemap overview, family-funnel notes
+docs/                    ← shared CRM runbook, project record, sitemap overview, family-funnel notes
 .github/workflows/ci.yml ← runs tests + build on every push
 ```
 
@@ -72,7 +77,7 @@ No dependencies to install. Node 18+.
    - `SITE_URL` (your final domain) and optional `GA_MEASUREMENT_ID`.
 3. Redeploy after adding env vars, then add your custom domain under Project → Domains.
 
-Until a destination is configured, leads are still accepted and written to Vercel's function logs (Project → Logs) so nothing is lost during setup.
+If no storing destination is configured (or if a configured Supabase CRM fails to store the lead), `/api/leads` returns `502` rather than reporting false success to the visitor. Partial notification failures (such as a failed email alert after a successful Supabase insert) are recorded directly on the lead's HQ activity timeline.
 
 ## Before launch checklist
 
@@ -105,8 +110,10 @@ Analytics events (GTM/GA4, no personal data): `phone_click`, `cta_click`, `lead_
 
 Private, password-protected team panel at **https://www.callharbison.com/hq**.
 
-- **Dashboard:** leads waiting for first contact, follow-ups due, new today / 7 days, open pipeline, appointments, median time to first contact, gross profit (90 days), leads per week, pipeline by stage, source, and path of interest.
-- **CRM:** filter (open, new, follow-ups due, closed, all) and search; open a lead to call/text/email/map, see everything they submitted, change stage, set follow-up and appointment, record values and outcome, add notes and call logs, and see the activity timeline.
+- **Dashboard:** leads waiting for first contact, follow-ups due, new today / 7 days, open pipeline, appointments, median time to first contact, gross profit (90 days), leads per week, pipeline by stage, brand, source, path of interest, and a live delivery/integration readiness card with a one-click test email alert (`Send test email alert`).
+- **CRM (`/hq/leads`):** filter by view (open, new, follow-ups due, closed, spam, all), brand, or individual stage; punctuation-tolerant phone/text search; `+ New lead` manual intake; duplicate-aware `Import` (CSV/JSON with preview); `Export CSV`; editable contact/property/pipeline fields; outreach logs that automatically record first contact; and deep-linkable lead URLs (`/hq?lead=<id>`).
+- **Partners & ROI (`/hq/partners`):** manage referral partner slugs (`callharbison.com/family?ref=<slug>`) and monthly ad spend / CPL / ROAS.
+- **Website stats (`/hq/stats/harbison-standard` & `/hq/stats/call-harbison`):** first-party traffic, sources, geography, devices, and pages for each site.
 - **Setup:** in Vercel set `HQ_PASSWORD` (long and unique) plus `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY`, then redeploy. Changing the password signs everyone out.
 - **Security:** one `/api/hq` function; signed HttpOnly/Secure/SameSite=Strict session cookie (12 hours); failed-login throttling; writes require the panel's own header; edits are whitelisted and validated; the database key never reaches the browser; `/hq` is noindex and blocked in robots.txt.
 - **Try it locally with sample data:** `npm run dev -- --mock`, open http://localhost:3000/hq, password `demo`.

@@ -104,7 +104,7 @@ export const guides = [
     short: 'Cash Offer vs. Listing',
     description: 'A side-by-side look at selling to a cash buyer versus listing with an agent in Kern County — net proceeds, timelines, risks, and when each makes sense.',
     image: images.list,
-    updated,
+    updated: '2026-10-23',
     answer: 'Listing usually brings a higher sale price for a move-in-ready home, while a cash offer can net a similar result for a house that needs major repairs once you subtract repair costs, commissions, holding costs, and time. The right choice depends on the home’s condition, your timeline, and how much uncertainty you can accept.',
     sections: [
       ['What is the difference between a cash offer and listing?', [

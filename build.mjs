@@ -3,9 +3,9 @@ import { rmSync, mkdirSync, writeFileSync, cpSync, readFileSync, renameSync } fr
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import site from './site.config.mjs';
-import { areas, guides, faqs, situations } from './src/templates.mjs';
+import { areas, guides, faqs, situations, contentDate } from './src/templates.mjs';
 import { buildPages } from './src/pages.mjs';
-import { decoratePage, esPath, loadDictionary, pathOfFile, translatePage } from './src/i18n/translate.mjs';
+import { decoratePage, esPath, loadDictionary, translatePage } from './src/i18n/translate.mjs';
 import { family } from './src/family.mjs';
 
 const out = 'dist';
@@ -13,9 +13,8 @@ rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 cpSync('static', out, { recursive: true });
 mkdirSync(join(out, 'hq/stats'), { recursive: true });
-for (const site of ['harbison-standard', 'call-harbison']) cpSync('static/hq/index.html', join(out, `hq/stats/${site}.html`));
-
-const today = new Date().toISOString().slice(0, 10);
+for (const statsSite of ['harbison-standard', 'call-harbison']) cpSync('static/hq/index.html', join(out, `hq/stats/${statsSite}.html`));
+for (const hqRoute of ['leads', 'partners']) cpSync('static/hq/index.html', join(out, `hq/${hqRoute}.html`));
 
 // [output file, html, url path for sitemap (null = exclude), lastmod]
 // Every page is built in English and again in Spanish (under /es), then each gets its language switch and hreflang links.
@@ -34,22 +33,33 @@ const pages = englishPages.flatMap(([file, html, path, mod]) => {
 });
 if (translation.report.missing.size) console.warn(`[i18n] ${translation.report.missing.size} English texts have no Spanish entry and stay in English on /es pages. Run: node scripts/i18n.mjs extract --out todo.json`);
 
-// Mobile performance: inline the (small) stylesheet so first paint doesn't wait on a second request,
-// and fingerprint script.js so it can be cached for a year.
+// Minify and fingerprint CSS + client scripts so repeat page navigations reuse immutable browser cache.
 const css = readFileSync('static/styles.css', 'utf8')
   .replace(/\/\*[\s\S]*?\*\//g, '')
   .replace(/\s+/g, ' ')
   .replace(/\s*([{}:;,>])\s*/g, '$1')
   .replace(/;}/g, '}')
   .trim();
-const jsHash = createHash('sha256').update(readFileSync('static/script.js')).digest('hex').slice(0, 10);
-renameSync(join(out, 'script.js'), join(out, `script.${jsHash}.js`));
+const hashOf = (buf) => createHash('sha256').update(buf).digest('hex').slice(0, 10);
+const cssHash = hashOf(css);
+const jsHash = hashOf(readFileSync('static/script.js'));
+const analyticsHash = hashOf(readFileSync('static/analytics.js'));
+
+writeFileSync(join(out, `styles.${cssHash}.css`), css);
 rmSync(join(out, 'styles.css'));
+renameSync(join(out, 'script.js'), join(out, `script.${jsHash}.js`));
+renameSync(join(out, 'analytics.js'), join(out, `analytics.${analyticsHash}.js`));
 
 for (const [file, html] of pages) {
   const path = join(out, file);
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, html.replace('<link rel="stylesheet" href="/styles.css">', `<style>${css}</style>`).replace('src="/script.js"', `src="/script.${jsHash}.js"`));
+  writeFileSync(
+    path,
+    html
+      .replace('href="/styles.css"', `href="/styles.${cssHash}.css"`)
+      .replace('src="/script.js"', `src="/script.${jsHash}.js"`)
+      .replace('src="/analytics.js"', `src="/analytics.${analyticsHash}.js"`)
+  );
 }
 
 writeFileSync(
@@ -62,7 +72,7 @@ ${pages
     const en = `${site.url}${p === '/' ? '/' : p}`;
     const es = `${site.url}${esPath(p)}`;
     const alternates = `<xhtml:link rel="alternate" hreflang="en" href="${en}"/><xhtml:link rel="alternate" hreflang="es" href="${es}"/><xhtml:link rel="alternate" hreflang="x-default" href="${en}"/>`;
-    return [en, es].map((loc) => `  <url><loc>${loc}</loc><lastmod>${mod || today}</lastmod>${alternates}</url>`);
+    return [en, es].map((loc) => `  <url><loc>${loc}</loc><lastmod>${mod || contentDate(p)}</lastmod>${alternates}</url>`);
   })
   .join('\n')}
 </urlset>
@@ -85,6 +95,9 @@ Disallow: /hq
 ${aiBots.map((b) => `User-agent: ${b}`).join('\n')}
 Allow: /
 Disallow: /api/
+Disallow: /thank-you
+Disallow: /family-property-guide
+Disallow: /hq
 
 Sitemap: ${site.url}/sitemap.xml
 `
@@ -109,7 +122,7 @@ Key facts:
 
 ## Main pages
 ${link('/', 'Home', 'overview, process, direct sale vs. listing comparison, FAQ')}
-${link('/how-it-works', 'How it works', 'process, walkthrough, how direct offers are figured, seller promise')}
+${link('/how-it-works', 'How it works', 'process, walkthrough, interactive net estimator, how direct offers are figured, seller promise')}
 ${link('/about', `About ${site.agent}`, 'credentials, approach, profiles')}
 ${link('/contact', 'Contact', `call or text ${site.phone}`)}
 ${link('/situations', 'Situations we help with')}
