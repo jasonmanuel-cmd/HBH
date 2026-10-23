@@ -368,13 +368,18 @@ export default async function handler(req, res, env = process.env) {
   if (body.company) return res.status(200).json({ ok: true });
 
   if (body.kind === 'details') {
-    if (detailsSecret(env)) {
+    if (body.details_token && detailsSecret(env)) {
       const verified = readDetailsToken(body.details_token, env);
       if (!verified) return res.status(401).json({ ok: false, error: 'Invalid or expired lead reference.' });
       body = { ...body, id: verified.id, phone: verified.phone, address: verified.address };
     }
     const d = parseDetails(body);
-    if (d.phone.replace(/\D/g, '').length < 10 || d.address.length < 5) return res.status(400).json({ ok: false, error: 'Missing lead reference.' });
+    if (d.phone.replace(/\D/g, '').length < 10 || d.address.length < 5) {
+      return res.status(400).json({ ok: false, error: 'Missing lead reference.' });
+    }
+    if (detailsSecret(env) && !body.details_token) {
+      return res.status(401).json({ ok: false, error: 'Invalid or expired lead reference.' });
+    }
     const r = await deliverDetails(d, env);
     return res.status(r.ok ? 200 : 502).json({ ok: r.ok, delivered: r.delivered || [], error: r.error, failures: r.failures || [] });
   }
