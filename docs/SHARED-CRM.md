@@ -5,12 +5,12 @@ Destination: **https://www.callharbison.com/hq**. Both websites use the existing
 ### Central website stats and login
 
 Standard's `/hq` and `/hq/dashboard` redirect directly to Call Harbison HQ.
-The **Website stats** tab in Call Harbison HQ shows Standard's existing first-party
-analytics: sessions, daily unique visitors, page views, average/median/total dwell
-time, pages per session, daily/hourly traffic, referrers, campaigns, countries,
-regions, cities, devices, browsers, operating systems, and entry/exit/top pages.
-Date ranges are 7, 30 and 90 days. These are Standard website metrics; the main
-CRM dashboard continues to report leads and pipeline activity for both brands.
+Call Harbison HQ includes two bookmarkable first-party **Website stats** tabs
+(`/hq/stats/harbison-standard` and `/hq/stats/call-harbison`): sessions, daily
+unique visitors, page views, average/median/total dwell time, pages per session,
+daily/hourly traffic, referrers, campaigns, countries, regions, cities, devices,
+browsers, operating systems, and entry/exit/top pages across 7, 30 and 90 days.
+The main CRM dashboard continues to report leads and pipeline activity for both brands.
 
 The HQ server fetches aggregates from Standard's existing analytics API using
 the shared intake secret. That API and its database stay on Standard; no raw
@@ -70,4 +70,9 @@ Broker review still covers brand/brokerage identification, personal-platform mar
 - `npm run build`: generated public pages and HQ assets.
 - In Standard: `npm test`, `npm run check`, `npm run build`.
 
-The integration test uses a local mock database and no real notifications. Live storage and analytics were verified separately; provider notification receipt, historical-lead migration and broker approval remain unverified or pending. See [the project record](PROJECT-RECORD.md).
+The integration test uses a local mock database and no real notifications. HQ also includes:
+- Duplicate-aware historical CSV/JSON lead import (`POST /api/hq?action=import` with dry-run preview) preserving original timestamps, notes, stages, and brand provenance.
+- Live integration readiness + one-click non-polluting email/webhook delivery test (`GET /api/hq?action=health` & `POST /api/hq?action=test-alert`).
+- Spoof-resistant IP/phone rate limiting on `/api/leads`, transient 429/5xx outbound retries, and HMAC-signed `details_token` authorization on `/thank-you` follow-up updates.
+
+Broker approval items remain as noted above. See [the project record](PROJECT-RECORD.md).

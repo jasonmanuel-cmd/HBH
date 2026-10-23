@@ -13,7 +13,7 @@ Each partner gets `callharbison.com/family?ref=<slug>` (slugs seeded in `partner
 **Resource relationships only — no per-referral payments** without California real-estate counsel / broker sign-off (DRE unlicensed-compensation rules, RESPA, and health-care anti-referral rules for care providers).
 
 ## 3. Tracking
-- `GTM_ID` → container. dataLayer events emitted: `form_start`, `form_step`, `generate_lead` (with `form_type`), `call_click`, `video_play`.
+- `GTM_ID` → container. dataLayer events emitted: `lead_form_view`, `lead_form_start`, `lead_form_step_complete`, `lead_form_submit`, `lead_form_success`, `generate_lead` (with `form_type`), `phone_click`, `call_click`, `cta_click`, `video_play`.
 - Google Ads primary conversion should be **qualified lead**, imported offline from Supabase using stored `gclid` — not raw form fills.
 - First touch persists 90 days in localStorage (gclid window); last touch per session.
 

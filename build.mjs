@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import site from './site.config.mjs';
 import {
-  areas, guides, faqs, situations,
+  areas, guides, faqs, situations, contentDate,
   homePage, howItWorksPage, contactPage, accessibilityPage, situationPage, areaPage, situationsIndexPage, aboutPage, guidesIndexPage, guidePage,
   thankYouPage, notFoundPage, privacyPage, termsPage, familyPage, partnerGuidePage,
 } from './src/templates.mjs';
@@ -15,9 +15,8 @@ rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 cpSync('static', out, { recursive: true });
 mkdirSync(join(out, 'hq/stats'), { recursive: true });
-for (const site of ['harbison-standard', 'call-harbison']) cpSync('static/hq/index.html', join(out, `hq/stats/${site}.html`));
-
-const today = new Date().toISOString().slice(0, 10);
+for (const statsSite of ['harbison-standard', 'call-harbison']) cpSync('static/hq/index.html', join(out, `hq/stats/${statsSite}.html`));
+for (const hqRoute of ['leads', 'partners']) cpSync('static/hq/index.html', join(out, `hq/${hqRoute}.html`));
 
 // [output file, html, url path for sitemap (null = exclude), lastmod]
 const pages = [
@@ -28,8 +27,8 @@ const pages = [
   [`${family.path.slice(1)}.html`, familyPage(), family.path],
   ['family-property-guide.html', partnerGuidePage(), null],
   ['situations/index.html', situationsIndexPage(), '/situations'],
-  ...situations.map((s) => [`situations/${s.slug}.html`, situationPage(s), `/situations/${s.slug}`]),
-  ...areas.map((a) => [`areas/${a.slug}.html`, areaPage(a), `/areas/${a.slug}`]),
+  ...situations.map((s) => [`situations/${s.slug}.html`, situationPage(s), `/situations/${s.slug}`, s.updated]),
+  ...areas.map((a) => [`areas/${a.slug}.html`, areaPage(a), `/areas/${a.slug}`, a.updated]),
   ['guides/index.html', guidesIndexPage(), '/guides'],
   ...guides.map((g) => [`guides/${g.slug}.html`, guidePage(g), `/guides/${g.slug}`, g.updated]),
   ['privacy.html', privacyPage(), '/privacy'],
@@ -39,22 +38,33 @@ const pages = [
   ['404.html', notFoundPage(), null],
 ];
 
-// Mobile performance: inline the (small) stylesheet so first paint doesn't wait on a second request,
-// and fingerprint script.js so it can be cached for a year.
+// Minify and fingerprint CSS + client scripts so repeat page navigations reuse immutable browser cache.
 const css = readFileSync('static/styles.css', 'utf8')
   .replace(/\/\*[\s\S]*?\*\//g, '')
   .replace(/\s+/g, ' ')
   .replace(/\s*([{}:;,>])\s*/g, '$1')
   .replace(/;}/g, '}')
   .trim();
-const jsHash = createHash('sha256').update(readFileSync('static/script.js')).digest('hex').slice(0, 10);
-renameSync(join(out, 'script.js'), join(out, `script.${jsHash}.js`));
+const hashOf = (buf) => createHash('sha256').update(buf).digest('hex').slice(0, 10);
+const cssHash = hashOf(css);
+const jsHash = hashOf(readFileSync('static/script.js'));
+const analyticsHash = hashOf(readFileSync('static/analytics.js'));
+
+writeFileSync(join(out, `styles.${cssHash}.css`), css);
 rmSync(join(out, 'styles.css'));
+renameSync(join(out, 'script.js'), join(out, `script.${jsHash}.js`));
+renameSync(join(out, 'analytics.js'), join(out, `analytics.${analyticsHash}.js`));
 
 for (const [file, html] of pages) {
   const path = join(out, file);
   mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, html.replace('<link rel="stylesheet" href="/styles.css">', `<style>${css}</style>`).replace('src="/script.js"', `src="/script.${jsHash}.js"`));
+  writeFileSync(
+    path,
+    html
+      .replace('href="/styles.css"', `href="/styles.${cssHash}.css"`)
+      .replace('src="/script.js"', `src="/script.${jsHash}.js"`)
+      .replace('src="/analytics.js"', `src="/analytics.${analyticsHash}.js"`)
+  );
 }
 
 writeFileSync(
@@ -63,7 +73,7 @@ writeFileSync(
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${pages
   .filter(([, , p]) => p)
-  .map(([, , p, mod]) => `  <url><loc>${site.url}${p}</loc><lastmod>${mod || today}</lastmod></url>`)
+  .map(([, , p, mod]) => `  <url><loc>${site.url}${p}</loc><lastmod>${mod || contentDate(p)}</lastmod></url>`)
   .join('\n')}
 </urlset>
 `
@@ -83,6 +93,9 @@ Disallow: /hq
 ${aiBots.map((b) => `User-agent: ${b}`).join('\n')}
 Allow: /
 Disallow: /api/
+Disallow: /thank-you
+Disallow: /family-property-guide
+Disallow: /hq
 
 Sitemap: ${site.url}/sitemap.xml
 `
@@ -106,7 +119,7 @@ Key facts:
 
 ## Main pages
 ${link('/', 'Home', 'overview, process, direct sale vs. listing comparison, FAQ')}
-${link('/how-it-works', 'How it works', 'process, walkthrough, how direct offers are figured, seller promise')}
+${link('/how-it-works', 'How it works', 'process, walkthrough, interactive net estimator, how direct offers are figured, seller promise')}
 ${link('/about', `About ${site.agent}`, 'credentials, approach, profiles')}
 ${link('/contact', 'Contact', `call or text ${site.phone}`)}
 ${link('/situations', 'Situations we help with')}

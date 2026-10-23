@@ -1,8 +1,14 @@
 // Same-origin collector. Only this server can label records as Call Harbison.
 import { createHmac } from 'node:crypto';
+import { clientIp } from '../lib/request-ip.js';
 
 export default async function handler(req, res, env = process.env) {
   res.setHeader('Cache-Control', 'no-store');
+  const url = new URL(req.url || '/api/track', 'http://x');
+  // Browser CSP report sink (routed from /csp-report in vercel.json without adding a separate function).
+  if (url.searchParams.get('csp') === '1') {
+    return res.end ? res.status(204).end('') : res.status(204).json({ ok: true });
+  }
   if (req.method !== 'POST') return res.status(405).json({ ok: false });
   if (!env.CRM_INGEST_SECRET) return res.status(503).json({ ok: false });
   if (req.headers?.dnt === '1' || req.headers?.['sec-gpc'] === '1') return res.status(202).json({ ok: true, stored: false });
@@ -11,7 +17,7 @@ export default async function handler(req, res, env = process.env) {
   if (!body || !/^[a-f0-9-]{36}$/i.test(body.sid || '') || !['start', 'pageview', 'heartbeat', 'end'].includes(body.type)) return res.status(400).json({ ok: false });
   const path = typeof body.path === 'string' ? body.path.split(/[?#]/)[0].slice(0, 300) : '/';
   if (!path.startsWith('/') || path.startsWith('//') || /^\/(hq|api)(\/|$)/.test(path)) return res.status(400).json({ ok: false });
-  const ip = String(req.headers?.['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown').split(',').at(-1).trim();
+  const ip = clientIp(req) || 'unknown';
   const visitor = createHmac('sha256', env.CRM_INGEST_SECRET).update(`call_harbison:${new Date().toISOString().slice(0, 10)}:${ip}`).digest('hex');
   try {
     const response = await fetch('https://www.harbisonstandard.com/api/track', {
