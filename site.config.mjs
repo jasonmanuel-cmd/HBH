@@ -43,7 +43,7 @@ export default {
     'https://www.harbisonstandard.com/about',
     'https://www.facebook.com/nate85.realtor',
     'https://www.instagram.com/nathanaelharbison',
-    'https://www.youtube.com/@Nathanaelharbison',
+    'https://www.youtube.com/@NathanaelRealEstate',
     'https://www.linkedin.com/in/nathanael-harbison',
   ],
   // Add the Google Business Profile URL here once it exists (strong local + AI search signal).
