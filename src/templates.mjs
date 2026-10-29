@@ -17,6 +17,8 @@ export const guides = [...baseGuides.map((g) => ({ ...g, meaning: guideMeaning[g
 const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const strip = (s = '') => String(s).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
 const year = new Date().getFullYear();
+// Fallback delay before gtag.js loads for visitors who never interact (see head()).
+const GA_LOAD_DELAY_MS = 4000;
 // Brand assets cut from the Harbison Buys Homes logo sheet (see static/assets).
 const logo = '/assets/logo-horizontal-v2.png'; // full color, transparent, 1172×231
 const logoReverse = '/assets/logo-header-reverse-v2.png'; // ivory + gold for navy grounds, 487×96
@@ -174,9 +176,14 @@ const serviceLd = ({ name, description, url, areaServed }) => ({
 function head({ title, description, path, image, noindex = false, ld, preload, article }) {
   const canonical = `${site.url}${path === '/' ? '/' : path}`;
   const ogImage = image || `${site.url}${ogDefault}`;
+  // The gtag() stub runs immediately so page views and events queue in dataLayer from the start.
+  // gtag.js itself (~177 KB, the biggest main-thread cost on phones) loads on the first interaction
+  // or GA_LOAD_DELAY_MS after the load event; it then sends everything already queued.
   const ga = site.gaId
-    ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${esc(site.gaId)}"></script>
-  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(site.gaId)}');</script>`
+    ? `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(site.gaId)}');
+  (function(){var loaded=false;function load(){if(loaded)return;loaded=true;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${esc(site.gaId)}';document.head.appendChild(s)}
+  ['pointerdown','keydown','touchstart','scroll'].forEach(function(e){addEventListener(e,load,{once:true,passive:true})});
+  addEventListener('load',function(){setTimeout(load,${GA_LOAD_DELAY_MS})})})();</script>`
     : '';
   const gtm = site.gtmId
     ? `<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${esc(site.gtmId)}');</script>`
