@@ -20,6 +20,7 @@ export const ROUTES = ['direct', 'listing', 'renovate', 'development', 'not_read
 const PARTNER_CATEGORIES = ['placement', 'senior_community', 'estate_sale', 'fiduciary', 'elder_law', 'move_manager', 'other'];
 const PARTNER_STATUSES = ['prospect', 'contacted', 'meeting_set', 'active', 'paused', 'declined'];
 const PURGE_CONFIRMATION = 'DELETE';
+const EMPTY_TRASH_MAX = 200;
 
 const EVENT_KINDS = ['note', 'call', 'text', 'email', 'appointment', 'offer'];
 const CONTACT_KINDS = ['call', 'text', 'email'];
@@ -682,6 +683,19 @@ export default async function handler(req, res, env = process.env) {
       // The row and its activity log are gone, so keep a server-side record of who removed what.
       console.warn(`[hq] lead ${id} permanently deleted by ${session.n}`);
       return res.status(200).json({ ok: true, deleted: id });
+    }
+
+    // Empty Trash removes only the trashed leads the user was shown, so a lead trashed meanwhile is never swept up.
+    if (action === 'empty-trash' && req.method === 'DELETE') {
+      if (body.confirm !== PURGE_CONFIRMATION) return res.status(400).json({ ok: false, error: `Type ${PURGE_CONFIRMATION} to confirm.` });
+      const ids = Array.isArray(body.ids) ? [...new Set(body.ids)] : [];
+      if (!ids.length || ids.length > EMPTY_TRASH_MAX || !ids.every(isUuid)) {
+        return res.status(400).json({ ok: false, error: `Send between 1 and ${EMPTY_TRASH_MAX} lead ids.` });
+      }
+      const removed = await sb(env, `leads?id=in.(${ids.join(',')})&deleted_at=not.is.null`, { method: 'DELETE', prefer: 'return=representation' });
+      const count = removed?.length || 0;
+      console.warn(`[hq] ${count} trashed lead(s) permanently deleted by ${session.n}: ${(removed || []).map((l) => l.id).join(',')}`);
+      return res.status(200).json({ ok: true, deleted: count });
     }
 
     return res.status(404).json({ ok: false, error: 'Unknown action' });

@@ -375,6 +375,7 @@ async function loadLeads(reset) {
       <div class="row"><strong>${esc(l.name)}</strong>${pill(l.status)}</div>
       <span class="muted">${esc(BRANDS[brandOf(l)])} · ${esc(l.address || l.email || 'General inquiry')}${spanishTag(l)}</span>
       <div class="row"><span class="muted">${esc(l.situation || '')}</span><span class="${due(l) ? 'due' : 'muted'}">${l.next_followup ? `Follow up ${esc(when(l.next_followup))}` : esc(ago(l.created_at))}</span></div></div>`).join('');
+  renderEmptyTrash();
 }
 ['#rows', '#cards'].forEach((sel) => {
   $(sel).addEventListener('click', (e) => { const el = e.target.closest('[data-id]'); if (el) openLead(el.dataset.id); });
@@ -776,5 +777,56 @@ $('#d-purge').addEventListener('submit', async (e) => {
   } catch (err) {
     dangerMsg(err.message);
     $('#d-purge-go').disabled = false;
+  }
+});
+
+// ---------- Empty Trash ----------
+// Deletes only the trashed leads currently listed, and says how many before anything happens.
+const plural = (n) => `${n} lead${n === 1 ? '' : 's'}`;
+function resetEmptyTrashForm() {
+  $('#empty-trash-form').hidden = true;
+  $('#empty-trash-start').hidden = false;
+  $('#empty-trash-confirm').value = '';
+  $('#empty-trash-go').disabled = true;
+}
+function renderEmptyTrash() {
+  const n = list.view === 'trash' ? list.items.length : 0;
+  $('#empty-trash').hidden = n === 0;
+  resetEmptyTrashForm();
+  emptyTrashMsg('');
+  if (!n) return;
+  $('#empty-trash-text').textContent = `Empty Trash deletes the ${plural(n)} listed below and their activity, for good.`;
+  $('#empty-trash-go').textContent = `Delete ${plural(n)} forever`;
+}
+function emptyTrashMsg(text, ok = false) {
+  $('#empty-trash-msg').textContent = text;
+  $('#empty-trash-msg').className = `status-msg ${ok ? 'ok' : 'bad'}`;
+}
+$('#empty-trash-start').addEventListener('click', () => {
+  $('#empty-trash-start').hidden = true;
+  $('#empty-trash-form').hidden = false;
+  emptyTrashMsg('');
+  $('#empty-trash-confirm').focus();
+});
+$('#empty-trash-cancel').addEventListener('click', resetEmptyTrashForm);
+$('#empty-trash-confirm').addEventListener('input', (e) => { $('#empty-trash-go').disabled = e.target.value.trim() !== 'DELETE'; });
+$('#empty-trash-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const ids = list.view === 'trash' ? list.items.map((l) => l.id) : [];
+  if (!ids.length || $('#empty-trash-confirm').value.trim() !== 'DELETE') return;
+  $('#empty-trash-go').disabled = true;
+  try {
+    const r = await api('empty-trash', { method: 'DELETE', body: { confirm: 'DELETE', ids } });
+    await afterTrashChange();
+    // The reload hides the bar once Trash is empty; keep it open just to confirm what happened.
+    if (!list.items.length) {
+      $('#empty-trash-text').textContent = '';
+      $('#empty-trash-start').hidden = true;
+      $('#empty-trash').hidden = false;
+    }
+    emptyTrashMsg(`Deleted ${plural(r.deleted)} for good.`, true);
+  } catch (err) {
+    emptyTrashMsg(err.message);
+    $('#empty-trash-go').disabled = false;
   }
 });
