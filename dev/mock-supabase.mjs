@@ -96,6 +96,7 @@ function matches(row, key, expr) {
   if (op === 'gte') return cell != null && cmp(cell, val) >= 0;
   if (op === 'lte') return cell != null && cmp(cell, val) <= 0;
   if (op === 'in') return val.slice(1, -1).split(',').includes(String(cell));
+  if (op === 'not' && rest[0] === 'is' && rest[1] === 'null') return cell != null;
   if (op === 'not' && rest[0] === 'in') return !rest.slice(1).join('.').slice(1, -1).split(',').includes(String(cell));
   return true;
 }
