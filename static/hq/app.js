@@ -568,10 +568,15 @@ function renderLead(l, events) {
   contactButtons.push(`<button class="btn ghost" type="button" id="copy-lead-link">Copy HQ link</button>`);
   $('#d-actions').innerHTML = contactButtons.join('');
   $('#copy-lead-link')?.addEventListener('click', async (ev) => {
+    // currentTarget is null once the handler awaits, so keep the button first.
+    const btn = ev.currentTarget;
     try {
       await navigator.clipboard.writeText(`${location.origin}/hq?lead=${encodeURIComponent(l.id)}`);
-      ev.currentTarget.textContent = 'Link copied';
-    } catch {}
+      btn.textContent = 'Link copied';
+    } catch (e) {
+      console.error('[hq] copy link failed:', e);
+      btn.textContent = 'Copy failed';
+    }
   });
 
   const consent = [l.consent_response && 'contact about property', l.consent_marketing && 'marketing'].filter(Boolean).join(' + ');
