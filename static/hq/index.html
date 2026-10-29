@@ -140,6 +140,14 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .status-msg{font-size:.88rem}
 .status-msg.ok{color:var(--ok)}
 .status-msg.bad{color:var(--bad)}
+.btn.danger{background:var(--bad);color:#fff}
+.btn.danger:disabled{opacity:.45;cursor:not-allowed}
+.btn.danger-ghost{background:transparent;border:1px solid var(--bad);color:var(--bad)}
+.danger-zone{border-color:rgba(179,38,30,.35)}
+.danger-zone p{margin:0 0 10px}
+.danger-zone label{display:block;font-size:.85rem;margin-bottom:6px}
+.danger-zone input{min-height:44px;border:1px solid var(--line);border-radius:4px;padding:0 10px;font-size:16px;max-width:160px}
+.trash-banner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:#fff4e5;border:1px solid #f0c68a;color:#7a4300;border-radius:4px;padding:10px 12px;font-weight:600;font-size:.9rem}
 .timeline{list-style:none;margin:0;padding:0;display:grid;gap:0}
 .timeline li{padding:10px 0 10px 16px;border-left:2px solid var(--line);position:relative;font-size:.9rem}
 .timeline li::before{content:"";position:absolute;left:-6px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--gold-dark)}
@@ -321,6 +329,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
           <button type="button" data-view="closed" aria-pressed="false">Closed</button>
           <button type="button" data-view="spam" aria-pressed="false">Spam</button>
           <button type="button" data-view="all" aria-pressed="false">All</button>
+          <button type="button" data-view="trash" aria-pressed="false">Trash</button>
         </div>
         <label class="toolbar-filter" for="brand">Brand <select id="brand"><option value="">Both brands</option><option value="harbison_standard">Harbison Standard</option><option value="call_harbison">Call Harbison</option></select></label>
         <label class="toolbar-filter" for="stage-filter">Stage <select id="stage-filter"><option value="">Any stage</option></select></label>
@@ -354,6 +363,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
   </div>
   <div class="d-body">
     <div class="actions" id="d-actions"></div>
+    <div class="trash-banner" id="d-trash" role="status" hidden><span id="d-trash-text"></span><button class="btn" type="button" id="d-restore">Restore lead</button></div>
     <div class="dnc" id="d-dnc" hidden>Do not contact — this person asked us to stop.</div>
     <div class="card"><h3>What they told us</h3><dl class="facts" id="d-facts"></dl></div>
     <div class="card" id="d-original" hidden><h3>Original website inquiry</h3><p id="d-original-text" style="white-space:pre-wrap;overflow-wrap:anywhere"></p></div>
@@ -407,6 +417,23 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
       </form>
       <h3 style="margin-top:16px">Timeline</h3>
       <ul class="timeline" id="d-timeline"></ul>
+    </div>
+    <div class="card danger-zone" id="d-danger">
+      <h3>Delete</h3>
+      <div id="d-delete-start">
+        <p class="muted">Moves this lead to Trash. It disappears from the dashboard and lists, and can be restored from the Trash view.</p>
+        <button class="btn danger-ghost" type="button" id="d-delete">Delete lead</button>
+      </div>
+      <div id="d-delete-confirm" hidden>
+        <p><strong>Move this lead to Trash?</strong></p>
+        <div class="savebar"><button class="btn danger" type="button" id="d-delete-yes">Yes, move to Trash</button><button class="btn ghost" type="button" id="d-delete-no">Cancel</button></div>
+      </div>
+      <form id="d-purge" hidden novalidate>
+        <p class="muted">Permanently erases this lead and its activity history, for example to honor a privacy deletion request. This cannot be undone.</p>
+        <label for="d-purge-confirm">Type <strong>DELETE</strong> to confirm</label>
+        <div class="savebar"><input id="d-purge-confirm" autocomplete="off" spellcheck="false" maxlength="10"><button class="btn danger" type="submit" id="d-purge-go" disabled>Delete forever</button></div>
+      </form>
+      <span class="status-msg" id="d-danger-msg" role="status"></span>
     </div>
   </div>
 </aside>

@@ -329,7 +329,7 @@ $('#stage-filter').innerHTML = `<option value="">Any stage</option>${Object.entr
 
 function setView(v, reload = true) {
   list.view = v;
-  if (v === 'spam') { list.status = ''; $('#stage-filter').value = ''; }
+  if (v === 'spam' || v === 'trash') { list.status = ''; $('#stage-filter').value = ''; }
   document.querySelectorAll('[data-view]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.view === v)));
   if (reload) { syncUrl({ tab: 'leads', replace: true }); loadLeads(true); }
 }
@@ -555,6 +555,7 @@ const alertMsg = (m) => { $('#d-save-msg').textContent = m; $('#d-save-msg').cla
 
 function renderLead(l, events) {
   $('#d-name').textContent = l.name;
+  renderTrashState(l);
   $('#d-sub').textContent = `${BRANDS[brandOf(l)]} · ${l.address || 'Property not supplied'} · received ${when(l.created_at)}`;
   $('#d-dnc').hidden = !l.do_not_contact;
   const tel = digits(l.phone);
@@ -690,3 +691,85 @@ $('#note-form').addEventListener('submit', async (e) => {
 // ---------- boot ----------
 try { $('#login-name').value = localStorage.getItem('hq_name') || ''; } catch {}
 api('me').then((r) => showApp(r.name)).catch((e) => showLogin(e.status === 503 ? e.message : ''));
+
+// ---------- Trash: delete, restore, delete forever ----------
+function renderTrashState(l) {
+  const trashed = Boolean(l.deleted_at);
+  $('#d-trash').hidden = !trashed;
+  $('#d-trash-text').textContent = trashed ? `In Trash — deleted ${when(l.deleted_at)}${l.deleted_by ? ` by ${l.deleted_by}` : ''}` : '';
+  $('#d-form').hidden = trashed;
+  $('#note-form').hidden = trashed;
+  $('#d-delete-start').hidden = trashed;
+  $('#d-delete-confirm').hidden = true;
+  $('#d-purge').hidden = !trashed;
+  $('#d-purge-confirm').value = '';
+  $('#d-purge-go').disabled = true;
+  $('#d-danger-msg').textContent = '';
+  $('#d-danger-msg').className = 'status-msg';
+}
+
+function dangerMsg(text, ok = false) {
+  $('#d-danger-msg').textContent = text;
+  $('#d-danger-msg').className = `status-msg ${ok ? 'ok' : 'bad'}`;
+}
+
+async function afterTrashChange() {
+  if (!$('#leads').hidden) await loadLeads(true);
+  if (!$('#dash').hidden) await loadDash();
+}
+
+$('#d-delete').addEventListener('click', () => {
+  $('#d-delete-start').hidden = true;
+  $('#d-delete-confirm').hidden = false;
+  $('#d-delete-yes').focus();
+});
+$('#d-delete-no').addEventListener('click', () => {
+  $('#d-delete-confirm').hidden = true;
+  $('#d-delete-start').hidden = false;
+  $('#d-delete').focus();
+});
+$('#d-delete-yes').addEventListener('click', async (ev) => {
+  if (!current) return;
+  const btn = ev.currentTarget; // currentTarget is cleared once the event finishes dispatching
+  btn.disabled = true;
+  try {
+    await api('lead', { method: 'DELETE', params: { id: current.id } });
+    closeDrawer();
+    await afterTrashChange();
+  } catch (e) {
+    dangerMsg(e.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+$('#d-restore').addEventListener('click', async (ev) => {
+  if (!current) return;
+  const btn = ev.currentTarget;
+  btn.disabled = true;
+  try {
+    await api('restore', { method: 'POST', params: { id: current.id }, body: {} });
+    const r = await api('lead', { params: { id: current.id } });
+    current = r.lead;
+    renderLead(r.lead, r.events);
+    dangerMsg('Restored. The lead is back in your lists.', true);
+    await afterTrashChange();
+  } catch (e) {
+    dangerMsg(e.message);
+  } finally {
+    btn.disabled = false;
+  }
+});
+$('#d-purge-confirm').addEventListener('input', (e) => { $('#d-purge-go').disabled = e.target.value.trim() !== 'DELETE'; });
+$('#d-purge').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  if (!current || $('#d-purge-confirm').value.trim() !== 'DELETE') return;
+  $('#d-purge-go').disabled = true;
+  try {
+    await api('purge', { method: 'DELETE', params: { id: current.id }, body: { confirm: 'DELETE' } });
+    closeDrawer();
+    await afterTrashChange();
+  } catch (err) {
+    dangerMsg(err.message);
+    $('#d-purge-go').disabled = false;
+  }
+});

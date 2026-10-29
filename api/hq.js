@@ -19,6 +19,8 @@ export const OUTCOMES = ['direct_purchase', 'listing', 'buyer_purchase', 'referr
 export const ROUTES = ['direct', 'listing', 'renovate', 'development', 'not_ready'];
 const PARTNER_CATEGORIES = ['placement', 'senior_community', 'estate_sale', 'fiduciary', 'elder_law', 'move_manager', 'other'];
 const PARTNER_STATUSES = ['prospect', 'contacted', 'meeting_set', 'active', 'paused', 'declined'];
+const PURGE_CONFIRMATION = 'DELETE';
+
 const EVENT_KINDS = ['note', 'call', 'text', 'email', 'appointment', 'offer'];
 const CONTACT_KINDS = ['call', 'text', 'email'];
 const SESSION_HOURS = 12;
@@ -194,6 +196,14 @@ const setCookie = (res, value, maxAge) => res.setHeader('Set-Cookie', `${COOKIE}
 export const loginLimiter = createRateLimiter({ max: 8, windowMs: 15 * 60e3 });
 export const testAlertLimiter = createRateLimiter({ max: 4, windowMs: 10 * 60e3 });
 
+async function logTrashEvent(env, id, detail, actor) {
+  try {
+    await sb(env, 'lead_events', { method: 'POST', body: { lead_id: id, kind: 'note', detail, actor }, prefer: 'return=minimal' });
+  } catch (e) {
+    console.error('[hq] trash activity not recorded:', e.message);
+  }
+}
+
 // ---------- Supabase ----------
 async function sb(env, path, { method = 'GET', body, prefer } = {}) {
   const res = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/${path}`, {
@@ -216,7 +226,11 @@ const isUuid = (s) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
 function applyLeadFilters(p, searchParams) {
   const status = searchParams.get('status') || '';
   const view = searchParams.get('view') || 'open';
-  if (status && STATUSES.includes(status)) p.set('status', `eq.${status}`);
+  // Trashed leads are hidden from every view except Trash.
+  const trash = view === 'trash';
+  p.set('deleted_at', trash ? 'not.is.null' : 'is.null');
+  if (trash) p.set('order', 'deleted_at.desc');
+  else if (status && STATUSES.includes(status)) p.set('status', `eq.${status}`);
   else if (view === 'open') p.set('status', `not.in.(${CLOSED.join(',')})`);
   else if (view === 'closed') p.set('status', `in.(${CLOSED.filter((s) => s !== 'spam').join(',')})`);
   else if (view === 'spam') p.set('status', 'eq.spam');
@@ -506,10 +520,10 @@ export default async function handler(req, res, env = process.env) {
       const now = Date.now();
       const since = new Date(now - 365 * 864e5).toISOString();
       const fiveMinAgo = new Date(now - 5 * 60e3).toISOString();
-      const rows = await sb(env, `leads?select=id,created_at,status,channel,form_type,route_interest,situation,first_contact_at,appointment_at,next_followup,gross_profit,closed_at,do_not_contact&created_at=gte.${since}&limit=5000&order=created_at.desc`);
-      const rawWaiting = await sb(env, `leads?select=id,created_at,name,phone,email,address,situation,channel,form_type,do_not_contact&status=eq.new&do_not_contact=eq.false&created_at=lte.${fiveMinAgo}&order=created_at.asc&limit=8`);
+      const rows = await sb(env, `leads?select=id,created_at,status,channel,form_type,route_interest,situation,first_contact_at,appointment_at,next_followup,gross_profit,closed_at,do_not_contact&created_at=gte.${since}&deleted_at=is.null&limit=5000&order=created_at.desc`);
+      const rawWaiting = await sb(env, `leads?select=id,created_at,name,phone,email,address,situation,channel,form_type,do_not_contact&status=eq.new&do_not_contact=eq.false&deleted_at=is.null&created_at=lte.${fiveMinAgo}&order=created_at.asc&limit=8`);
       const waiting = rawWaiting.map((l) => ({ ...l, minutes_waiting: Math.round((now - Date.parse(l.created_at)) / 60e3) }));
-      const upcoming = await sb(env, `leads?select=id,name,address,situation,form_type,appointment_at&appointment_at=gte.${new Date(now).toISOString()}&order=appointment_at.asc&limit=6`);
+      const upcoming = await sb(env, `leads?select=id,name,address,situation,form_type,appointment_at&appointment_at=gte.${new Date(now).toISOString()}&deleted_at=is.null&order=appointment_at.asc&limit=6`);
       return res.status(200).json({ ok: true, stats: computeStats(rows, now), waiting, upcoming });
     }
 
@@ -633,6 +647,41 @@ export default async function handler(req, res, env = process.env) {
         }
       }
       return res.status(200).json({ ok: true, event: ev });
+    }
+
+    // Trash is a recoverable delete: the lead drops out of every list, count and view until restored.
+    if (action === 'lead' && req.method === 'DELETE') {
+      if (!isUuid(id)) return res.status(400).json({ ok: false, error: 'Bad id' });
+      const [lead] = await sb(env, `leads?id=eq.${id}&deleted_at=is.null`, {
+        method: 'PATCH', body: { deleted_at: new Date().toISOString(), deleted_by: session.n }, prefer: 'return=representation',
+      });
+      if (!lead) return res.status(404).json({ ok: false, error: 'Lead not found, or it is already in Trash.' });
+      await logTrashEvent(env, id, 'Moved to Trash', session.n);
+      return res.status(200).json({ ok: true, lead });
+    }
+
+    if (action === 'restore' && req.method === 'POST') {
+      if (!isUuid(id)) return res.status(400).json({ ok: false, error: 'Bad id' });
+      const [lead] = await sb(env, `leads?id=eq.${id}&deleted_at=not.is.null`, {
+        method: 'PATCH', body: { deleted_at: null, deleted_by: null }, prefer: 'return=representation',
+      });
+      if (!lead) return res.status(404).json({ ok: false, error: 'Lead not found in Trash.' });
+      await logTrashEvent(env, id, 'Restored from Trash', session.n);
+      return res.status(200).json({ ok: true, lead });
+    }
+
+    // Permanent deletion (e.g. a privacy request). Only from Trash, and only with the typed confirmation.
+    if (action === 'purge' && req.method === 'DELETE') {
+      if (!isUuid(id)) return res.status(400).json({ ok: false, error: 'Bad id' });
+      if (body.confirm !== PURGE_CONFIRMATION) return res.status(400).json({ ok: false, error: `Type ${PURGE_CONFIRMATION} to confirm.` });
+      const [lead] = await sb(env, `leads?id=eq.${id}&select=id,deleted_at`);
+      if (!lead) return res.status(404).json({ ok: false, error: 'Lead not found' });
+      if (!lead.deleted_at) return res.status(409).json({ ok: false, error: 'Move the lead to Trash first.' });
+      const removed = await sb(env, `leads?id=eq.${id}&deleted_at=not.is.null`, { method: 'DELETE', prefer: 'return=representation' });
+      if (!removed?.length) return res.status(409).json({ ok: false, error: 'The lead changed before it could be deleted. Nothing was removed.' });
+      // The row and its activity log are gone, so keep a server-side record of who removed what.
+      console.warn(`[hq] lead ${id} permanently deleted by ${session.n}`);
+      return res.status(200).json({ ok: true, deleted: id });
     }
 
     return res.status(404).json({ ok: false, error: 'Unknown action' });
