@@ -148,6 +148,12 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 .danger-zone label{display:block;font-size:.85rem;margin-bottom:6px}
 .danger-zone input{min-height:44px;border:1px solid var(--line);border-radius:4px;padding:0 10px;font-size:16px;max-width:160px}
 .trash-banner{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;background:#fff4e5;border:1px solid #f0c68a;color:#7a4300;border-radius:4px;padding:10px 12px;font-weight:600;font-size:.9rem}
+.empty-trash{margin-bottom:12px}
+.empty-trash form{flex-basis:100%}
+.empty-trash label{display:block;font-size:.85rem;margin-bottom:6px}
+.empty-trash input{min-height:44px;border:1px solid var(--line);border-radius:4px;padding:0 10px;font-size:16px;max-width:160px}
+.empty-trash .status-msg{flex-basis:100%;margin:0}
+.empty-trash .status-msg:empty{display:none}
 .timeline{list-style:none;margin:0;padding:0;display:grid;gap:0}
 .timeline li{padding:10px 0 10px 16px;border-left:2px solid var(--line);position:relative;font-size:.9rem}
 .timeline li::before{content:"";position:absolute;left:-6px;top:15px;width:10px;height:10px;border-radius:50%;background:var(--gold-dark)}
@@ -340,6 +346,15 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
           <button class="btn ghost" id="export-csv" type="button">Export CSV</button>
           <button class="btn" id="leads-new-btn" type="button">+ New lead</button>
         </div>
+      </div>
+      <div class="trash-banner empty-trash" id="empty-trash" hidden>
+        <span id="empty-trash-text"></span>
+        <button class="btn danger-ghost" type="button" id="empty-trash-start">Empty Trash</button>
+        <form id="empty-trash-form" hidden novalidate>
+          <label for="empty-trash-confirm">Type <strong>DELETE</strong> to confirm</label>
+          <div class="savebar"><input id="empty-trash-confirm" autocomplete="off" spellcheck="false" maxlength="10"><button class="btn danger" type="submit" id="empty-trash-go" disabled>Delete forever</button><button class="btn ghost" type="button" id="empty-trash-cancel">Cancel</button></div>
+        </form>
+        <p class="status-msg" id="empty-trash-msg" role="status"></p>
       </div>
       <div class="table-wrap leads-table">
         <table>

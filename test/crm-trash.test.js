@@ -65,6 +65,30 @@ test('Delete forever only works from Trash and needs the typed confirmation', as
   assert.ok(!db.leads.some((l) => l.id === lead.id), 'row is gone');
 });
 
+test('Empty Trash permanently deletes exactly the trashed leads it was shown', async () => {
+  const [a, b, kept, live] = db.leads.filter((l) => !l.deleted_at);
+  for (const l of [a, b, kept]) await callApi({ method: 'DELETE', url: `/api/hq?action=lead&id=${l.id}`, headers: write }, env);
+  const empty = (body) => callApi({ method: 'DELETE', url: '/api/hq?action=empty-trash', headers: write, body }, env);
+
+  assert.equal((await empty({ ids: [a.id, b.id] })).statusCode, 400, 'requires confirm: "DELETE"');
+  assert.equal((await empty({ confirm: 'DELETE', ids: [] })).statusCode, 400, 'requires at least one id');
+  assert.equal((await empty({ confirm: 'DELETE', ids: ['not-a-uuid'] })).statusCode, 400, 'rejects bad ids');
+  assert.ok(db.leads.includes(a) && db.leads.includes(b), 'nothing removed by refused requests');
+
+  const res = await empty({ confirm: 'DELETE', ids: [a.id, b.id, live.id] });
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.deleted, 2, 'reports how many were removed');
+  assert.ok(!db.leads.some((l) => l.id === a.id || l.id === b.id), 'listed trashed leads are gone');
+  assert.ok(db.leads.includes(live), 'a lead that is not in Trash is never removed');
+  assert.ok(db.leads.includes(kept), 'a trashed lead that was not listed stays in Trash');
+});
+
+test('Empty Trash requires a session and the HQ header', async () => {
+  const body = { confirm: 'DELETE', ids: [db.leads[0].id] };
+  assert.equal((await callApi({ method: 'DELETE', url: '/api/hq?action=empty-trash', headers: {}, body }, env)).statusCode, 401);
+  assert.equal((await callApi({ method: 'DELETE', url: '/api/hq?action=empty-trash', headers: read, body }, env)).statusCode, 403);
+});
+
 test('Trash actions require a session, the HQ header, and a valid id', async () => {
   const id = db.leads[0].id;
   assert.equal((await callApi({ method: 'DELETE', url: `/api/hq?action=lead&id=${id}`, headers: {} }, env)).statusCode, 401);
