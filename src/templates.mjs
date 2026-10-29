@@ -1,6 +1,6 @@
 import site from '../site.config.mjs';
 import { images, situations as baseSituations, areas as baseAreas, faqs as baseFaqs } from './content.mjs';
-import { californiaCity, extraFaqs, glance, testimonials, about, guides as baseGuides } from './content-extra.mjs';
+import { californiaCity, extraFaqs, glance, about, guides as baseGuides } from './content-extra.mjs';
 import { family, familyForm, partnerGuide } from './family.mjs';
 import {
   supportingPromise, heroCopy, reassurance, processSteps, routes, compareDisclosure, whyHarbison, transparency, safeguards,
@@ -442,17 +442,6 @@ const pathsBlock = () => `<h3>Possible paths</h3><ul class="path-mini">${routes
 
 const glanceTable = () => `<dl class="glance">${glance.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
 
-const testimonialSection = () => `<section class="section white" aria-labelledby="testimonials-h">
-  <div class="container">
-    <div class="section-head center">
-      <p class="eyebrow gold-dark">Client Words</p>
-      <h2 id="testimonials-h">What sellers say about <em>working with Nathanael.</em></h2>
-    </div>
-    <div class="quote-grid">${testimonials.map(([q, who]) => `<figure class="quote"><blockquote><p>“${esc(q)}”</p></blockquote><figcaption>${esc(who)}</figcaption></figure>`).join('')}</div>
-    <p class="source-note">Client comments as published on <a class="link" href="${site.brokerageUrl}">${esc(site.brokerage)}</a>.</p>
-  </div>
-</section>`;
-
 const guideCards = (list = guides) => `<div class="guide-grid">${list
   .map((g) => `<a class="guide-card" href="/guides/${g.slug}">${img(g.image, g.short, 600, 360)}<div><p class="eyebrow gold-dark">Seller Guide</p><h3>${esc(g.title)}</h3><p>${esc(g.description)}</p><span>Read the guide →</span></div></a>`)
   .join('')}</div>`;
@@ -568,8 +557,6 @@ ${reassuranceStrip()}
     ${transparencyList()}
   </div>
 </section>
-
-${testimonialSection()}
 
 <section class="section cream" aria-labelledby="guides-h">
   <div class="container">
@@ -805,7 +792,6 @@ export function aboutPage() {
     <aside class="help-card"><h2>Talk with Nathanael</h2><ul><li>Call or text ${esc(site.phone)}</li><li>${esc(site.email)}</li><li>Replies typically within 24 hours</li><li>Serving ${areas.map((a) => esc(a.name)).join(', ')}</li></ul><a class="btn btn-gold btn-full" href="/#lead-form">Get My Options →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a></aside>
   </div>
 </section>
-${testimonialSection()}
 ${finalCta('/#lead-form')}`
   );
 }

@@ -35,7 +35,7 @@ Also: lead form API (`/api/leads`), private Harbison Standard intake bridge (`/a
 ```
 site.config.mjs          ← phone, email, service area, site URL, GA4/GTM validation (edit once, used everywhere)
 src/content.mjs          ← original situations, areas, FAQs, images
-src/content-extra.mjs    ← About page, guides, testimonials, "at a glance" facts, California City page
+src/content-extra.mjs    ← About page, guides, "at a glance" facts, California City page
 src/content-playbook.mjs ← site-playbook content: hero, 5 paths, seller promise, offer math, form options, new pages
 src/family.mjs           ← "Selling a loved one's house" funnel content
 src/templates.mjs        ← HTML layout, structured data, interactive net estimator, and page templates
