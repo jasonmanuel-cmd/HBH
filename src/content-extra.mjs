@@ -1,4 +1,4 @@
-// About page, guides, testimonials, and quick facts. Keep every statement true — search and AI engines quote these.
+// About page, guides, and quick facts. Keep every statement true — search and AI engines quote these.
 import { images } from './content.mjs';
 
 export const californiaCity = {
@@ -35,13 +35,6 @@ export const glance = [
   ['Cost to ask', 'Free and no obligation. No commission paid to Harbison on a direct sale.'],
   ['Response time', 'Typically within 24 hours. Call or text (661) 472-7499.'],
   ['Closing', 'You choose the date. Direct sales can often close in a few weeks.'],
-];
-
-// Quotes from clients of Nathanael Harbison, as published on harbisonstandard.com.
-export const testimonials = [
-  ['Our inherited home felt overwhelming. Nathanael helped us understand the options and what the property was actually worth. We felt supported every step.', 'Seller · Inherited property'],
-  ['We weren’t sure whether to fix things up or sell as-is. Nathanael helped us think it through clearly and never made us feel pressured. We felt confident in our decision.', 'Seller · As-is decision'],
-  ['Nathanael brought calm, clarity, and practical advice throughout the sale. We always felt like we understood what was happening and why.', 'Seller · Time-sensitive sale'],
 ];
 
 export const about = {
