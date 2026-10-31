@@ -79,7 +79,7 @@ ${pages
 `
 );
 
-// Search engines plus AI search/answer crawlers are explicitly welcome — being cited by AI assistants is the goal.
+// Preserve existing crawler access preferences. Access does not guarantee indexing or AI citations.
 const aiBots = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot-Extended', 'Bingbot', 'CCBot', 'DuckAssistBot', 'meta-externalagent'];
 writeFileSync(
   join(out, 'robots.txt'),
@@ -97,6 +97,8 @@ Allow: /
 Disallow: /api/
 Disallow: /thank-you
 Disallow: /family-property-guide
+Disallow: /es/thank-you
+Disallow: /es/family-property-guide
 Disallow: /hq
 
 Sitemap: ${site.url}/sitemap.xml

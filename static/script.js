@@ -312,22 +312,51 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     if (hasConsentCheckbox && data.consent_response !== 'yes') missing.push('consent_response');
     if (missing.length) return showErrors(missing);
 
+    // Persist only a random reference (not contact data) across uncertain retries/reloads.
+    // Keep the same reference even if fields change after a failed attempt: the server
+    // rejects conflicting reuse rather than silently overwriting or alerting twice.
+    const submissionKey = `hbh_submission:${location.pathname}:${data.form_type || 'standard'}`;
+    let submissionStorage;
+    try { submissionStorage = window.sessionStorage; } catch {}
+    try {
+      const savedReference = (submissionStorage ? store.get(submissionKey, submissionStorage) : null) || form.dataset.submissionId;
+      if (typeof savedReference === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(savedReference)) data.submission_id = savedReference;
+      else if (typeof crypto.randomUUID === 'function') data.submission_id = crypto.randomUUID();
+      else {
+        const bytes = crypto.getRandomValues(new Uint8Array(16));
+        bytes[6] = (bytes[6] & 15) | 64; bytes[8] = (bytes[8] & 63) | 128;
+        const hex = [...bytes].map((v) => v.toString(16).padStart(2, '0')).join('');
+        data.submission_id = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+      }
+    } catch {
+      status.textContent = say('This browser cannot send the form securely. Please use the call or text links instead.', 'Este navegador no puede enviar el formulario de forma segura. Use los enlaces para llamar o enviar un texto.');
+      status.classList.add('error');
+      return;
+    }
+    form.dataset.submissionId = data.submission_id;
+    if (submissionStorage) store.set(submissionKey, data.submission_id, submissionStorage);
     track('lead_form_submit', formProps(form));
     button.disabled = true;
     const label = button.textContent;
     button.textContent = say('Sending…', 'Enviando…');
 
+    let requestTimer;
     try {
+      const controller = new AbortController();
+      requestTimer = setTimeout(() => controller.abort(), 45000);
       const res = await fetch('/api/leads', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
+        signal: controller.signal,
       });
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.ok) {
         track('lead_form_success', formProps(form));
         track('generate_lead', { form_type: data.form_type || 'standard' });
-        store.set('hbh_lead', { id: json.id || null, phone: data.phone, address: data.address, details_token: json.details_token || '' }, sessionStorage);
+        if (submissionStorage) store.set('hbh_lead', { id: json.id || null, phone: data.phone, address: data.address, details_token: json.details_token || '' }, submissionStorage);
+        try { submissionStorage?.removeItem(submissionKey); } catch {}
+        delete form.dataset.submissionId;
         location.href = spanish ? '/es/thank-you' : '/thank-you';
         return;
       }
@@ -345,6 +374,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
       status.textContent = status.textContent.trim();
       status.classList.add('error');
     } finally {
+      clearTimeout(requestTimer);
       button.disabled = false;
       button.textContent = label;
     }

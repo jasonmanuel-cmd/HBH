@@ -31,7 +31,7 @@ test('email alerts target both staff addresses when recipients are not overridde
   } finally { globalThis.fetch = original; }
 });
 
-test('email success cannot hide a failure to save in the configured HQ CRM', async () => {
+test('failed CRM storage stops notifications and cannot report success', async () => {
   const original = globalThis.fetch;
   const originalError = console.error;
   console.error = () => {};
@@ -43,7 +43,7 @@ test('email success cannot hide a failure to save in the configured HQ CRM', asy
       RESEND_API_KEY: 'test-key', SUPABASE_URL: 'https://db.test', SUPABASE_SERVICE_ROLE_KEY: 'test-key',
     });
     assert.equal(result.ok, false);
-    assert.deepEqual(result.delivered, ['email']);
+    assert.deepEqual(result.delivered, []);
     assert.equal(result.failures[0].channel, 'supabase');
   } finally { globalThis.fetch = original; console.error = originalError; }
 });
