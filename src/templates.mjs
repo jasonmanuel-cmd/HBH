@@ -66,6 +66,7 @@ const ids = {
   org: `${site.url}/#business`,
   person: `${site.url}/about#nathanael-harbison`,
   website: `${site.url}/#website`,
+  brokerage: `${site.url}/#responsible-broker`,
 };
 
 const placeLd = (a) => ({
@@ -108,7 +109,7 @@ const personLd = () => ({
   image: { '@type': 'ImageObject', url: `${site.url}${headshot}`, width: 325, height: 325 },
   telephone: site.phoneHref,
   email: site.email,
-  worksFor: [{ '@id': ids.org }, { '@type': 'RealEstateAgent', name: site.brokerage, url: site.brokerageUrl }],
+  worksFor: [{ '@id': ids.org }, { '@id': ids.brokerage }],
   hasCredential: {
     '@type': 'EducationalOccupationalCredential',
     credentialCategory: 'license',
@@ -118,6 +119,15 @@ const personLd = () => ({
   },
   knowsAbout: ['Kern County real estate', 'Probate and inherited property sales', 'As-is home sales', 'Investment property analysis'],
   sameAs: site.agentProfiles,
+});
+
+// The licensed brokerage is distinct from the site's consumer-facing brand.
+const brokerageLd = () => ({
+  '@type': 'Organization',
+  '@id': ids.brokerage,
+  name: site.brokerage,
+  url: site.brokerageUrl,
+  identifier: `California DRE #${site.brokerageDre}`,
 });
 
 const websiteLd = () => ({ '@type': 'WebSite', '@id': ids.website, url: `${site.url}/`, name: site.name, publisher: { '@id': ids.org }, inLanguage: 'en-US' });
@@ -152,7 +162,7 @@ function graph({ path, title, description, image, type = 'WebPage', crumbs, extr
     ...(type === 'ProfilePage' ? { mainEntity: { '@id': ids.person } } : {}),
     ...(crumbs ? { breadcrumb: { '@id': `${url}#breadcrumb` } } : {}),
   };
-  const nodes = [orgLd(), personLd(), websiteLd(), webpage];
+  const nodes = [orgLd(), personLd(), brokerageLd(), websiteLd(), webpage];
   if (crumbs) nodes.push(breadcrumbLd(url, crumbs));
   if (faq) nodes.push(faqLd(url, faq));
   nodes.push(...extra.map((n) => ({ ...n, mainEntityOfPage: { '@id': `${url}#webpage` } })));
@@ -266,12 +276,12 @@ function footer(cta) {
   <div class="container footer-grid">
     <div><img class="footer-logo" src="${logoReverse}" alt="${esc(site.name)}" width="243" height="48" loading="lazy"><p><strong class="footer-tag">${esc(site.tagline)}</strong><br>${esc(supportingPromise)}</p><p class="footer-social">${socials}</p></div>
     <div><h2 class="footer-h">Explore</h2><a href="/how-it-works">How It Works</a><a href="/situations">Situations</a><a href="${family.path}">Selling a Loved One’s House</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
-    <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">Call or text ${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/contact">Contact page</a><a href="/#lead-form">Request property options</a></div>
+    <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/contact">Contact page</a><a href="/#lead-form">Request property options</a></div>
     <div><h2 class="footer-h">Service Area</h2>${areas.map((a) => `<a href="/areas/${a.slug}">${esc(a.name)}</a>`).join('')}</div>
   </div>
-  <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/accessibility">Accessibility</a></span></div>
+  <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)} · DRE #${esc(site.brokerageDre)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/accessibility">Accessibility</a></span></div>
 </footer>
-<div class="mobile-bar"><a href="tel:${site.phoneHref}" class="btn btn-outline">Call or Text</a><a href="${cta}" class="btn btn-gold" data-cta="mobile_bar">Get My Options</a></div>
+<div class="mobile-bar"><a href="tel:${site.phoneHref}" class="btn btn-outline">Call</a><a href="sms:${site.phoneHref}" class="btn btn-outline">Text</a><a href="${cta}" class="btn btn-gold" data-cta="mobile_bar">Get My Options</a></div>
 <script src="/script.js" defer></script><script src="/analytics.js" defer></script>`;
 }
 
@@ -476,7 +486,7 @@ export function homePage() {
       <div class="hero-brand"><img class="hero-mark" src="${heroMark}" alt="" width="96" height="96" decoding="async"><p class="eyebrow">${esc(heroCopy.eyebrow)}</p></div>
       <h1><span class="h1-kicker">We buy houses in Bakersfield &amp; Kern County</span>Property<br>Problem?<br><em>Call Harbison.</em></h1>
       <p class="hero-lead">${esc(heroCopy.sub)}</p>
-      <div class="hero-actions"><a class="btn btn-gold" href="#lead-form" data-cta="hero">Get My Property Options</a><a class="btn btn-outline" href="tel:${site.phoneHref}">Call or Text ${esc(site.phone)}</a></div>
+      <div class="hero-actions"><a class="btn btn-gold" href="#lead-form" data-cta="hero">Get My Property Options</a><a class="btn btn-outline" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a class="btn btn-outline" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a></div>
       <ul class="hero-benefits" aria-label="Why owners choose Harbison">
         ${heroCopy.trust.map(([s, t]) => `<li><strong>${esc(s)}</strong><span>${esc(t)}</span></li>`).join('\n        ')}
       </ul>
@@ -785,7 +795,7 @@ export function aboutPage() {
       <dl class="principles">${about.principles.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
       <h2 class="prose-h">Verify &amp; connect</h2>
       <ul class="link-list">
-        <li><a href="https://www2.dre.ca.gov/PublicASP/pplinfo.asp" rel="noopener" target="_blank">Look up DRE license #${esc(site.dre)}</a> on the California Department of Real Estate site</li>
+        <li><a href="https://www2.dre.ca.gov/publicasp/pplinfo.asp?License_id=${site.dre}" rel="noopener" target="_blank">Look up DRE license #${esc(site.dre)}</a> on the California Department of Real Estate site</li>
         ${site.agentProfiles.map((u) => `<li><a href="${u}" rel="noopener me" target="_blank">${esc(u.replace(/^https:\/\/(www\.)?/, ''))}</a></li>`).join('\n        ')}
       </ul>
     </article>
@@ -862,7 +872,7 @@ export function guidePage(g) {
       ${g.sections.map(([h, paras], i) => `<section id="s${i + 1}"><h2 class="prose-h">${esc(h)}</h2>${paras.map((p) => (p.startsWith('<ul') || p.startsWith('<div') ? p : `<p>${p}</p>`)).join('')}</section>`).join('\n      ')}
       ${g.slug === 'cash-offer-vs-listing' ? netEstimator('#lead-form') : ''}
       ${g.meaning ? `<aside class="meaning"><h2>What this means for your property</h2><p>${esc(g.meaning)}</p><a class="btn btn-gold" href="#lead-form" data-cta="guide_meaning">Get Options for My Property →</a></aside>` : ''}
-      <aside class="author-box"><img class="author-photo" src="${headshot}" alt="${esc(site.agent)}" width="64" height="64" loading="lazy"><div><p class="answer-label">About the author</p><p>Written by the ${esc(site.name)} team, led by ${esc(site.agent)}, California-licensed REALTOR® (DRE #${esc(site.dre)}) with ${esc(site.brokerage)}. <a class="link" href="/about">About Nathanael →</a></p></div></aside>
+      <aside class="author-box"><img class="author-photo" src="${headshot}" alt="${esc(site.agent)}" width="64" height="64" loading="lazy"><div><p class="answer-label">About the author</p><p>Written by the ${esc(site.name)} team, led by ${esc(site.agent)}, California-licensed REALTOR® (DRE #${esc(site.dre)}) with ${esc(site.brokerage)} <a class="link" href="/about">About Nathanael →</a></p></div></aside>
       <p class="disclaimer">This guide is educational and does not replace legal, tax, or financial advice. Laws and thresholds change — consult a qualified attorney, CPA, or your agent about your specific situation.</p>
       <h3>Related situations</h3><ul class="chip-list">${related.map((s) => `<li><a href="/situations/${s.slug}">${esc(s.name)}</a></li>`).join('')}</ul>
       <h3>More guides</h3><ul class="link-list">${guides.filter((o) => o.slug !== g.slug).map((o) => `<li><a href="/guides/${o.slug}">${esc(o.title)}</a></li>`).join('')}</ul>
@@ -903,8 +913,8 @@ export function thankYouPage() {
       <p class="eyebrow gold-dark">Request received</p>
       <h1 class="page-title">We received your <em>property information.</em></h1>
       <p class="lead">We’ll review the address and situation before contacting you. If a direct sale, listing, renovation, or development path appears relevant, we’ll explain why. There is no obligation to move forward.</p>
-      <p>We typically respond within 24 hours. If there’s a specific deadline or issue we should know about, reply to our confirmation text or call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>.</p>
-      <div class="hero-actions ty-actions"><a class="btn btn-gold" href="tel:${site.phoneHref}">Call or Text ${esc(site.phone)}</a><a class="btn btn-ghost-dark" href="/guides">Read the seller guides</a><a class="btn btn-ghost-dark" href="/how-it-works">How it works</a></div>
+      <p>We typically respond within 24 hours. If there’s a specific deadline or issue we should know about, call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>.</p>
+      <div class="hero-actions ty-actions"><a class="btn btn-gold" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a class="btn btn-gold" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a><a class="btn btn-ghost-dark" href="/guides">Read the seller guides</a><a class="btn btn-ghost-dark" href="/how-it-works">How it works</a></div>
     </div>
     <aside class="lead-card details-card" aria-label="Optional property details">
       <p class="eyebrow gold">Optional · 30 seconds</p>
@@ -965,7 +975,7 @@ export function howItWorksPage() {
       <h2 class="prose-h">Closing</h2>
       <p>Every sale closes through a licensed title or escrow company, which holds funds, handles payoffs, and records the deed. Signatures can often be done remotely. You choose the closing date, subject to title and any required approvals.</p>
     </article>
-    <aside class="help-card"><h2>Ready to start?</h2><ul>${reassurance.map((r) => `<li>${esc(r)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="/#lead-form" data-cta="how_it_works">Get My Property Options →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call or Text ${esc(site.phone)}</a></aside>
+    <aside class="help-card"><h2>Ready to start?</h2><ul>${reassurance.map((r) => `<li>${esc(r)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="/#lead-form" data-cta="how_it_works">Get My Property Options →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a class="btn btn-ghost btn-full" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a></aside>
   </div>
 </section>
 ${finalCta('/#lead-form')}`
@@ -988,7 +998,7 @@ export function contactPage() {
       <p class="eyebrow gold-dark">Contact</p>
       <h1 class="page-title">Property problem? <em>Call Harbison.</em></h1>
       <dl class="contact-list">
-        <div><dt>Call or text</dt><dd><a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a></dd></div>
+        <div><dt>Call or text</dt><dd><a class="link" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a> · <a class="link" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a></dd></div>
         <div><dt>Email</dt><dd><a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a></dd></div>
         <div><dt>Response</dt><dd>Typically within 24 hours</dd></div>
         <div><dt>Service area</dt><dd>${areas.map((a) => `<a class="link" href="/areas/${a.slug}">${esc(a.name)}</a>`).join(', ')}</dd></div>
@@ -1076,7 +1086,7 @@ export function termsPage() {
     <h2 class="prose-h">No offer or advice</h2>
     <p>Content on this site is for general information only. Nothing here is an offer to purchase any property, and no binding agreement exists until a written purchase agreement is signed by all parties. We do not provide legal, tax, or financial advice — please consult a qualified professional about your situation.</p>
     <h2 class="prose-h">License disclosure</h2>
-    <p>${esc(site.agent)} is a California-licensed real estate agent (DRE #${esc(site.dre)}) with ${esc(site.brokerage)}. When ${esc(site.name)} offers to purchase a property directly, that licensed status is disclosed to the seller in writing.</p>
+    <p>${esc(site.agent)} is a California-licensed real estate agent (DRE #${esc(site.dre)}) with ${esc(site.brokerage)} When ${esc(site.name)} offers to purchase a property directly, that licensed status is disclosed to the seller in writing.</p>
     <h2 class="prose-h">Submissions</h2>
     <p>You agree that information you submit is accurate and that you have the right to share it. Submitting a form does not obligate you to sell, and does not obligate us to make an offer.</p>
     <h2 class="prose-h">Intellectual property</h2>

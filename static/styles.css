@@ -385,7 +385,7 @@ main>section:not(:first-child),.local-band{content-visibility:auto;contain-intri
   .local-photo{min-height:360px}
   .local-copy{padding:56px 5vw}
   .final-cta-grid{grid-template-columns:1fr}
-  .mobile-bar{display:grid;grid-template-columns:1fr 1fr;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:999;padding:10px 4vw calc(10px + env(safe-area-inset-bottom));background:rgba(3,31,43,.97);border-top:1px solid rgba(224,181,94,.3)}
+  .mobile-bar{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:999;padding:10px 4vw calc(10px + env(safe-area-inset-bottom));background:rgba(3,31,43,.97);border-top:1px solid rgba(224,181,94,.3)}
   .mobile-bar .btn{min-height:46px;padding:0 10px}
   body{padding-bottom:70px}
   .situation span{opacity:1}

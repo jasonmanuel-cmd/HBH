@@ -25,7 +25,7 @@ export const reassurance = [
 ];
 
 export const processSteps = [
-  ['Tell us the address.', `Use the form or call or text ${site.phone}. That’s all we need to start.`],
+  ['Tell us the address.', `Use the form or call or text ${site.phone}. The form asks for the property address, your name, phone number, and permission to respond.`],
   ['We review the property and situation.', 'Condition, timeline, occupancy, and what you want out of the sale — in person or by video.'],
   ['You compare your options.', 'A direct offer if it fits, and a listing, repair, or development path when those are realistic — in writing, with the assumptions.'],
   ['You decide what comes next.', 'Take the time you need. Talk it over with family or an advisor. There is no obligation.'],
@@ -44,7 +44,7 @@ export const compareDisclosure = 'A direct offer may be lower than the price a p
 
 export const whyHarbison = [
   ['Local Kern County knowledge', 'Bakersfield, Tehachapi, California City, Stallion Springs, and the communities around them.'],
-  ['California-licensed REALTOR®', `${site.agent}, DRE #${site.dre}, with ${site.brokerage}.`],
+  ['California-licensed REALTOR®', `${site.agent}, DRE #${site.dre}, with ${site.brokerage}`],
   ['Construction and remodeling perspective', 'Repair scope is estimated the way a builder sees it, not guessed.'],
   ['Direct acquisition capability', 'When a direct sale fits, Harbison can be the buyer.'],
   ['Listing and development perspective', 'When it doesn’t, the same team can list, plan repairs, or review development potential.'],

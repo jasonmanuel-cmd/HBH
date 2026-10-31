@@ -10,6 +10,9 @@ import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { clientIp, createRateLimiter } from '../lib/request-ip.js';
 import { fetchWithRetry } from '../lib/fetch-retry.js';
 
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const safeFailure = (channel, err) => ({ channel, reason: `${channel} delivery failed`, code: err?.code === 'SUBMISSION_CONFLICT' ? 'SUBMISSION_CONFLICT' : 'DELIVERY_FAILED' });
+
 const MAX = { address: 200, name: 120, phone: 40, email: 160, situation: 80, timeline: 60, source: 300, utm: 200, short: 80, id: 256 };
 const DETAILS_TTL_MS = 6 * 3600e3;
 
@@ -151,7 +154,7 @@ async function sendEmail(lead, env) {
   const hqLink = lead.id ? ` · <a href="${escapeHtml(`${siteBase}/hq?lead=${encodeURIComponent(lead.id)}`)}">Open in Harbison HQ →</a>` : '';
   const res = await fetchWithRetry('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json', ...(lead.id ? { 'Idempotency-Key': `lead-${lead.id}` } : {}) },
     body: JSON.stringify({
       from: env.LEAD_FROM_EMAIL || 'Harbison Leads <onboarding@resend.dev>',
       to: notificationRecipients(env),
@@ -165,7 +168,7 @@ async function sendEmail(lead, env) {
 
 async function saveToSupabase(lead, env) {
   const endpoint = `${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/leads${lead.id ? '?on_conflict=id' : ''}`;
-  const prefer = lead.id ? 'resolution=merge-duplicates,return=minimal' : 'return=minimal';
+  const prefer = lead.id ? 'resolution=ignore-duplicates,return=representation' : 'return=minimal';
   const res = await fetchWithRetry(endpoint, {
     method: 'POST',
     headers: {
@@ -176,7 +179,7 @@ async function saveToSupabase(lead, env) {
     },
     body: JSON.stringify({ ...lead, email: lead.email || null }),
   });
-  if (res.ok) return;
+  if (res.ok) return readInsertResult(res, lead, env);
   const text = await res.text();
   // Migration 002 not run yet? Save the core lead instead of losing it.
   if (res.status === 400 && /column/i.test(text)) {
@@ -187,10 +190,30 @@ async function saveToSupabase(lead, env) {
       headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json', Prefer: prefer },
       body: JSON.stringify({ ...(lead.id ? { id: lead.id } : {}), ...core, address: lead.address, name: lead.name, phone: lead.phone }),
     });
-    if (retry.ok) return;
+    if (retry.ok) return readInsertResult(retry, lead, env, true);
     throw new Error(`Supabase ${retry.status}: ${await retry.text()}`);
   }
   throw new Error(`Supabase ${res.status}: ${text}`);
+}
+
+// The primary key arbitrates concurrent submissions; never overwrite a lead on retry.
+async function readInsertResult(response, lead, env, legacy = false) {
+  if (!lead.id) return { duplicate: false };
+  const rows = await response.json();
+  if (!Array.isArray(rows)) throw new Error('Invalid storage response');
+  if (rows.length) return { duplicate: false };
+  const fields = legacy ? LEGACY_FIELDS : Object.keys(lead).filter((key) => !['id', 'consent_at'].includes(key));
+  const q = new URLSearchParams({ id: `eq.${lead.id}`, select: fields.join(',') });
+  const existing = await fetchWithRetry(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/leads?${q}`, {
+    headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}` },
+  });
+  if (!existing.ok) throw new Error('Could not verify existing submission');
+  const saved = (await existing.json())[0];
+  // Reject token reuse with changed contact/consent. Never mint a details token for a different lead.
+  if (legacy || !saved || fields.some((key) => (saved[key] ?? '') !== (lead[key] ?? ''))) {
+    const err = new Error('Submission reference conflict'); err.code = 'SUBMISSION_CONFLICT'; throw err;
+  }
+  return { duplicate: true };
 }
 
 async function sendSms(to, body, env) {
@@ -199,7 +222,7 @@ async function sendSms(to, body, env) {
     method: 'POST',
     headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ To: to, From: env.TWILIO_FROM, Body: body }),
-  });
+  }, { retries: 0 });
   if (!res.ok) throw new Error(`Twilio ${res.status}: ${await res.text()}`);
 }
 
@@ -222,52 +245,56 @@ async function postWebhook(lead, env) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...lead, submitted_at: new Date().toISOString() }),
-  });
+  }, { retries: 0 });
   if (!res.ok) throw new Error(`Webhook ${res.status}`);
 }
 
 export async function deliver(lead, env = process.env) {
-  const tasks = [];
-  if (env.RESEND_API_KEY) tasks.push(['email', sendEmail(lead, env)]);
-  if (env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) tasks.push(['supabase', saveToSupabase(lead, env)]);
-  if (env.LEAD_WEBHOOK_URL) tasks.push(['webhook', postWebhook(lead, env)]);
-  if (env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM) tasks.push(['sms', textLeadAndTeam(lead, env)]);
-
-  if (!tasks.length) {
-    // Previously returned ok:true here, which reported success while the lead was only
-    // written to the log and lost. A misconfigured deployment must fail loudly.
-    console.error('[leads] No delivery configured — set RESEND/SUPABASE/WEBHOOK env vars. Lead:', JSON.stringify(lead));
-    return { ok: false, delivered: [], error: 'no_delivery_configured' };
-  }
-
-  const results = await Promise.allSettled(tasks.map(([, p]) => p));
+  const crmConfigured = Boolean(env.SUPABASE_URL || env.SUPABASE_SERVICE_ROLE_KEY);
   const delivered = [];
   const failures = [];
+  // Persist before notifying. At most one request wins the insert and attempts alerts.
+  // This is not a durable outbox: a crash after insertion can leave an unalerted HQ lead.
+  if (crmConfigured) {
+    try {
+      if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) throw new Error('Incomplete storage configuration');
+      const result = await saveToSupabase(lead, env);
+      delivered.push('supabase');
+      if (result?.duplicate) return { ok: true, delivered, failures, duplicate: true };
+    } catch (err) {
+      const failure = safeFailure('supabase', err);
+      console.error('[leads] storage failed', { id: lead.id, code: failure.code });
+      return { ok: false, delivered, failures: [failure] };
+    }
+  }
+  const tasks = [];
+  if (env.RESEND_API_KEY) tasks.push(['email', sendEmail(lead, env)]);
+  if (env.LEAD_WEBHOOK_URL) tasks.push(['webhook', postWebhook(lead, env)]);
+  // A customer acknowledgment must never precede successful durable storage.
+  if (delivered.includes('supabase') && env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM) tasks.push(['sms', textLeadAndTeam(lead, env)]);
+  if (!tasks.length && !delivered.length) {
+    console.error('[leads] no storing destination configured', { id: lead.id });
+    return { ok: false, delivered, error: 'no_delivery_configured' };
+  }
+  const results = await Promise.allSettled(tasks.map(([, p]) => p));
   results.forEach((r, i) => {
     if (r.status === 'fulfilled') delivered.push(tasks[i][0]);
     else {
-      failures.push({ channel: tasks[i][0], reason: r.reason?.message || String(r.reason) });
-      console.error(`[leads] ${tasks[i][0]} failed:`, r.reason?.message || r.reason);
+      const failure = safeFailure(tasks[i][0], r.reason);
+      failures.push(failure);
+      console.error('[leads] notification failed', { id: lead.id, channel: failure.channel });
     }
   });
-  if (!delivered.length) console.error('[leads] All deliveries failed. Lead:', JSON.stringify(lead));
-  // A text alone isn't a record of the lead — require at least one storing destination.
-  const crmConfigured = Boolean(env.SUPABASE_URL || env.SUPABASE_SERVICE_ROLE_KEY);
   const stored = crmConfigured ? delivered.includes('supabase') : delivered.some((d) => d !== 'sms');
-  if (!stored) console.error('[leads] No storing destination succeeded. Lead:', JSON.stringify(lead));
-  // Surface partial notification failures directly inside HQ's activity timeline so they aren't hidden in ephemeral logs.
-  if (stored && lead.id && failures.length && env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) {
-    const warnDetail = `Notification alert warning: ${failures.map((f) => `${f.channel} failed (${String(f.reason).slice(0, 140)})`).join('; ')}`;
-    await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/lead_events`, {
-      method: 'POST',
-      headers: {
-        apikey: env.SUPABASE_SERVICE_ROLE_KEY,
-        Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
-        'Content-Type': 'application/json',
-        Prefer: 'return=minimal',
-      },
-      body: JSON.stringify({ lead_id: lead.id, kind: 'note', actor: 'System', detail: warnDetail }),
-    }).catch(() => {});
+  if (stored && lead.id && failures.length && crmConfigured) {
+    try {
+      const warning = await fetchWithRetry(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/lead_events`, {
+        method: 'POST',
+        headers: { apikey: env.SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`, 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+        body: JSON.stringify({ lead_id: lead.id, kind: 'note', actor: 'System', detail: `Notification alert warning: ${failures.map((f) => f.reason).join('; ')}` }),
+      }, { retries: 0 });
+      if (!warning.ok) throw new Error('Warning storage failed');
+    } catch { console.error('[leads] notification warning could not be stored', { id: lead.id }); }
   }
   return { ok: stored, delivered, failures };
 }
@@ -294,7 +321,7 @@ async function patchSupabase(d, env) {
   const q = d.id
     ? new URLSearchParams({ id: `eq.${d.id}`, created_at: `gte.${since}` })
     : new URLSearchParams({ phone: `eq.${d.phone}`, address: `eq.${d.address}`, created_at: `gte.${since}` });
-  const res = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/leads?${q}`, {
+  const res = await fetchWithRetry(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/leads?${q}`, {
     method: 'PATCH',
     headers: {
       apikey: env.SUPABASE_SERVICE_ROLE_KEY,
@@ -319,7 +346,7 @@ export async function deliverDetails(d, env = process.env) {
   const tasks = [];
   if (env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) tasks.push(['supabase', patchSupabase(d, env)]);
   if (env.RESEND_API_KEY) {
-    tasks.push(['email', fetch('https://api.resend.com/emails', {
+    tasks.push(['email', fetchWithRetry('https://api.resend.com/emails', {
       method: 'POST',
       headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -328,16 +355,16 @@ export async function deliverDetails(d, env = process.env) {
         subject: `Lead details added: ${d.address}`,
         html: `<p><strong>${escapeHtml(d.address)}</strong> · ${escapeHtml(d.phone)}</p><ul>${summary.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ul>${hqLink}`,
       }),
-    }).then(async (r) => { if (!r.ok) throw new Error(`Resend ${r.status}`); })]);
+    }, { retries: 0 }).then(async (r) => { if (!r.ok) throw new Error(`Resend ${r.status}`); })]);
   }
   if (env.LEAD_WEBHOOK_URL) {
-    tasks.push(['webhook', fetch(env.LEAD_WEBHOOK_URL, {
+    tasks.push(['webhook', fetchWithRetry(env.LEAD_WEBHOOK_URL, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ kind: 'details', ...d, submitted_at: new Date().toISOString() }),
-    }).then((r) => { if (!r.ok) throw new Error(`Webhook ${r.status}`); })]);
+    }, { retries: 0 }).then((r) => { if (!r.ok) throw new Error(`Webhook ${r.status}`); })]);
   }
   if (!tasks.length) {
-    console.error('[leads] Details received with no delivery configured:', JSON.stringify(d));
+    console.error('[leads] details destination unavailable', { id: d.id });
     return { ok: false, delivered: [], error: 'no_delivery_configured' };
   }
   const results = await Promise.allSettled(tasks.map(([, p]) => p));
@@ -346,8 +373,8 @@ export async function deliverDetails(d, env = process.env) {
   results.forEach((r, i) => {
     if (r.status === 'fulfilled') delivered.push(tasks[i][0]);
     else {
-      failures.push({ channel: tasks[i][0], reason: r.reason?.message || String(r.reason) });
-      console.error('[leads] details delivery failed:', r.reason?.message || r.reason);
+      failures.push(safeFailure(tasks[i][0], r.reason));
+      console.error('[leads] details delivery failed', { id: d.id, channel: tasks[i][0] });
     }
   });
   const crmConfigured = Boolean(env.SUPABASE_URL || env.SUPABASE_SERVICE_ROLE_KEY);
@@ -389,7 +416,7 @@ export default async function handler(req, res, env = process.env) {
       return res.status(401).json({ ok: false, error: 'Invalid or expired lead reference.' });
     }
     const r = await deliverDetails(d, env);
-    return res.status(r.ok ? 200 : 502).json({ ok: r.ok, delivered: r.delivered || [], error: r.error, failures: r.failures || [] });
+    return res.status(r.ok ? 200 : 502).json({ ok: r.ok, delivered: r.delivered || [], error: r.error, code: r.ok ? undefined : 'DELIVERY_FAILED' });
   }
 
   const { lead, errors } = parseLead(body);
@@ -403,12 +430,16 @@ export default async function handler(req, res, env = process.env) {
     }
   }
 
-  lead.id = randomUUID();
+  if (body.submission_id !== undefined && (typeof body.submission_id !== 'string' || !UUID.test(body.submission_id))) return res.status(400).json({ ok: false, error: 'Invalid submission reference.' });
+  // Stable browser retries require the atomic database path, not email/webhook-only delivery.
+  if (body.submission_id && (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY)) return res.status(502).json({ ok: false, error: 'We could not save your request. Please call us instead.', code: 'STORAGE_UNAVAILABLE' });
+  lead.id = body.submission_id || randomUUID();
   const result = await deliver(lead, env);
-  if (!result.ok) return res.status(502).json({ ok: false, error: es ? 'No pudimos enviar su solicitud. Por favor, llámenos.' : 'We could not send your request. Please call us instead.', failures: result.failures || [] });
+  if (!result.ok && result.failures?.[0]?.code === 'SUBMISSION_CONFLICT') return res.status(409).json({ ok: false, error: es ? 'Ya recibimos una solicitud con esta referencia. Llámenos para actualizarla.' : 'A request with this reference was already received. Please call us to update it.', code: 'SUBMISSION_CONFLICT' });
+  if (!result.ok) return res.status(502).json({ ok: false, error: es ? 'No pudimos enviar su solicitud. Por favor, llámenos.' : 'We could not send your request. Please call us instead.', code: result.failures?.[0]?.code || 'DELIVERY_FAILED' });
   return res.status(200).json({
     ok: true,
-    delivered: result.delivered,
+    duplicate: result.duplicate || false,
     id: lead.id,
     details_token: makeDetailsToken({ id: lead.id, phone: lead.phone, address: lead.address }, env),
   });

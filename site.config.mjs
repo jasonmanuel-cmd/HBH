@@ -37,8 +37,9 @@ export default {
   // Licensee info — California requires the DRE number on advertising.
   agent: 'Nathanael Harbison',
   dre: '02059393',
-  brokerage: 'Harbison Standard',
-  brokerageUrl: 'https://www.harbisonstandard.com',
+  brokerage: 'The Mora Partners Inc.',
+  brokerageDre: '02227690',
+  brokerageUrl: 'https://www2.dre.ca.gov/publicasp/pplinfo.asp?License_id=02227690',
   agentProfiles: [
     'https://www.harbisonstandard.com/about',
     'https://www.facebook.com/nate85.realtor',

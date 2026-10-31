@@ -20,14 +20,14 @@ export const californiaCity = {
 };
 
 export const extraFaqs = [
-  ['Is Harbison a licensed real estate agent?', 'Yes. Harbison Buys Homes is led by Nathanael Harbison, a California-licensed REALTOR® (DRE #02059393) with Harbison Standard. When Harbison buys a property directly, that licensed status is disclosed to you in writing.'],
+  ['Is Harbison a licensed real estate agent?', 'Yes. Harbison Buys Homes is led by Nathanael Harbison, a California-licensed REALTOR® (DRE #02059393) with The Mora Partners Inc. When Harbison buys a property directly, that licensed status is disclosed to you in writing.'],
   ['What areas do you serve?', 'Bakersfield, Tehachapi, California City, Stallion Springs, and communities throughout Kern County, California.'],
   ['How quickly will I hear back?', 'Typically within 24 hours. You can also call or text (661) 472-7499.'],
 ];
 
 // Short, extractable facts for search engines and AI answer engines.
 export const glance = [
-  ['Who we are', 'Harbison Buys Homes, led by Nathanael Harbison — California-licensed REALTOR® (DRE #02059393) with Harbison Standard.'],
+  ['Who we are', 'Harbison Buys Homes, led by Nathanael Harbison — California-licensed REALTOR® (DRE #02059393) with The Mora Partners Inc.'],
   ['Where we buy', 'Bakersfield, Tehachapi, California City, Stallion Springs, and throughout Kern County, CA.'],
   ['What we buy', 'Houses in any condition, inherited and probate properties, rentals with tenants, fire- or water-damaged homes, unfinished remodels, and land.'],
   ['Your options', 'Direct cash sale, traditional listing, renovate-then-sell, or development — we compare them with you.'],
@@ -41,7 +41,7 @@ export const about = {
   title: 'About Nathanael Harbison',
   description: 'Harbison Buys Homes is led by Nathanael Harbison, a California-licensed REALTOR® (DRE #02059393) helping Kern County owners sell as-is, list, renovate, or develop.',
   paragraphs: [
-    'Harbison Buys Homes is led by Nathanael Harbison, a California-licensed REALTOR® (DRE #02059393) with Harbison Standard, a Kern County real estate brokerage. Nathanael works with sellers, buyers, and investors across Bakersfield, Tehachapi, California City, Stallion Springs, and the surrounding communities.',
+    'Harbison Buys Homes is led by Nathanael Harbison, a California-licensed REALTOR® (DRE #02059393) with The Mora Partners Inc. (DRE #02227690). Nathanael works with sellers, buyers, and investors across Bakersfield, Tehachapi, California City, Stallion Springs, and the surrounding communities.',
     'Because Nathanael is both a licensed agent and a direct buyer, Harbison can do something most “we buy houses” companies cannot: put a direct offer side by side with a traditional listing, a renovation plan, or a development strategy — and tell you honestly which one is likely to serve you best.',
     'His experience includes residential sales across price ranges, investment-property analysis, and special situations such as probate and inherited homes, divorce settlements, short sales, and time-sensitive moves. The approach is simple: listen first, give straight market feedback, and never push a transaction.',
   ],
