@@ -1,6 +1,6 @@
-# Seller recovery corrections — local, not released
+# Seller recovery corrections — activation remains gated
 
-Reviewed all 11 Copilot comments on PR19 against the implementation. All describe confirmed defects; none were dismissed as not applicable. Production remains e9c0cc8 with seller operations OFF. These changes require a reviewed release and the additive recovery migration before activation.
+Reviewed all 11 Copilot comments on PR19 against the implementation. All describe confirmed defects; none were dismissed as not applicable. The recovery-only release is based on production e9c0cc8 and excludes all Neon adapter/cutover code. Seller operations remain OFF; no hosted migration or configuration change accompanies this code release. The additive recovery migration is required before later activation.
 
 | Finding | Local correction | Evidence |
 | --- | --- | --- |
@@ -24,9 +24,11 @@ Independent read-only review found two additional pending-form bugs (filtered-ou
 
 The pending command is in memory. Overview refresh/retry is recoverable; a full browser reload, tab loss or logout discards it. The pending state explicitly warns the operator not to reload/sign out until resolved and to inspect activity history before re-entering an interrupted event. No durable browser restart recovery or exactly-once delivery claim is made. A later server-side unresolved-command reconciliation flow is preferable to persisting sensitive command payloads in browser storage. This limitation remains deferred and is distinct from the fixed overview-refresh defect.
 
+Existing seller_commands rows record completed transactions only. A lookup returning no row cannot distinguish a request that never arrived from one still in flight; it must not authorize a new submission automatically. Durable restart recovery needs a server-side command lifecycle (pending/completed/reconciled), an authenticated status lookup, and an opaque client reference that survives restart without storing the sensitive payload. That is additional backend schema/protocol work and remains outside this recovery-only release. Current code never automatically replays an event after reload or logout; operators must inspect recorded activity before manually re-entering it. A new database provider does not remove this limitation.
+
 ## Verification boundary
 
-Local full suite: 105 tests passing; build:69 pages; syntax and diff checks passed. Actual PostgreSQL16.15 ran the complete migration chain and 11 checks, including distinct simultaneous outbox claims, stale leases, duplicate inquiry/workflow/import transactions, stale revision rejection, role denial, suppression, opposite-order imports and same-batch source ordering. The first attempt at the added concurrency test failed due to a dollar-quote error in the external test harness; correcting the harness and rerunning from a fresh temporary database passed all11. No application change was needed for that harness error.
+Recovery-only release suite: 99 tests passing; build:69 pages; syntax and diff checks passed. The earlier Neon compatibility branch additionally passed six adapter tests (105 total); those adapter files are excluded here. Findings above that cite the SQL adapter describe that independent local cross-check. Actual PostgreSQL16.15 ran this same migration chain and 11 checks, including distinct simultaneous outbox claims, stale leases, duplicate inquiry/workflow/import transactions, stale revision rejection, role denial, suppression, opposite-order imports and same-batch source ordering. The first attempt at the added concurrency test failed due to a dollar-quote error in the external test harness; correcting the harness and rerunning from a fresh temporary database passed all11. No application change was needed for that harness error.
 
 Browser verification used loopback3188 with in-memory synthetic records and all external fetch blocked. Verified session restore, research evidence/checkbox reset, unchanged lead controls and zero research-created notifications. Pending-response failure/retry was exercised by the browser-script VM test, not a production network interruption.
 
