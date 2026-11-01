@@ -340,7 +340,7 @@ async function patchSupabase(d, env) {
   const text = await res.text();
   if (!res.ok) throw new Error(`Supabase ${res.status}: ${text}`);
   const updated = text ? JSON.parse(text) : [];
-  if (!Array.isArray(updated) || updated.length !== 1 || !updated[0]?.id || (d.id && updated[0].id !== d.id)) {
+  if (!Array.isArray(updated) || updated.length !== 1 || typeof updated[0]?.id !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(updated[0].id) || (d.id && updated[0].id.toLowerCase() !== d.id.toLowerCase())) {
     throw new Error('Details update could not be confirmed');
   }
 }
