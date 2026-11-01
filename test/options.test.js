@@ -58,7 +58,7 @@ test('details request needs a lead reference', async () => {
 test('details patch only the matching recent lead', async () => {
   const calls = [];
   const orig = globalThis.fetch;
-  globalThis.fetch = async (url, o) => (calls.push([url, o]), { ok: true, text: async () => '' });
+  globalThis.fetch = async (url, o) => (calls.push([url, o]), { ok: true, text: async () => JSON.stringify([{ id: '11111111-1111-4111-8111-111111111111' }]) });
   try {
     const d = parseDetails({ phone: '(661) 555-0199', address: '123 Main St, Bakersfield, CA 93301', occupancy: 'Vacant', condition_flags: ['Major repairs needed'] });
     const r = await deliverDetails(d, { SUPABASE_URL: 'https://x.supabase.co/', SUPABASE_SERVICE_ROLE_KEY: 'k' });

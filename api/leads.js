@@ -333,15 +333,15 @@ async function patchSupabase(d, env) {
       apikey: env.SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${env.SUPABASE_SERVICE_ROLE_KEY}`,
       'Content-Type': 'application/json',
-      Prefer: d.id ? 'return=representation' : 'return=minimal',
+      Prefer: 'return=representation',
     },
     body: JSON.stringify({ timeline: d.timeline || undefined, occupancy: d.occupancy || null, condition_flags: d.condition_flags.length ? d.condition_flags : null, desired_outcome: d.desired_outcome || null }),
-  });
+  }, { retries: 0 });
   const text = await res.text();
   if (!res.ok) throw new Error(`Supabase ${res.status}: ${text}`);
-  if (d.id) {
-    const updated = text ? JSON.parse(text) : [];
-    if (!updated.length) throw new Error('Lead not found for details update');
+  const updated = text ? JSON.parse(text) : [];
+  if (!Array.isArray(updated) || updated.length !== 1 || !updated[0]?.id || (d.id && updated[0].id !== d.id)) {
+    throw new Error('Details update could not be confirmed');
   }
 }
 
@@ -349,8 +349,15 @@ export async function deliverDetails(d, env = process.env) {
   const summary = [d.timeline && `Timeline: ${d.timeline}`, d.occupancy && `Occupancy: ${d.occupancy}`, d.condition_flags.length && `Condition: ${d.condition_flags.join(', ')}`, d.desired_outcome && `Goal: ${d.desired_outcome}`].filter(Boolean);
   const siteBase = (env.SITE_URL || 'https://www.callharbison.com').replace(/\/$/, '');
   const hqLink = d.id ? `<p><a href="${escapeHtml(`${siteBase}/hq?lead=${encodeURIComponent(d.id)}`)}">Open in Harbison HQ →</a></p>` : '';
+  // Admit alerts only after a confirmed save. An uncertain PATCH is not retried here.
+  try {
+    if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) throw new Error('Details storage unavailable');
+    await patchSupabase(d, env);
+  } catch (error) {
+    console.error('[leads] details storage unconfirmed', { id: d.id });
+    return { ok: false, delivered: [], failures: [safeFailure('supabase', error)] };
+  }
   const tasks = [];
-  if (env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY) tasks.push(['supabase', patchSupabase(d, env)]);
   if (env.RESEND_API_KEY) {
     tasks.push(['email', fetchWithRetry('https://api.resend.com/emails', {
       method: 'POST',
@@ -369,12 +376,8 @@ export async function deliverDetails(d, env = process.env) {
       body: JSON.stringify({ kind: 'details', ...d, submitted_at: new Date().toISOString() }),
     }, { retries: 0 }).then((r) => { if (!r.ok) throw new Error(`Webhook ${r.status}`); })]);
   }
-  if (!tasks.length) {
-    console.error('[leads] details destination unavailable', { id: d.id });
-    return { ok: false, delivered: [], error: 'no_delivery_configured' };
-  }
   const results = await Promise.allSettled(tasks.map(([, p]) => p));
-  const delivered = [];
+  const delivered = ['supabase'];
   const failures = [];
   results.forEach((r, i) => {
     if (r.status === 'fulfilled') delivered.push(tasks[i][0]);
@@ -383,9 +386,7 @@ export async function deliverDetails(d, env = process.env) {
       console.error('[leads] details delivery failed', { id: d.id, channel: tasks[i][0] });
     }
   });
-  const crmConfigured = Boolean(env.SUPABASE_URL || env.SUPABASE_SERVICE_ROLE_KEY);
-  const ok = crmConfigured ? delivered.includes('supabase') : delivered.length > 0;
-  return { ok, delivered, failures };
+  return { ok: true, delivered, failures };
 }
 
 export default async function handler(req, res, env = process.env) {
