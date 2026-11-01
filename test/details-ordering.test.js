@@ -60,3 +60,19 @@ test('confirmed details remain saved when optional alerts fail', async () => {
     assert.deepEqual(result.failures.map(f => f.channel), ['email', 'webhook']);
   } finally { globalThis.fetch = original; console.error = log; }
 });
+
+test('details confirmation compares UUID identity independent of casing', async () => {
+  const original = fetch;
+  const lower = 'abcdefab-cdef-1abc-8def-abcdefabcdef';
+  const calls = [];
+  globalThis.fetch = async url => {
+    calls.push(String(url));
+    return String(url).startsWith(env.SUPABASE_URL) ? response(JSON.stringify([{ id: lower }])) : { ok: true };
+  };
+  try {
+    const result = await deliverDetails({ ...details, id: lower.toUpperCase() }, env);
+    assert.equal(result.ok, true);
+    assert.deepEqual(result.delivered, ['supabase', 'email', 'webhook']);
+    assert.equal(calls.length, 3);
+  } finally { globalThis.fetch = original; }
+});
