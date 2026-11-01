@@ -1,3 +1,4 @@
+import { sellerOperations } from '../lib/seller-operations-api.js';
 // HQ panel API: POST/GET/PATCH/DELETE /api/hq?action=...
 // Password login (HQ_PASSWORD) → signed, HttpOnly session cookie. All data access happens here with the
 // Supabase service key; the browser never sees it. One function file keeps the Vercel Hobby function count low.
@@ -340,7 +341,7 @@ export default async function handler(req, res, env = process.env) {
     }
     const name = (typeof body.name === 'string' ? body.name.trim() : '').slice(0, 40) || 'Team';
     setCookie(res, makeSession(name, env), SESSION_HOURS * 3600);
-    return res.status(200).json({ ok: true, name });
+    return res.status(200).json({ ok: true, name, sellerOperationsEnabled: env.SELLER_OPERATIONS_ENABLED === 'true' });
   }
 
   if (action === 'logout') {
@@ -354,7 +355,8 @@ export default async function handler(req, res, env = process.env) {
   if (req.method !== 'GET' && req.headers?.['x-hq'] !== '1') return res.status(403).json({ ok: false, error: 'Forbidden' });
 
   try {
-    if (action === 'me') return res.status(200).json({ ok: true, name: session.n });
+    if (await sellerOperations({ action, req, res, body, session, env, sb })) return;
+    if (action === 'me') return res.status(200).json({ ok: true, name: session.n, sellerOperationsEnabled: env.SELLER_OPERATIONS_ENABLED === 'true' });
 
     if (action === 'health' && req.method === 'GET') {
       const fromRaw = (env.LEAD_FROM_EMAIL || '').trim();
@@ -437,6 +439,7 @@ export default async function handler(req, res, env = process.env) {
       const defaultBrand = body.default_brand === 'call_harbison' ? 'call_harbison' : 'harbison_standard';
       const format = ['csv', 'json', 'auto'].includes(body.format) ? body.format : 'auto';
       const { ready, duplicates, invalid } = prepareLeadImport(body.raw ?? body.rows, { format, defaultBrand, existingLeads });
+      if (env.SELLER_OPERATIONS_ENABLED === 'true') for (const row of ready) row.intake_kind = 'historical';
       if (body.dry_run !== false) {
         return res.status(200).json({
           ok: true,
@@ -521,11 +524,11 @@ export default async function handler(req, res, env = process.env) {
       const now = Date.now();
       const since = new Date(now - 365 * 864e5).toISOString();
       const fiveMinAgo = new Date(now - 5 * 60e3).toISOString();
-      const rows = await sb(env, `leads?select=id,created_at,status,channel,form_type,route_interest,situation,first_contact_at,appointment_at,next_followup,gross_profit,closed_at,do_not_contact&created_at=gte.${since}&deleted_at=is.null&limit=5000&order=created_at.desc`);
+      const rows = await sb(env, `leads?select=id,created_at,status,channel,form_type,route_interest,situation,first_contact_at,appointment_at,next_followup,gross_profit,closed_at,do_not_contact${env.SELLER_OPERATIONS_ENABLED === 'true' ? ',response_evidence_at,intake_kind' : ''}&created_at=gte.${since}&deleted_at=is.null&limit=5000&order=created_at.desc`);
       const rawWaiting = await sb(env, `leads?select=id,created_at,name,phone,email,address,situation,channel,form_type,do_not_contact&status=eq.new&do_not_contact=eq.false&deleted_at=is.null&created_at=lte.${fiveMinAgo}&order=created_at.asc&limit=8`);
       const waiting = rawWaiting.map((l) => ({ ...l, minutes_waiting: Math.round((now - Date.parse(l.created_at)) / 60e3) }));
       const upcoming = await sb(env, `leads?select=id,name,address,situation,form_type,appointment_at&appointment_at=gte.${new Date(now).toISOString()}&deleted_at=is.null&order=appointment_at.asc&limit=6`);
-      return res.status(200).json({ ok: true, stats: computeStats(rows, now), waiting, upcoming });
+      return res.status(200).json({ ok: true, stats: computeStats(env.SELLER_OPERATIONS_ENABLED === 'true' ? rows.filter(l => l.intake_kind !== 'historical').map(l => ({...l, first_contact_at:l.response_evidence_at})) : rows, now), waiting, upcoming });
     }
 
     if (action === 'partners' && req.method === 'GET') {
@@ -591,6 +594,7 @@ export default async function handler(req, res, env = process.env) {
     if (action === 'lead' && req.method === 'POST') {
       const { row, bad } = cleanNewLead(body);
       if (bad.length) return res.status(400).json({ ok: false, error: `Check these fields: ${bad.join(', ')}`, fields: bad });
+      if (env.SELLER_OPERATIONS_ENABLED === 'true') { row.notification_mode = 'durable'; row.assigned_to = 'jay'; row.status = 'new'; delete row.first_contact_at; }
       const [lead] = await sb(env, 'leads', { method: 'POST', body: row, prefer: 'return=representation' });
       await sb(env, 'lead_events', {
         method: 'POST', body: { lead_id: lead.id, kind: 'note', detail: 'Created manually in HQ', actor: session.n }, prefer: 'return=minimal',
@@ -609,6 +613,7 @@ export default async function handler(req, res, env = process.env) {
 
     if (action === 'lead' && req.method === 'PATCH') {
       if (!isUuid(id)) return res.status(400).json({ ok: false, error: 'Bad id' });
+      if (env.SELLER_OPERATIONS_ENABLED === 'true' && ['status','assigned_to','next_followup','appointment_at','authority_confirmed','do_not_contact','outcome_path'].some(k => k in body)) return res.status(409).json({ok:false,error:'Use Seller operations to record workflow evidence.'});
       const { patch, bad } = cleanPatch(body);
       if (bad.length) return res.status(400).json({ ok: false, error: `Check these fields: ${bad.join(', ')}`, fields: bad });
       if (!Object.keys(patch).length) return res.status(400).json({ ok: false, error: 'Nothing to save' });
@@ -632,6 +637,7 @@ export default async function handler(req, res, env = process.env) {
 
     if (action === 'event' && req.method === 'POST') {
       if (!isUuid(id)) return res.status(400).json({ ok: false, error: 'Bad id' });
+      if (env.SELLER_OPERATIONS_ENABLED === 'true' && CONTACT_KINDS.includes(body.kind)) return res.status(409).json({ok:false,error:'Record the actual contact result in Seller operations.'});
       const kind = EVENT_KINDS.includes(body.kind) ? body.kind : 'note';
       const detail = typeof body.detail === 'string' ? body.detail.trim().slice(0, 2000) : '';
       if (!detail) return res.status(400).json({ ok: false, error: 'Write something first' });

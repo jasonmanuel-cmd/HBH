@@ -65,7 +65,7 @@ npm run dev    # builds and serves http://localhost:3000 (API included)
 npm test       # lead API tests
 ```
 
-No dependencies to install. Node 18+.
+Run `npm ci` first. Node 22+ is recommended; the isolated SQL tests use the pinned PGlite development dependency.
 
 ## Deploy to Vercel
 
@@ -126,3 +126,6 @@ Every page is also built in Spanish under `/es` (home, how it works, situations,
 - **Form values stay English** (what HQ and the CRM read). Only the visible labels change.
 - **Spanish leads** are recognised by the page they were submitted from (`/es/...`): the alert email subject gets `[ES]`, the text-message alert says `[SPANISH]`, the automatic acknowledgement text goes out in Spanish, and HQ shows "Spanish" beside the contact.
 - **Have a native speaker review the Spanish**, especially the privacy, terms and consent wording. The legal pages carry a note that the English version governs.
+## Seller operations draft
+
+The feature-flagged `/hq/operations` workbench adds separate research review, evidence-based inquiry workflow and an internal notification outbox. Both feature flags default off. Read [the development, verification and rollout runbook](docs/SELLER-OPERATIONS.md) before activation. Use `npm run dev -- --mock` for synthetic local testing only.

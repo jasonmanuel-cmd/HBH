@@ -18,6 +18,7 @@ export default async function handler(req, res, env = process.env) {
       version: 1, brand: 'harbison_standard', submission_id: randomUUID(),
       lead: { name: 'CRM verification - do not contact', email: 'crm-verification@example.invalid', goal: 'Integration verification' },
     } : body);
+    if (env.SELLER_OPERATIONS_ENABLED === 'true') { row.notification_mode = 'durable'; row.assigned_to = 'jay'; }
     if (verification) row.status = 'spam';
   }
   catch { return res.status(400).json({ ok: false, error: 'Invalid inquiry' }); }

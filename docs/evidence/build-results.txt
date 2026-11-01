@@ -1,0 +1,5 @@
+
+> harbison-buys-homes@1.0.0 build
+> node build.mjs
+
+Built 69 pages into ./dist

@@ -52,15 +52,16 @@ function tabFromLocation() {
   const p = location.pathname;
   if (p.endsWith('/call-harbison')) return 'analytics-call';
   if (p.endsWith('/harbison-standard')) return 'analytics-standard';
+  if (p.endsWith('/operations')) return 'operations';
   if (p.endsWith('/leads')) return 'leads';
   if (p.endsWith('/partners')) return 'partners';
   const t = new URLSearchParams(location.search).get('tab');
-  return ['dash', 'leads', 'partners', 'analytics-standard', 'analytics-call'].includes(t) ? t : 'dash';
+  return ['operations', 'dash', 'leads', 'partners', 'analytics-standard', 'analytics-call'].includes(t) ? t : 'dash';
 }
 
 function syncUrl({ tab, leadId, replace = false } = {}) {
   const activeTab = tab || document.querySelector('[data-tab][aria-selected="true"]')?.dataset.tab || 'dash';
-  let path = '/hq';
+  let path = activeTab === 'operations' ? '/hq/operations' : '/hq';
   if (activeTab === 'analytics-call') path = '/hq/stats/call-harbison';
   else if (activeTab === 'analytics-standard') path = '/hq/stats/harbison-standard';
   else if (activeTab === 'leads') path = '/hq/leads';
@@ -89,7 +90,9 @@ function showLogin(msg = '') {
   $('#login-password').value = '';
   ($('#login-name').value ? $('#login-password') : $('#login-name')).focus();
 }
-function showApp(name) {
+let operationsEnabled = false;
+function showApp(name, enabled = false) {
+  operationsEnabled = enabled;
   $('#login').hidden = true;
   $('#app').hidden = false;
   $('#who').textContent = name;
@@ -111,7 +114,7 @@ $('#login-form').addEventListener('submit', async (e) => {
   $('#login-err').textContent = '';
   try {
     const r = await api('login', { method: 'POST', body: { name: $('#login-name').value, password: $('#login-password').value } });
-    showApp(r.name);
+    showApp(r.name, r.sellerOperationsEnabled);
   } catch (err) {
     $('#login-err').textContent = err.message;
     $('#login-password').select();
@@ -121,6 +124,7 @@ $('#login-form').addEventListener('submit', async (e) => {
 });
 $('#logout').addEventListener('click', async () => {
   await api('logout', { method: 'POST' }).catch(() => {});
+  window.clearSellerOperations?.();
   showLogin('Signed out.');
 });
 
@@ -128,6 +132,8 @@ $('#logout').addEventListener('click', async () => {
 function openTab(name, navigate = true) {
   const analytics = name.startsWith('analytics-');
   document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
+  $('#operations').hidden = name !== 'operations';
+  if (name === 'operations') window.loadSellerOperations?.();
   $('#dash').hidden = name !== 'dash';
   $('#leads').hidden = name !== 'leads';
   $('#partners').hidden = name !== 'partners';
@@ -560,12 +566,13 @@ function renderLead(l, events) {
   $('#d-sub').textContent = `${BRANDS[brandOf(l)]} · ${l.address || 'Property not supplied'} · received ${when(l.created_at)}`;
   $('#d-dnc').hidden = !l.do_not_contact;
   const tel = digits(l.phone);
-  const contactButtons = l.do_not_contact ? [] : [
+  const contactButtons = l.do_not_contact || (operationsEnabled && !l.consent_response) ? [] : [
     tel && `<a class="btn" href="tel:${esc(tel)}">Call ${esc(l.phone)}</a>`,
     tel && `<a class="btn ghost" href="sms:${esc(tel)}">Text</a>`,
     l.email && `<a class="btn ghost" href="mailto:${esc(l.email)}">Email</a>`,
     l.address && `<a class="btn ghost" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l.address)}" target="_blank" rel="noopener">Map</a>`,
   ].filter(Boolean);
+  if (operationsEnabled) contactButtons.push(`<a class="btn" href="/hq/operations?inquiry=${encodeURIComponent(l.id)}">Work this inquiry</a>`);
   contactButtons.push(`<button class="btn ghost" type="button" id="copy-lead-link">Copy HQ link</button>`);
   $('#d-actions').innerHTML = contactButtons.join('');
   $('#copy-lead-link')?.addEventListener('click', async (ev) => {
@@ -606,6 +613,7 @@ function renderLead(l, events) {
   initialFormValues = {};
   for (const f of FIELDS) {
     const el = $(`#f-${f}`);
+    el.disabled = operationsEnabled && ['status','assigned_to','next_followup','appointment_at','authority_confirmed','do_not_contact','outcome_path'].includes(f);
     if (el.type === 'checkbox') {
       el.checked = !!l[f];
       initialFormValues[f] = el.checked;

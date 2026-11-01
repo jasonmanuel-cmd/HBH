@@ -8,14 +8,14 @@ import handler from './api/leads.js';
 import hqHandler from './api/hq.js';
 import intakeHandler from './api/intake.js';
 import trackHandler from './api/track.js';
-import { installMockSupabase } from './dev/mock-supabase.mjs';
 import { family } from './src/family.mjs';
 
 const PORT = Number(process.env.PORT) || 3000;
-const HOST = process.env.HOST || '0.0.0.0';
+const HOST = process.env.HOST || '127.0.0.1';
 
 if (process.argv.includes('--mock')) {
-  installMockSupabase();
+  const { installOperationsMock } = await import('./dev/operations-mock.mjs');
+  await installOperationsMock();
   console.log(`HQ mock mode: sample data, password "demo" → http://localhost:${PORT}/hq`);
 }
 

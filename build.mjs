@@ -14,7 +14,7 @@ mkdirSync(out, { recursive: true });
 cpSync('static', out, { recursive: true });
 mkdirSync(join(out, 'hq/stats'), { recursive: true });
 for (const statsSite of ['harbison-standard', 'call-harbison']) cpSync('static/hq/index.html', join(out, `hq/stats/${statsSite}.html`));
-for (const hqRoute of ['leads', 'partners']) cpSync('static/hq/index.html', join(out, `hq/${hqRoute}.html`));
+for (const hqRoute of ['leads', 'partners', 'operations']) cpSync('static/hq/index.html', join(out, `hq/${hqRoute}.html`));
 
 // [output file, html, url path for sitemap (null = exclude), lastmod]
 // Every page is built in English and again in Spanish (under /es), then each gets its language switch and hreflang links.

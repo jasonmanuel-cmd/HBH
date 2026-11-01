@@ -75,7 +75,7 @@ function splitConditions(value) {
   return [...parts, value.slice(start)];
 }
 
-function matches(row, key, expr) {
+export function matches(row, key, expr) {
   if (key === 'and' || key === 'or') {
     const results = splitConditions(expr.slice(1, -1)).map((condition) => {
       if (condition.startsWith('or(')) return matches(row, 'or', condition.slice(2));
