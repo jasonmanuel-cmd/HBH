@@ -704,7 +704,7 @@ $('#note-form').addEventListener('submit', async (e) => {
 
 // ---------- boot ----------
 try { $('#login-name').value = localStorage.getItem('hq_name') || ''; } catch {}
-api('me').then((r) => showApp(r.name)).catch((e) => showLogin(e.status === 503 ? e.message : ''));
+api('me').then((r) => showApp(r.name, r.sellerOperationsEnabled)).catch((e) => showLogin(e.status === 503 ? e.message : ''));
 
 // ---------- Trash: delete, restore, delete forever ----------
 function renderTrashState(l) {

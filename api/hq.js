@@ -219,7 +219,10 @@ async function sb(env, path, { method = 'GET', body, prefer } = {}) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const txt = await res.text();
-  if (!res.ok) throw Object.assign(new Error(`Supabase ${res.status}: ${txt.slice(0, 300)}`), { status: res.status });
+  if (!res.ok) {
+    let code; try { code = JSON.parse(txt).code; } catch {}
+    throw Object.assign(new Error('Database request failed'), { status: res.status, code: /^[A-Z0-9]{5}$/.test(code || '') ? code : undefined });
+  }
   return txt ? JSON.parse(txt) : null;
 }
 
@@ -303,7 +306,7 @@ export function computeStats(leads, now = Date.now()) {
     new30: since(30),
     uncontacted: real.filter((l) => l.status === 'new' && !l.do_not_contact && now - t(l.created_at) > 5 * 60e3).length,
     followupsDue: open.filter((l) => !l.do_not_contact && l.next_followup && t(l.next_followup) <= now).length,
-    appointments7: real.filter((l) => l.appointment_at && t(l.appointment_at) >= now && t(l.appointment_at) < now + 7 * day).length,
+    appointments7: real.filter((l) => l.appointment_result !== 'cancelled' && l.appointment_at && t(l.appointment_at) >= now && t(l.appointment_at) < now + 7 * day).length,
     openPipeline: open.length,
     medianMinutesToContact: minutes.length ? Math.round(minutes[Math.floor((minutes.length - 1) / 2)]) : null,
     won90: won90.length,
@@ -524,10 +527,10 @@ export default async function handler(req, res, env = process.env) {
       const now = Date.now();
       const since = new Date(now - 365 * 864e5).toISOString();
       const fiveMinAgo = new Date(now - 5 * 60e3).toISOString();
-      const rows = await sb(env, `leads?select=id,created_at,status,channel,form_type,route_interest,situation,first_contact_at,appointment_at,next_followup,gross_profit,closed_at,do_not_contact${env.SELLER_OPERATIONS_ENABLED === 'true' ? ',response_evidence_at,intake_kind' : ''}&created_at=gte.${since}&deleted_at=is.null&limit=5000&order=created_at.desc`);
-      const rawWaiting = await sb(env, `leads?select=id,created_at,name,phone,email,address,situation,channel,form_type,do_not_contact&status=eq.new&do_not_contact=eq.false&deleted_at=is.null&created_at=lte.${fiveMinAgo}&order=created_at.asc&limit=8`);
+      const rows = await sb(env, `leads?select=id,created_at,status,channel,form_type,route_interest,situation,first_contact_at,appointment_at,next_followup,gross_profit,closed_at,do_not_contact${env.SELLER_OPERATIONS_ENABLED === 'true' ? ',response_evidence_at,intake_kind,appointment_result' : ''}&created_at=gte.${since}&deleted_at=is.null&limit=5000&order=created_at.desc`);
+      const rawWaiting = await sb(env, `leads?select=id,created_at,name,phone,email,address,situation,channel,form_type,do_not_contact&status=eq.new&do_not_contact=eq.false&deleted_at=is.null${env.SELLER_OPERATIONS_ENABLED === 'true' ? '&intake_kind=neq.historical' : ''}&created_at=lte.${fiveMinAgo}&order=created_at.asc&limit=8`);
       const waiting = rawWaiting.map((l) => ({ ...l, minutes_waiting: Math.round((now - Date.parse(l.created_at)) / 60e3) }));
-      const upcoming = await sb(env, `leads?select=id,name,address,situation,form_type,appointment_at&appointment_at=gte.${new Date(now).toISOString()}&deleted_at=is.null&order=appointment_at.asc&limit=6`);
+      const upcoming = await sb(env, `leads?select=id,name,address,situation,form_type,appointment_at&appointment_at=gte.${new Date(now).toISOString()}&deleted_at=is.null${env.SELLER_OPERATIONS_ENABLED === 'true' ? '&or=(appointment_result.is.null,appointment_result.neq.cancelled)' : ''}&order=appointment_at.asc&limit=6`);
       return res.status(200).json({ ok: true, stats: computeStats(env.SELLER_OPERATIONS_ENABLED === 'true' ? rows.filter(l => l.intake_kind !== 'historical').map(l => ({...l, first_contact_at:l.response_evidence_at})) : rows, now), waiting, upcoming });
     }
 

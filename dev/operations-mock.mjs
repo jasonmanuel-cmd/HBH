@@ -40,7 +40,7 @@ export async function installOperationsMock(env=process.env) {
    const order=u.searchParams.get('order');
    if(order) {const [key,dir]=order.split('.'); rows.sort((a,b)=>((a[key] instanceof Date && b[key] instanceof Date)?a[key]-b[key]:String(a[key]||'').localeCompare(String(b[key]||'')))*(dir==='desc'?-1:1));}
    const start=Number(u.searchParams.get('offset'))||0; return reply(rows.slice(start,start+(Number(u.searchParams.get('limit'))||1000)));
-  } catch(e) {return reply({message:e.message},e.code==='23505'?409:400);}
+  } catch(e) {return reply({message:e.message,code:e.code},e.code==='23505'?409:e.code==='40001'?500:400);}
  };
  return db;
 }
