@@ -426,12 +426,12 @@ const netEstimator = (ctaHref = '#lead-form') => `<div class="estimator" id="est
           <caption class="sr-only">Illustrative net proceeds comparison</caption>
           <thead><tr><th scope="col">Illustrative line item</th><th scope="col">Direct As-Is Sale</th><th scope="col">Fix &amp; List</th></tr></thead>
           <tbody>
-            <tr><th scope="row">Gross sale price</th><td data-out-direct-gross>$256,000 – $268,000</td><td data-out-list-gross>$350,000</td></tr>
+            <tr><th scope="row">Gross sale price</th><td data-out-direct-gross>$229,000 – $245,000</td><td data-out-list-gross>$350,000</td></tr>
             <tr><th scope="row">Out-of-pocket repairs (+10% buffer)</th><td>$0</td><td data-out-list-repairs>−$44,000</td></tr>
             <tr><th scope="row">Agent commissions (illustrative 5%)</th><td>$0</td><td data-out-list-comm>−$17,500</td></tr>
-            <tr><th scope="row">Seller closing &amp; transfer costs</th><td data-out-direct-close>−$1,500</td><td data-out-list-close>−$5,250</td></tr>
-            <tr><th scope="row">Holding costs (taxes, utilities, carry)</th><td data-out-direct-hold>−$1,000</td><td data-out-list-hold>−$7,875</td></tr>
-            <tr class="total"><th scope="row">Illustrative net before loan payoff</th><td data-out-direct-net>$253,500 – $265,500</td><td data-out-list-net>≈ $275,375</td></tr>
+            <tr><th scope="row">Seller closing &amp; transfer costs</th><td data-out-direct-close>−$1,400</td><td data-out-list-close>−$5,250</td></tr>
+            <tr><th scope="row">Holding costs (taxes, utilities, carry)</th><td data-out-direct-hold>−$875</td><td data-out-list-hold>−$7,875</td></tr>
+            <tr class="total"><th scope="row">Illustrative net before loan payoff</th><td data-out-direct-net>$226,725 – $242,725</td><td data-out-list-net>≈ $275,375</td></tr>
             <tr><th scope="row">Typical timeline</th><td>2–4 weeks</td><td data-out-list-time>~5 months</td></tr>
           </tbody>
         </table>
