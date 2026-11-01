@@ -1,0 +1,66 @@
+{
+  "at": "2026-11-01T19:35:11.592Z",
+  "container": "hbh-seller-recovery-20261101",
+  "branch": "feat/neon-compatibility",
+  "workingTree": "recovery corrections plus local SQL adapter",
+  "records": [
+    {
+      "name": "Fresh PostgreSQL 16 applies complete committed migration chain",
+      "passed": true,
+      "durationMs": 1824
+    },
+    {
+      "name": "Browser roles denied tables and RPC; service-role invoker can execute",
+      "passed": true,
+      "durationMs": 1156
+    },
+    {
+      "name": "Independent overlapping workers skip the locked job and claim distinct jobs",
+      "passed": true,
+      "durationMs": 3570
+    },
+    {
+      "name": "Expired claims quarantine; reconciliation replaces lease; stale completion rejected",
+      "passed": true,
+      "durationMs": 1531
+    },
+    {
+      "name": "Concurrent duplicate inquiry inserts produce one inquiry and one outbox job",
+      "passed": true,
+      "durationMs": 3511
+    },
+    {
+      "name": "Concurrent identical workflow commands commit only one contact event",
+      "passed": true,
+      "durationMs": 3798
+    },
+    {
+      "name": "Concurrent different workflow commands with the same revision reject stale write",
+      "passed": true,
+      "durationMs": 3745
+    },
+    {
+      "name": "Concurrent research repeats preserve one revision/audit and never enqueue inquiries",
+      "passed": true,
+      "durationMs": 3864
+    },
+    {
+      "name": "Suppressed pending inquiry is excluded from notification claims",
+      "passed": true,
+      "durationMs": 638
+    },
+    {
+      "name": "Opposite-order overlapping imports cannot deadlock under independent transactions",
+      "passed": true,
+      "durationMs": 2528
+    },
+    {
+      "name": "Same-batch revisions have strict sequence; stale source review fails",
+      "passed": true,
+      "durationMs": 549
+    }
+  ],
+  "failure": null,
+  "postgrest": "UNRUN: no cached image or host executable; no download permitted",
+  "cleanup": "Confirmed removed only labeled hbh-seller-recovery-20261101; follow-up lookup empty. Loopback mock server stopped and QA tab closed."
+}

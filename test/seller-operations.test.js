@@ -84,6 +84,9 @@ test('full HQ workflow runs against isolated PostgreSQL with external fetch bloc
  assert.equal(superseded.verification_state,'hold');
  assert.equal((await db.query("select count(*)::integer as n from research_audit where action='superseded'")).rows[0].n,1);
  const newId=randomUUID();const delivery=await deliver({id:newId,name:'Synthetic new inquiry',phone:'6615550199',address:'Test only',consent_response:true,status:'new'}, {...env,RESEND_API_KEY:'mock-no-network'});assert.equal(delivery.ok,true);assert.equal(delivery.notification,'queued');
+ await db.query("update leads set assigned_to='billy' where id=$1",[newId]);
+ assert.equal((await deliver({id:newId,name:'Synthetic new inquiry',phone:'6615550199',address:'Test only'},env)).duplicate,true);
+ await db.query("update leads set assigned_to='nathanael' where id=$1",[newId]);
  assert.equal((await deliver({id:newId,name:'Synthetic new inquiry',phone:'6615550199',address:'Test only'},env)).duplicate,true);
  assert.equal((await db.query('select count(*)::integer as n from notification_outbox where lead_id=$1',[newId])).rows[0].n,1);
  // Standard bridge: same API contract; consent is not invented from a form submission.

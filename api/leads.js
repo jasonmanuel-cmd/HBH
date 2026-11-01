@@ -250,7 +250,7 @@ async function postWebhook(lead, env) {
 }
 
 export async function deliver(lead, env = process.env) {
-  if (env.SELLER_OPERATIONS_ENABLED === 'true') lead = { ...lead, notification_mode: 'durable', assigned_to: 'jay' };
+  if (env.SELLER_OPERATIONS_ENABLED === 'true') lead = { ...lead, notification_mode: 'durable' };
   const crmConfigured = Boolean(env.SUPABASE_URL || env.SUPABASE_SERVICE_ROLE_KEY);
   const delivered = [];
   const failures = [];
