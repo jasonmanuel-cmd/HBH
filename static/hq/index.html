@@ -179,7 +179,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 }
 @media(max-width:480px){.hq-tag,.who{display:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
+#operations form{display:grid;gap:12px}#operations label{display:grid;gap:5px}#operations input,#operations select,#operations textarea{max-width:100%;min-height:44px;padding:8px;border:1px solid var(--line);border-radius:4px}#operations pre{white-space:pre-wrap;overflow-wrap:anywhere}#operations .grid3{grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr))}#operations h2{margin-top:20px}#operations .card{min-width:0;overflow-wrap:anywhere}</style>
 </head>
 <body>
 
@@ -206,6 +206,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
         <button role="tab" aria-selected="false" data-tab="partners" id="tab-partners">Partners &amp; ROI</button>
         <button role="tab" aria-selected="false" data-tab="analytics-standard" id="tab-analytics">Harbison Standard stats</button>
         <button role="tab" aria-selected="false" data-tab="analytics-call" id="tab-analytics-call">Call Harbison stats</button>
+        <button role="tab" aria-selected="false" data-tab="operations" id="tab-operations">Seller operations</button>
       </nav>
       <div class="top-actions">
         <button class="btn top-add" id="top-new-lead" type="button">+ New lead</button>
@@ -216,6 +217,41 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
   </header>
 
   <main>
+<section id="operations" role="tabpanel" aria-labelledby="tab-operations" hidden>
+ <div class="dash-head"><div><h2>Seller operations</h2><p class="muted">Jay and Billy handle intake and follow-up. Nathanael handles licensed property and transaction discussions.</p></div><button class="btn ghost" id="ops-refresh">Refresh</button></div>
+ <p id="ops-message" role="status" aria-live="polite"></p>
+ <div class="card"><h3>Review access</h3><label>Reviewer password <input id="ops-review-key" type="password" autocomplete="off"></label><p class="muted">Required for research imports, reviews, links and notification reconciliation. Display names are audit labels, not verified personal identities.</p></div>
+ <div class="grid2" style="margin-top:16px">
+  <div class="card"><h3>Research import</h3><p>Research is not seller intent or contact permission. Exact repeated source revisions are ignored; changed source records remain separate history.</p>
+   <label>Format <select id="ops-format"><option value="json">JSON</option><option value="csv">CSV</option></select></label>
+   <label style="display:block">Research records <textarea id="ops-raw" rows="7" style="width:100%" placeholder='[{"source_system":"synthetic","source_record_id":"sample-1","jurisdiction":"Kern","apn":"SYNTHETIC-001","assertions":["Owner UNKNOWN"]}]'></textarea></label>
+   <button class="btn" id="ops-preview">Dry run</button> <button class="btn ghost" id="ops-import" disabled>Import reviewed preview</button>
+   <pre id="ops-preview-result" style="white-space:pre-wrap;overflow-wrap:anywhere"></pre>
+  </div>
+  <div class="card"><h3>Source results</h3><p class="muted">Current-record snapshot, not a historical conversion funnel. Response times use explicit contact evidence. Reopening can reduce qualified/outcome counts. Historical imports are excluded; research is separate.</p><div id="ops-metrics"></div></div>
+ </div>
+ <h2>Research review queue</h2><div id="ops-research" class="grid3"></div>
+ <form id="ops-review-form" class="card" style="margin:16px 0" hidden>
+  <h3>Review selected source revision</h3><p id="ops-selected-research"></p><label>Decision <select name="verification_state"><option value="hold">Hold</option><option value="verified_facts">Facts verified — no contact permission</option><option value="rejected">Rejected</option></select></label>
+  <label><input type="checkbox" name="ownership_title_representation_checked"> Current owner, mailing, title and representation checked with evidence; not a name-only match</label><label>Hold reason <input name="hold_reason" maxlength="2000"></label><label>Evidence <textarea name="evidence" required maxlength="2000"></textarea></label><button class="btn">Save review</button>
+  <hr><label>Link to genuine inquiry <select id="ops-link-lead"></select></label><label><input id="ops-link-identity" type="checkbox"> I verified that this requester and property match the inquiry, using the evidence above</label><button type="button" class="btn ghost" id="ops-link">Approve evidence-based link</button><p class="muted">Requires verified facts, no unresolved conflicts, matching property addresses and a genuine inquiry with response permission. This never creates a new lead or changes marketing consent.</p><div id="ops-audit"></div>
+ </form>
+ <h2>Inquiry workbench</h2>
+ <form id="ops-workflow" class="card">
+  <label>Inquiry <select id="ops-lead" name="id" required></select></label><p id="ops-lead-context"></p>
+  <label>Record actual event <select name="event" id="ops-event"><option value="followup">Assign / internal follow-up</option><option value="response_permission">Record response permission</option><option value="contact_attempt">Contact attempt / conversation</option><option value="qualify">Qualification checklist</option><option value="handoff">Handoff to Nathanael</option><option value="appointment_booked">Book appointment</option><option value="appointment_result">Record appointment result</option><option value="outcome">Record outcome</option><option value="reopen">Reopen closed inquiry</option><option value="suppress">Suppress contact</option></select></label>
+  <div data-ops-events="followup"><label>Operator <select name="assigned_to"><option value="jay">Jay</option><option value="billy">Billy</option><option value="nathanael">Nathanael</option></select></label><label>Next follow-up <input type="datetime-local" name="next_followup"></label></div>
+  <div data-ops-events="contact_attempt response_permission"><label>Channel / permission source <select name="channel" id="ops-channel"></select></label></div>
+  <div data-ops-events="contact_attempt appointment_result"><label>Actual result <select name="result" id="ops-result"></select></label></div>
+  <div data-ops-events="qualify"><label><input type="checkbox" name="authority_confirmed"> Authority confirmed with evidence</label><label><input type="checkbox" name="service_fit"> Service fit confirmed</label><label>Timeline <input name="timeline" maxlength="200"></label><label>Agreed next step <input name="next_step" maxlength="500"></label></div>
+  <div data-ops-events="appointment_booked"><label>Appointment time <input type="datetime-local" name="appointment_at"></label></div>
+  <div data-ops-events="outcome"><label>Outcome <select name="status"><option value="closed_won">Closed won</option><option value="closed_lost">Closed lost</option><option value="not_a_fit">Not a fit</option></select></label><label>Path <select name="outcome_path"><option value="none">None</option><option value="listing">Listing</option><option value="direct_purchase">Direct purchase</option><option value="buyer_purchase">Buyer purchase</option><option value="referral_out">Referral out</option></select></label></div>
+  <label>Evidence / agreed next step <textarea name="detail" required maxlength="2000"></textarea></label><p class="muted">Records activity that already happened. This form sends no email, text or call. Response permission does not grant ongoing marketing permission.</p><button class="btn">Record event</button>
+ </form>
+ <h2 style="margin-top:24px">Notification recovery</h2><p id="ops-dispatch"></p><div id="ops-outbox"></div>
+ <form id="ops-reconcile" class="card" hidden><h3>Reconcile provider result</h3><label>Decision <select name="state"><option value="accepted">Provider confirms acceptance</option><option value="pending">Provider confirms NOT accepted — queue retry</option></select></label><label>Provider evidence <textarea name="evidence" required minlength="10" maxlength="2000"></textarea></label><button class="btn">Save reconciliation</button></form>
+</section>
+
     <section id="dash" role="tabpanel" aria-labelledby="tab-dash">
       <div class="dash-head">
         <p class="muted">One intake desk for both brands. Marketing staff organize inquiries and coordinate follow-up. Real estate advice, pricing, negotiations and contracts go to Nathanael Harbison.</p>
@@ -514,6 +550,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 </aside>
 
 <script src="/hq/app.js" defer></script>
+<script src="/hq/operations.js" defer></script>
 <script src="/hq/analytics.js" defer></script>
 </body>
 </html>

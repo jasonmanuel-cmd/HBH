@@ -182,7 +182,7 @@ async function saveToSupabase(lead, env) {
   if (res.ok) return readInsertResult(res, lead, env);
   const text = await res.text();
   // Migration 002 not run yet? Save the core lead instead of losing it.
-  if (res.status === 400 && /column/i.test(text)) {
+  if (res.status === 400 && /column/i.test(text) && env.SELLER_OPERATIONS_ENABLED !== 'true') {
     console.warn('[leads] Supabase missing new columns — run supabase/migrations/002_family_transition.sql. Saving core fields.');
     const core = Object.fromEntries(LEGACY_FIELDS.map((k) => [k, lead[k] || null]));
     const retry = await fetchWithRetry(endpoint, {
@@ -250,11 +250,12 @@ async function postWebhook(lead, env) {
 }
 
 export async function deliver(lead, env = process.env) {
+  if (env.SELLER_OPERATIONS_ENABLED === 'true') lead = { ...lead, notification_mode: 'durable', assigned_to: 'jay' };
   const crmConfigured = Boolean(env.SUPABASE_URL || env.SUPABASE_SERVICE_ROLE_KEY);
   const delivered = [];
   const failures = [];
   // Persist before notifying. At most one request wins the insert and attempts alerts.
-  // This is not a durable outbox: a crash after insertion can leave an unalerted HQ lead.
+  // Legacy mode retains its at-most-once notification attempt; operations mode uses the atomic outbox.
   if (crmConfigured) {
     try {
       if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) throw new Error('Incomplete storage configuration');
@@ -266,6 +267,11 @@ export async function deliver(lead, env = process.env) {
       console.error('[leads] storage failed', { id: lead.id, code: failure.code });
       return { ok: false, delivered, failures: [failure] };
     }
+  }
+  // The DB trigger commits the alert job atomically with the inquiry.
+  if (env.SELLER_OPERATIONS_ENABLED === 'true') {
+    if (!delivered.includes('supabase')) return { ok: false, delivered, failures };
+    return { ok: true, delivered, failures, notification: 'queued' };
   }
   const tasks = [];
   if (env.RESEND_API_KEY) tasks.push(['email', sendEmail(lead, env)]);

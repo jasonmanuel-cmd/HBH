@@ -51,7 +51,8 @@ group by 1, 2, 3;
 
 create or replace view public.v_uncontacted with (security_invoker = true) as
 select id, created_at, name, phone, address, channel, ref_partner,
-  round(extract(epoch from (now() - created_at)) / 60) as minutes_waiting
+  round(extract(epoch from (now() - created_at)) / 60) as minutes_waiting,
+  email, situation, form_type, do_not_contact
 from public.leads
-where status = 'new' and created_at < now() - interval '5 minutes' and deleted_at is null
+where status = 'new' and coalesce(do_not_contact, false) = false and created_at < now() - interval '5 minutes' and deleted_at is null
 order by created_at;
