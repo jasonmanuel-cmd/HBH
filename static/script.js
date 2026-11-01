@@ -218,7 +218,13 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
   });
 
   form.show = (i, focus = true) => {
-    current = Math.max(0, Math.min(i, steps.length - 1));
+    const next = Math.max(0, Math.min(i, steps.length - 1));
+    if (next !== current) {
+      form.querySelectorAll('.invalid').forEach((el) => el.classList.remove('invalid'));
+      status.className = 'form-status';
+      status.textContent = '';
+    }
+    current = next;
     steps.forEach((s, n) => (s.hidden = n !== current));
     dots.forEach((d, n) => d.classList.toggle('on', n <= current));
     const h = form.closest('.lead-card')?.querySelector('h2');

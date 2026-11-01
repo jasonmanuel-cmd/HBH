@@ -13,7 +13,7 @@ export const family = {
   image: img('photo-1570129477492-45c003edd2be'),
   headline: 'Not sure what to do with <em>a loved one’s house?</em>',
   lead: 'Whether a parent, grandparent, or other relative is downsizing, moving into senior living, or simply can’t keep up with the property anymore, we’ll help you understand your options — including selling as-is or listing traditionally.',
-  answer: `If a loved one is moving out of a Kern County home, the family usually has two realistic paths: sell the house as-is (no repairs, no clean-out, flexible closing) or prepare it and list it on the open market for a potentially higher price. ${site.name} reviews the property and shows both options side by side so the family can choose. Only the owner or someone with legal authority — a power of attorney, trustee, or conservator — can sign a sale.`,
+  answer: `If a loved one is moving out of a Kern County home, the family usually has two realistic paths: sell the house as-is (no repairs, no clean-out, flexible closing) or prepare it and list it on the open market for a potentially higher price. ${site.name} reviews the property and shows both options side by side so the family can choose. Only the owner or someone with legal authority — an agent under a valid power of attorney, trustee, or conservator — can sign a sale.`,
 
   // Video — Nathanael, 60–90 seconds. Leave id empty until uploaded; a placeholder renders instead.
   heroVideo: { id: '', title: `How ${site.agent} helps families with a loved one’s house` },
