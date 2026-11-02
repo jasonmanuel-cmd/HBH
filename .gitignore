@@ -10,3 +10,6 @@ Thumbs.db
 .vercel
 
 supabase/.temp/
+
+# Disposable local verification harness (preserved outside committed source).
+.local-test/

@@ -9,6 +9,8 @@
 import { createHmac, randomUUID, timingSafeEqual } from 'node:crypto';
 import { clientIp, createRateLimiter } from '../lib/request-ip.js';
 import { fetchWithRetry } from '../lib/fetch-retry.js';
+import { reliabilityRpc, digest, uuid, confirmedCommand } from '../lib/lead-reliability.js';
+import { alertIntents } from '../lib/lead-alerts.js';
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const safeFailure = (channel, err) => ({ channel, reason: `${channel} delivery failed`, code: err?.code === 'SUBMISSION_CONFLICT' ? 'SUBMISSION_CONFLICT' : 'DELIVERY_FAILED' });
@@ -31,10 +33,10 @@ const yes = (v) => v === true || v === 'yes' || v === 'on' || v === 'true';
 const detailsSecret = (env) => env.HQ_SESSION_SECRET || env.CRM_INGEST_SECRET || env.SUPABASE_SERVICE_ROLE_KEY || env.RESEND_API_KEY || env.LEAD_WEBHOOK_URL || '';
 const signDetails = (payload, secret) => createHmac('sha256', `lead-details|${secret}`).update(payload).digest('base64url');
 
-export function makeDetailsToken({ id, phone, address }, env = process.env, now = Date.now()) {
+export function makeDetailsToken({ id, phone, address, details_revision, details_expires_at }, env = process.env, now = Date.now()) {
   const secret = detailsSecret(env);
   if (!secret) return '';
-  const payload = Buffer.from(JSON.stringify({ id: id || null, phone, address, exp: now + DETAILS_TTL_MS })).toString('base64url');
+  const payload = Buffer.from(JSON.stringify({ id: id || null, phone, address, ...(details_revision === undefined ? {} : { details_revision }), exp: details_expires_at ?? now + DETAILS_TTL_MS })).toString('base64url');
   return `${payload}.${signDetails(payload, secret)}`;
 }
 
@@ -390,6 +392,8 @@ export async function deliverDetails(d, env = process.env) {
 }
 
 export default async function handler(req, res, env = process.env) {
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.method === 'GET' && new URL(req.url || '/', 'http://local').searchParams.get('reliability') === '1') return res.status(200).json({ ok: true, enabled: env.LEAD_RELIABILITY_ENABLED === 'true', version: 1 });
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
@@ -405,6 +409,11 @@ export default async function handler(req, res, env = process.env) {
     try { body = JSON.parse(body); } catch { body = {}; }
   }
   body = body && typeof body === 'object' ? body : {};
+
+  // Marked commands and recovery never fall through to legacy sends, including rollback.
+  if (body.kind === 'command_status' || body.reliability_version !== undefined || env.LEAD_RELIABILITY_ENABLED === 'true') {
+    return reliableRequest(body, res, env);
+  }
 
   // Honeypot: bots fill the hidden "company" field. Pretend success so they learn nothing.
   if (body.company) return res.status(200).json({ ok: true });
@@ -450,4 +459,54 @@ export default async function handler(req, res, env = process.env) {
     id: lead.id,
     details_token: makeDetailsToken({ id: lead.id, phone: lead.phone, address: lead.address }, env),
   });
+}
+
+// Capability-authenticated public command protocol. All outbound work is a SQL intent.
+async function reliableRequest(body, res, env) {
+ const reply=(status,data)=>res.status(status).json(data);
+ if(Buffer.byteLength(JSON.stringify(body))>40000)return reply(413,{ok:false,error:'Request too large.',state:'unresolved'});
+ const statusRequest=body.kind==='command_status';
+ const id=body.submission_id || body.request_id;
+ if(!uuid(id)||!uuid(body.recovery_key))return reply(400,{ok:false,error:'Invalid recovery reference.',state:'unresolved'});
+ const request_id=id.toLowerCase(),owner_hash=digest(body.recovery_key);
+ const rpc=reliabilityRpc(env);
+ const publicResult=r=>{
+  if(!r)return undefined;
+  const result={id:r.id,details_revision:r.details_revision};
+  if(r.details_expires_at!==undefined){
+   if(!Number.isFinite(r.details_expires_at))throw new Error('Invalid deadline');
+   if(r.details_expires_at>Date.now())result.details_token=makeDetailsToken(r,env);
+   else result.details_expired=true;
+  }
+  if(r.code)result.code=r.code;
+  return result;
+ };
+ try{
+  if(statusRequest){
+   const outcome=confirmedCommand(await rpc('lead_command_status',{request_id,owner_hash,fence:body.fence===true}));
+   return reply(200,{ok:true,state:outcome.state,result:publicResult(outcome.result)});
+  }
+  if(body.reliability_version!==1)return reply(409,{ok:false,error:'Please refresh this page before submitting.',state:'unresolved',code:'PROTOCOL_REQUIRED'});
+  if(body.company)return reply(400,{ok:false,error:'Request could not be accepted.',state:'unresolved'});
+  let lead,intent,lead_id,kind;
+  if(body.kind==='details'){
+   const verified=readDetailsToken(body.details_token,env);
+   if(!verified||!uuid(verified.id)||!Number.isInteger(verified.details_revision))return reply(401,{ok:false,error:'Invalid or expired lead reference.',state:'unresolved'});
+   if(body.expected_revision!==verified.details_revision)return reply(409,{ok:false,error:'Details reference changed.',state:'unresolved'});
+   lead=parseDetails({...body,id:verified.id,phone:verified.phone,address:verified.address});
+   lead_id=verified.id.toLowerCase();kind='details';intent={...lead,id:lead_id,expected_revision:body.expected_revision};
+  }else{
+   const parsed=parseLead(body);
+   if(parsed.errors.length)return reply(400,{ok:false,error:'Please check the highlighted fields.',fields:parsed.errors,state:'unresolved'});
+   lead={...parsed.lead,id:request_id};lead_id=request_id;kind='inquiry';
+   intent=Object.fromEntries(Object.entries(lead).filter(([key])=>!['id','consent_at'].includes(key)));
+  }
+  const alerts=alertIntents(lead,env,{details:kind==='details',recipients:notificationRecipients(env),ack:ACK_SMS[wantsSpanish(lead)?'es':'en'],spanish:wantsSpanish(lead)});
+  const outcome=confirmedCommand(await rpc('lead_command_execute',{request_id,owner_hash,kind,lead_id,intent,alerts,allow_new:env.LEAD_RELIABILITY_ENABLED==='true'&&env.SELLER_OPERATIONS_ENABLED!=='true'}),lead_id);
+  if(outcome.state!=='committed')return reply(409,{ok:false,state:outcome.state,code:outcome.result?.code||'ABORTED',error:'This command was not applied. Please review the current inquiry before starting a new request.'});
+  return reply(200,{ok:true,state:'committed',duplicate:outcome.replayed===true,...publicResult(outcome.result)});
+ }catch(error){
+  const status=error.code==='42501'?403:error.code==='23505'||error.code==='40001'?409:503;
+  return reply(status,{ok:false,state:'unresolved',error:status===403?'Invalid recovery reference.':status===409?'Command identity conflict. Resolve the original request before starting another.':'Request outcome is unconfirmed. Keep this reference and check again.',code:status===409?'COMMAND_CONFLICT':'UNRESOLVED'});
+ }
 }

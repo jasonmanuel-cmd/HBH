@@ -290,6 +290,7 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
 
 // ---------- Lead forms ----------
 document.querySelectorAll('form[data-lead-form]').forEach((form) => {
+  window.HBHCommands?.bind(form);
   const status = form.querySelector('.form-status');
   const button = form.querySelector('button[type="submit"]');
 
@@ -317,6 +318,14 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     if (form.dataset.formType === 'family_transition' && !data.relationship) missing.push('relationship');
     if (hasConsentCheckbox && data.consent_response !== 'yes') missing.push('consent_response');
     if (missing.length) return showErrors(missing);
+
+    try {
+      const reliable = await window.HBHCommands.submit(data, false, () => track('lead_form_submit', formProps(form)));
+      if (!reliable.legacy) {
+        if (!reliable.duplicate) { track('lead_form_success', formProps(form)); track('generate_lead', { form_type: data.form_type || 'standard' }); }
+        location.href = spanish ? '/es/thank-you' : '/thank-you'; return;
+      }
+    } catch (error) { track('lead_form_error', { ...formProps(form), step: 'submit' }); status.textContent = error.message; status.classList.add('error'); return; }
 
     // Persist only a random reference (not contact data) across uncertain retries/reloads.
     // Keep the same reference even if fields change after a failed attempt: the server
@@ -410,6 +419,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
 
 // ---------- Thank-you page: optional details ----------
 document.querySelectorAll('form[data-details-form]').forEach((form) => {
+  window.HBHCommands?.bind(form, true);
   const status = form.querySelector('.form-status');
   const button = form.querySelector('button[type="submit"]');
   form.addEventListener('submit', async (e) => {
@@ -429,6 +439,12 @@ document.querySelectorAll('form[data-details-form]').forEach((form) => {
       status.className = 'form-status error';
       return;
     }
+    try {
+      const reliable = await window.HBHCommands.submit({ timeline:payload.timeline,occupancy:payload.occupancy,condition_flags:payload.condition_flags,desired_outcome:payload.desired_outcome }, true);
+      if (!reliable.legacy) {
+        if (!reliable.duplicate) track('lead_details_added', { fields: ['timeline', 'occupancy', 'desired_outcome'].filter(k => payload[k]).concat(payload.condition_flags.length ? ['condition'] : []).join(',') });
+        status.textContent = say('Added to your request. Thank you.', 'Se agregó a su solicitud. Gracias.'); status.className = 'form-status ok'; button.disabled = true; return; }
+    } catch (error) { status.textContent = error.message; status.className = 'form-status error'; return; }
     if (!payload.phone) {
       status.textContent = say('Thanks — please mention these details when we call.', 'Gracias. Por favor, mencione estos detalles cuando le llamemos.');
       status.className = 'form-status';

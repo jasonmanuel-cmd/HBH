@@ -282,7 +282,7 @@ function footer(cta) {
   <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)} · DRE #${esc(site.brokerageDre)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/accessibility">Accessibility</a></span></div>
 </footer>
 <div class="mobile-bar"><a href="tel:${site.phoneHref}" class="btn btn-outline">Call</a><a href="sms:${site.phoneHref}" class="btn btn-outline">Text</a><a href="${cta}" class="btn btn-gold" data-cta="mobile_bar">Get My Options</a></div>
-<script src="/script.js" defer></script><script src="/analytics.js" defer></script>`;
+<script src="/command-recovery.js" defer></script><script src="/script.js" defer></script><script src="/analytics.js" defer></script>`;
 }
 
 function page(opts, body) {

@@ -1,14 +1,46 @@
 (() => {
  const q=s=>document.querySelector(s), safe=s=>String(s??'UNKNOWN').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  let data=null, token=null, selectedResearch=null, selectedJob=null, sequence=0, pendingCommand=null, requestId=crypto.randomUUID();
+ let recoveryOnly=false;
+ const recoveryKey='hbh_seller_pending';
+ const marker=()=>window.HBHCommands?.read(recoveryKey);
+ async function recoverSeller(fence=false) {
+  const saved=marker();if(!saved)return;
+  const result=await call('command-status',{...saved,fence});
+  if(result.state==='committed'&&(result.result?.id!==saved.id||!Number.isInteger(result.result?.ops_revision)))throw new Error('Recovery confirmation is invalid.');
+  if(result.state==='committed'||result.state==='aborted'){
+   window.HBHCommands.remove(recoveryKey);pendingCommand=null;recoveryOnly=false;requestId=crypto.randomUUID();pendingState();
+   message(result.state==='committed'?'Original event was recorded.':'Original event was fenced without applying it. Review before entering another event.');
+  }else if(result.state==='unresolved'){
+   if(!pendingCommand||pendingCommand.request_id!==saved.request_id){pendingCommand={...saved,event:'request'};recoveryOnly=true;}pendingState();
+  }else throw new Error('Original command outcome is unconfirmed.');
+ }
+ async function recordReliable(form,lead) {
+  return window.HBHCommands.lock('hbh-seller-command',async()=>{
+   const saved=marker();
+   if(saved && (recoveryOnly || !pendingCommand || pendingCommand.request_id!==saved.request_id)) {await recoverSeller(recoveryOnly);return;}
+   if(!pendingCommand){
+    if(!lead)throw new Error('Choose an inquiry');
+    pendingCommand={...Object.fromEntries(new FormData(form)),revision:lead.ops_revision,request_id:crypto.randomUUID(),reliability_version:1,authority_confirmed:form.elements.authority_confirmed.checked,service_fit:form.elements.service_fit.checked};
+    for(const k of ['next_followup','appointment_at'])if(pendingCommand[k])pendingCommand[k]=new Date(pendingCommand[k]).toISOString();
+    try{window.HBHCommands.write(recoveryKey,{request_id:pendingCommand.request_id,id:pendingCommand.id});}catch(e){pendingCommand=null;throw e;}
+   }
+   pendingState();
+   let confirmed;
+   try{confirmed=await call('workflow',pendingCommand);}catch(error){if(error.status&&error.status<500){recoveryOnly=true;pendingState();}throw error;}
+   if(confirmed.result?.id!==pendingCommand.id||!Number.isInteger(confirmed.result?.ops_revision)||confirmed.result.ops_revision<0)throw new Error('Event confirmation is invalid. Preserve and resolve the original reference.');
+   window.HBHCommands.remove(recoveryKey);pendingCommand=null;recoveryOnly=false;pendingState();requestId=crypto.randomUUID();
+   await window.loadSellerOperations();message('Event recorded. No external message sent.');
+  });
+ }
  const message=s=>{q('#ops-message').textContent=s;};
  function pendingState() {
   document.querySelectorAll('#ops-workflow input,#ops-workflow select,#ops-workflow textarea').forEach(el=>{
    if(pendingCommand){if(el.dataset.pendingDisabled===undefined)el.dataset.pendingDisabled=String(el.disabled);el.disabled=true;}
    else if(el.dataset.pendingDisabled!==undefined){el.disabled=el.dataset.pendingDisabled==='true';delete el.dataset.pendingDisabled;}
   });
-  q('#ops-submit').textContent=pendingCommand?'Retry original event':'Record event';
-  q('#ops-pending').textContent=pendingCommand?`Unconfirmed ${pendingCommand.event} for inquiry ${pendingCommand.id}. Retry resolves this original event. Do not reload or sign out until resolved; check its activity history before re-entering an event after interruption.`:'';
+  q('#ops-submit').textContent=recoveryOnly?'Resolve original request':pendingCommand?'Retry original event':'Record event';
+  q('#ops-pending').textContent=pendingCommand?`Unconfirmed ${pendingCommand.event} for inquiry ${pendingCommand.id}. Retry resolves this original event. Preserve this reference until the original outcome is confirmed. Resolve original request safely fences an unresolved operation before re-entry.`:'';
  }
  async function call(action,body) {
   const r=await fetch(`/api/hq?action=ops-${action}`,{method:body?'POST':'GET',credentials:'same-origin',headers:{'Content-Type':'application/json','X-HQ':'1','X-HQ-Review':q('#ops-review-key').value},body:body?JSON.stringify(body):undefined});
@@ -29,6 +61,7 @@
  window.loadSellerOperations=async()=>{
   const generation=++sequence;message('Loading…');
   try {
+   if(marker())await window.HBHCommands.lock('hbh-seller-command',()=>recoverSeller());
    const d=await call('overview');if(generation!==sequence)return;data=d;
    const old=q('#ops-lead').value || new URLSearchParams(location.search).get('inquiry');
    const options=d.leads.filter(l=>l.status!=='spam'&&l.intake_kind!=='historical').map(l=>`<option value="${safe(l.id)}">${safe(l.name)} · ${safe(l.status)}</option>`).join('');
@@ -56,8 +89,8 @@
   q('#ops-channel').innerHTML=(event==='response_permission'?['phone_call','email_request','web_form','in_person']:['call','text','email']).map(v=>`<option>${v}</option>`).join('');
   q('#ops-result').innerHTML=(event==='appointment_result'?['kept','cancelled','no_show']:['no_answer','voicemail','connected','failed']).map(v=>`<option>${v}</option>`).join('');
  });q('#ops-event').dispatchEvent(new Event('change'));
- q('#ops-workflow').onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{const form=e.target,lead=data.leads.find(l=>l.id===q('#ops-lead').value);if(!pendingCommand&&!lead)throw new Error('Choose an inquiry');const body=pendingCommand||{...Object.fromEntries(new FormData(form)),revision:lead.ops_revision,request_id:requestId,authority_confirmed:form.elements.authority_confirmed.checked,service_fit:form.elements.service_fit.checked};for(const k of ['next_followup','appointment_at']) if(body[k])body[k]=new Date(body[k]).toISOString();pendingCommand=body;pendingState();try{await call('workflow',body);}catch(error){if(error.status&&error.status<500){pendingCommand=null;pendingState();requestId=crypto.randomUUID();}else error.message+=' Retry resolves the original submitted event before any edited event.';throw error;}pendingCommand=null;pendingState();requestId=crypto.randomUUID();await window.loadSellerOperations();message('Event recorded. No external message sent.');});};
+ q('#ops-workflow').onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{const form=e.target,lead=data?.leads.find(l=>l.id===q('#ops-lead').value);if(data?.recoveryEnabled||marker())return recordReliable(form,lead);if(!pendingCommand&&!lead)throw new Error('Choose an inquiry');const body=pendingCommand||{...Object.fromEntries(new FormData(form)),revision:lead.ops_revision,request_id:requestId,authority_confirmed:form.elements.authority_confirmed.checked,service_fit:form.elements.service_fit.checked};for(const k of ['next_followup','appointment_at']) if(body[k])body[k]=new Date(body[k]).toISOString();pendingCommand=body;pendingState();try{await call('workflow',body);}catch(error){if(error.status&&error.status<500){pendingCommand=null;pendingState();requestId=crypto.randomUUID();}else error.message+=' Retry resolves the original submitted event before any edited event.';throw error;}pendingCommand=null;pendingState();requestId=crypto.randomUUID();await window.loadSellerOperations();message('Event recorded. No external message sent.');});};
  q('#ops-outbox').onclick=e=>{const b=e.target.closest('[data-reconcile]');if(b){selectedJob=b.dataset.reconcile;q('#ops-reconcile').hidden=false;}};
  q('#ops-reconcile').onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{await call('reconcile',{...Object.fromEntries(new FormData(e.target)),id:selectedJob});q('#ops-reconcile').hidden=true;await window.loadSellerOperations();message('Provider evidence recorded. Dispatch remains separately controlled.');});};
- window.clearSellerOperations=()=>{++sequence;data=null;token=null;pendingCommand=null;pendingState();selectedResearch=null;selectedJob=null;q('#ops-review-key').value='';q('#ops-raw').value='';q('#ops-preview-result').textContent='';q('#ops-research').textContent='';q('#ops-outbox').textContent='';};
+ window.clearSellerOperations=()=>{++sequence;data=null;token=null;pendingCommand=null;recoveryOnly=false;pendingState();selectedResearch=null;selectedJob=null;q('#ops-review-key').value='';q('#ops-raw').value='';q('#ops-preview-result').textContent='';q('#ops-research').textContent='';q('#ops-outbox').textContent='';};
 })();
