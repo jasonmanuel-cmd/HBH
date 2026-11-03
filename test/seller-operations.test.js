@@ -105,7 +105,7 @@ test('full HQ workflow runs against isolated PostgreSQL with external fetch bloc
   await assert.rejects(db.query("select seller_import('[]','forged')"));
   await db.exec('reset role');
  }
- let sends=0;assert.deepEqual(await processOutbox({env,rpc:()=>{throw Error('must not claim');},send:()=>sends++}),{disabled:true,processed:0});assert.equal(sends,0);
+ let sends=0;assert.deepEqual(await processOutbox({phase:'protocol',env,rpc:()=>{throw Error('must not claim');},send:()=>sends++}),{disabled:true,processed:0});assert.equal(sends,0);
  const [claims,competingClaims]=await Promise.all([rpc(db,'seller_claim_outbox',{}),rpc(db,'seller_claim_outbox',{})]);
  assert.equal(claims.length,1); assert.equal(competingClaims.length,1); assert.notEqual(claims[0].id,competingClaims[0].id);assert.equal((await rpc(db,'seller_claim_outbox',{})).length,0);
  await db.exec("update notification_outbox set lease_until=now()-interval '1 minute' where state='sending'");
@@ -114,7 +114,7 @@ test('full HQ workflow runs against isolated PostgreSQL with external fetch bloc
  assert.equal((await request('reconcile',{id:claims[0].id,state:'pending',evidence:'Mock provider confirms no acceptance'}, {review:false})).code,403);
  assert.equal((await request('reconcile',{id:claims[0].id,state:'pending',evidence:'short'})).code,400);
  assert.equal((await request('reconcile',{id:claims[0].id,state:'pending',evidence:'Mock provider confirms no acceptance'})).code,200);
- await processOutbox({env:{...env,SELLER_OUTBOX_DISPATCH_ENABLED:'true'},rpc:(n,b)=>rpc(db,n,b),send:async()=>({id:'mock-provider-receipt'})});
+ await processOutbox({phase:'protocol',env:{...env,SELLER_OUTBOX_DISPATCH_ENABLED:'true'},rpc:(n,b)=>rpc(db,n,b),send:async()=>({id:'mock-provider-receipt'})});
  assert.equal((await db.query('select state from notification_outbox where id=$1',[claims[0].id])).rows[0].state,'accepted');
  // Applying the schema alone does not opt legacy intake into assignment or outbox changes.
  const legacyId=randomUUID();const legacyEnv={...env,SELLER_OPERATIONS_ENABLED:'false'};
@@ -134,7 +134,7 @@ test('full HQ workflow runs against isolated PostgreSQL with external fetch bloc
 
 test('outbox distinguishes accepted, known rejected and uncertain outcomes',async()=>{
  for(const [send,state] of [[async()=>({id:'receipt'}),'accepted'],[async()=>{throw Object.assign(Error(),{definitelyRejected:true});},'failed'],[async()=>{throw Error('timeout');},'uncertain'],[async()=>({}),'uncertain']]) {
-  let finished;await processOutbox({env:{SELLER_OUTBOX_DISPATCH_ENABLED:'true'},rpc:async(n,b)=>n==='seller_claim_outbox'?[{id:'job',lease:'lease',lease_until:new Date(Date.now()+120000).toISOString()}]:(finished=b,true),send});assert.equal(finished.state,state);
+  let finished;await processOutbox({phase:'protocol',env:{SELLER_OUTBOX_DISPATCH_ENABLED:'true'},rpc:async(n,b)=>n==='seller_claim_outbox'?[{id:'job',lease:'lease',lease_until:new Date(Date.now()+120000).toISOString()}]:(finished=b,true),send});assert.equal(finished.state,state);
  }
  let called=false;await assert.rejects(emailAdapter({},async()=>{called=true;})({id:'job'}));assert.equal(called,false);
 });
@@ -147,12 +147,12 @@ test('durable intake never falls back to a schema that cannot queue notification
 });
 
 test('worker rejects a lost lease instead of claiming confirmed completion',async()=>{
- await assert.rejects(processOutbox({env:{SELLER_OUTBOX_DISPATCH_ENABLED:'true'},rpc:async n=>n==='seller_claim_outbox'?[{id:'job',lease:'expired',lease_until:new Date(Date.now()+120000).toISOString()}]:false,send:async()=>({id:'accepted-by-provider'})}),/Lease changed/);
+ await assert.rejects(processOutbox({phase:'protocol',env:{SELLER_OUTBOX_DISPATCH_ENABLED:'true'},rpc:async n=>n==='seller_claim_outbox'?[{id:'job',lease:'expired',lease_until:new Date(Date.now()+120000).toISOString()}]:false,send:async()=>({id:'accepted-by-provider'})}),/Lease changed/);
 });
 
 test('worker never starts a send with an expired or nearly expired lease',async()=>{
  let sent=0;for(const lease_until of [null,new Date(Date.now()-1).toISOString(),new Date(Date.now()+5000).toISOString()]) {
-  await assert.rejects(processOutbox({env:{SELLER_OUTBOX_DISPATCH_ENABLED:'true'},rpc:async()=>[{id:'job',lease_until}],send:async()=>{sent++;}}),/lease expired/);
+  await assert.rejects(processOutbox({phase:'protocol',env:{SELLER_OUTBOX_DISPATCH_ENABLED:'true'},rpc:async()=>[{id:'job',lease_until}],send:async()=>{sent++;}}),/lease expired/);
  }assert.equal(sent,0);
 });
 

@@ -59,7 +59,8 @@ test('select options send the English value even when the label is Spanish', () 
 test('Spanish pages declare Spanish and point at the Spanish canonical URL', () => {
   const { es } = render('about.html');
   const full = decoratePage(es, { lang: 'es', filePath: 'about.html', siteUrl: site.url });
-  assert.match(full, /<html lang="es-US">/);
+  assert.match(full, /<html lang="es-US"(?:\s[^>]*)?>/);
+  assert.match(full, /data-command-phase="preactivation"/);
   assert.match(full, new RegExp(`<link rel="canonical" href="${site.url}/es/about">`));
   assert.match(full, /hreflang="en" href="[^"]*\/about"/);
   assert.match(full, /hreflang="es" href="[^"]*\/es\/about"/);

@@ -7,14 +7,19 @@ import { areas, guides, faqs, situations, contentDate } from './src/templates.mj
 import { buildPages } from './src/pages.mjs';
 import { decoratePage, esPath, loadDictionary, translatePage } from './src/i18n/translate.mjs';
 import { family } from './src/family.mjs';
+import { COMMAND_PHASE, assertCommandBuild } from './lib/command-phase.js';
+
+assertCommandBuild(process.env);
 
 const out = 'dist';
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 cpSync('static', out, { recursive: true });
+const hqHtml = readFileSync('static/hq/index.html', 'utf8').replace('__COMMAND_PHASE__', COMMAND_PHASE);
+writeFileSync(join(out, 'hq/index.html'), hqHtml);
 mkdirSync(join(out, 'hq/stats'), { recursive: true });
-for (const statsSite of ['harbison-standard', 'call-harbison']) cpSync('static/hq/index.html', join(out, `hq/stats/${statsSite}.html`));
-for (const hqRoute of ['leads', 'partners', 'operations']) cpSync('static/hq/index.html', join(out, `hq/${hqRoute}.html`));
+for (const statsSite of ['harbison-standard', 'call-harbison']) writeFileSync(join(out, `hq/stats/${statsSite}.html`), hqHtml);
+for (const hqRoute of ['leads', 'partners', 'operations']) writeFileSync(join(out, `hq/${hqRoute}.html`), hqHtml);
 
 // [output file, html, url path for sitemap (null = exclude), lastmod]
 // Every page is built in English and again in Spanish (under /es), then each gets its language switch and hreflang links.

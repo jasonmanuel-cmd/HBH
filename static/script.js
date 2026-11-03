@@ -289,8 +289,17 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
 });
 
 // ---------- Lead forms ----------
+// Only a reviewed never-activated deployment may bypass recovery bootstrap.
+const commandPhase = document.documentElement?.dataset.commandPhase;
+const submitCommand = async (...args) => {
+  if (commandPhase === 'preactivation') return Promise.resolve({legacy:true});
+  if (commandPhase !== 'protocol' || !window.HBHCommands) throw new Error('Submission recovery is unavailable. Please reload or contact the team.');
+  const result = await window.HBHCommands.submit(...args);
+  if (result?.legacy) throw new Error('Recovery protocol mismatch. Please reload or contact the team.');
+  return result;
+};
 document.querySelectorAll('form[data-lead-form]').forEach((form) => {
-  window.HBHCommands?.bind(form);
+  if (commandPhase === 'protocol') window.HBHCommands?.bind(form);
   const status = form.querySelector('.form-status');
   const button = form.querySelector('button[type="submit"]');
 
@@ -320,7 +329,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     if (missing.length) return showErrors(missing);
 
     try {
-      const reliable = await window.HBHCommands.submit(data, false, () => track('lead_form_submit', formProps(form)));
+      const reliable = await submitCommand(data, false, () => track('lead_form_submit', formProps(form)));
       if (!reliable.legacy) {
         if (!reliable.duplicate) { track('lead_form_success', formProps(form)); track('generate_lead', { form_type: data.form_type || 'standard' }); }
         location.href = spanish ? '/es/thank-you' : '/thank-you'; return;
@@ -419,7 +428,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
 
 // ---------- Thank-you page: optional details ----------
 document.querySelectorAll('form[data-details-form]').forEach((form) => {
-  window.HBHCommands?.bind(form, true);
+  if (commandPhase === 'protocol') window.HBHCommands?.bind(form, true);
   const status = form.querySelector('.form-status');
   const button = form.querySelector('button[type="submit"]');
   form.addEventListener('submit', async (e) => {
@@ -440,7 +449,7 @@ document.querySelectorAll('form[data-details-form]').forEach((form) => {
       return;
     }
     try {
-      const reliable = await window.HBHCommands.submit({ timeline:payload.timeline,occupancy:payload.occupancy,condition_flags:payload.condition_flags,desired_outcome:payload.desired_outcome }, true);
+      const reliable = await submitCommand({ timeline:payload.timeline,occupancy:payload.occupancy,condition_flags:payload.condition_flags,desired_outcome:payload.desired_outcome }, true);
       if (!reliable.legacy) {
         if (!reliable.duplicate) track('lead_details_added', { fields: ['timeline', 'occupancy', 'desired_outcome'].filter(k => payload[k]).concat(payload.condition_flags.length ? ['condition'] : []).join(',') });
         status.textContent = say('Added to your request. Thank you.', 'Se agregó a su solicitud. Gracias.'); status.className = 'form-status ok'; button.disabled = true; return; }

@@ -1,5 +1,7 @@
 // Opaque identifiers only. Web Locks serialize marker creation across tabs.
 (() => {
+ const phase=()=>document.documentElement?.dataset.commandPhase;
+ const protocol=()=>{if(phase()!=='protocol')throw new Error('Recovery protocol unavailable. Please reload or contact the team.');};
  const valid=v=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
  const memory=new Map();
  const changed=()=>window.dispatchEvent?.(new Event('hbh-command-state'));
@@ -9,12 +11,13 @@
  const lock=(name,fn)=>{if(!navigator.locks?.request)throw new Error('This browser cannot safely preserve a pending request. Please call the team.');return navigator.locks.request(name,fn);};
  const post=async body=>{const r=await fetch('/api/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(45000)});const result=await r.json();if(!r.ok)throw Object.assign(new Error(result.error||'Request outcome unconfirmed.'),{state:result.state});return result;};
  const inquiryKey='hbh_reliable_inquiry',lastKey='hbh_reliable_last';
- async function config(){const r=await fetch('/api/leads?reliability=1',{cache:'no-store'});if(!r.ok)throw new Error('Cannot check submission readiness. Please try again.');const c=await r.json();if(c.version!==1||typeof c.enabled!=='boolean')throw new Error('Invalid submission readiness response.');return c.enabled;}
+ async function config(){const r=await fetch('/api/leads?reliability=1',{cache:'no-store',signal:AbortSignal.timeout(10000)});if(!r.ok)throw new Error('Cannot check submission readiness. Please try again.');const c=await r.json();if(c.version!==1||typeof c.enabled!=='boolean')throw new Error('Invalid submission readiness response.');return c.enabled;}
  async function status(marker,fence=false){const r=await post({kind:'command_status',...marker,fence});if(!['committed','aborted','unresolved'].includes(r.state))throw new Error('Recovery outcome unconfirmed.');return r;}
  async function inquiry(){const marker=read(lastKey)||read(inquiryKey);if(!marker)throw new Error('Please mention these details when the team calls.');const r=await status(marker);if(r.state!=='committed'||!r.result?.id)throw new Error('Details reference unavailable or expired. Please mention these details when the team calls.');return r.result;}
  async function submit(data,details=false,onAttempt=()=>{}){
+  if(phase()==='preactivation')return {legacy:true};
+  protocol();
   const enabled=await config();
-  if(!enabled&&!read(inquiryKey)&&!read(lastKey))return {legacy:true};
   return lock('hbh-lead-command',async()=>{
    if(enabled&&!details&&!read(inquiryKey)&&!read(lastKey)&&typeof sessionStorage!=='undefined'&&sessionStorage.getItem(`hbh_submission:${location.pathname}:${data.form_type||'standard'}`))throw new Error('An earlier request has an unresolved legacy reference. Please contact the team before submitting another inquiry.');
    let reference,key=inquiryKey;
@@ -39,7 +42,7 @@
    return r;
   });
  }
- async function resolve(details=false){return lock('hbh-lead-command',async()=>{
+ async function resolve(details=false){protocol();return lock('hbh-lead-command',async()=>{
   const ref=details?await inquiry():null,key=details?`hbh_reliable_details:${ref.id}`:inquiryKey,marker=read(key);
   if(!marker)return {state:'absent'};
   const r=await status(marker,true);
@@ -47,12 +50,14 @@
   if(r.state==='committed'&&!details)write(lastKey,marker);
   return r;
  });}
- async function startNew(){return lock('hbh-lead-command',async()=>{
+ async function startNew(){protocol();return lock('hbh-lead-command',async()=>{
   const marker=read(inquiryKey)||read(lastKey);
   if(marker){const r=await status(marker);if(!['committed','aborted'].includes(r.state))throw new Error('Resolve the original request before starting another.');}
   remove(inquiryKey);remove(lastKey);memory.delete(inquiryKey);
  });}
  function bind(form,details=false){
+  if(phase()==='preactivation')return;
+  protocol();
   const statusNode=form.querySelector('.form-status');
   const button=document.createElement('button');button.type='button';button.className='btn ghost';button.textContent='Resolve original request';button.hidden=true;statusNode.after(button);
   const next=document.createElement('button');next.type='button';next.className='btn ghost';next.textContent='Start another inquiry';next.hidden=true;if(!details)button.after(next);

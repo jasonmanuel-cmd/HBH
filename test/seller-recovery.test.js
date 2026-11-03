@@ -28,7 +28,7 @@ test('same-batch history has explicit order and older revisions cannot be verifi
 
 test('missing provider configuration leaves jobs unclaimed; spam triage is evidence-recorded',async()=>{
  let claims=0;
- await assert.rejects(processOutbox({env:{SELLER_OUTBOX_DISPATCH_ENABLED:'true'},rpc:async()=>{claims++;return[];},send:emailAdapter({SELLER_OUTBOX_DISPATCH_ENABLED:'true'})}),/configuration/);
+ await assert.rejects(processOutbox({phase:'protocol',env:{SELLER_OUTBOX_DISPATCH_ENABLED:'true'},rpc:async()=>{claims++;return[];},send:emailAdapter({SELLER_OUTBOX_DISPATCH_ENABLED:'true'})}),/configuration/);
  assert.equal(claims,0);
  const command=workflowCommand({id:randomUUID(),status:'new'},{request_id:randomUUID(),revision:0,event:'spam',detail:'Synthetic junk submission reviewed'});
  assert.equal(command.patch.status,'spam');assert.equal(command.patch.do_not_contact,true);assert.equal(command.patch.next_followup,null);
@@ -47,7 +47,7 @@ test('research changes clear confirmations and ambiguous browser retry preserves
  let revision=0,attempts=0;const commands=[];
  const data=()=>({research:[researchA,researchB].map(id=>({id,source_system:'synthetic',source_record_id:id,verification_state:'hold',revision:0,assertions:[],conflicts:[],hold_reasons:[]})),leads:[{id:leadId,status:'new',ops_revision:revision}],outbox:[],audit:[],metrics:{sources:{}}});
  const editable={disabled:false,dataset:{}};
- const context={window:{},document:{querySelector:node,querySelectorAll:selector=>selector.startsWith('#ops-workflow')?[editable]:[]},crypto:{randomUUID},location:{search:''},URLSearchParams,Event:class{constructor(type){this.type=type;}},FormData:class{*[Symbol.iterator](){yield ['id',leadId];yield ['event','spam'];yield ['detail','Synthetic evidence'];}},fetch:async(url,init)=>{
+ const context={window:{},document:{documentElement:{dataset:{commandPhase:"preactivation"}},querySelector:node,querySelectorAll:selector=>selector.startsWith('#ops-workflow')?[editable]:[]},crypto:{randomUUID},location:{search:''},URLSearchParams,Event:class{constructor(type){this.type=type;}},FormData:class{*[Symbol.iterator](){yield ['id',leadId];yield ['event','spam'];yield ['detail','Synthetic evidence'];}},fetch:async(url,init)=>{
   if(url.endsWith('ops-overview'))return {ok:true,json:async()=>data()};
   commands.push(JSON.parse(init.body));if(attempts++===0){revision=1;throw new Error('lost HTTP response');}
   return {ok:true,json:async()=>({ok:true})};

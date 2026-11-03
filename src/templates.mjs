@@ -1,4 +1,5 @@
 import site from '../site.config.mjs';
+import { COMMAND_PHASE } from '../lib/command-phase.js';
 import { images, situations as baseSituations, areas as baseAreas, faqs as baseFaqs } from './content.mjs';
 import { californiaCity, extraFaqs, glance, about, guides as baseGuides } from './content-extra.mjs';
 import { family, familyForm, partnerGuide } from './family.mjs';
@@ -199,7 +200,7 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
     ? `<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${esc(site.gtmId)}');</script>`
     : '';
   return `<!doctype html>
-<html lang="en-US">
+<html lang="en-US" data-command-phase="${COMMAND_PHASE}">
 <head>
   ${ga}
   <meta charset="utf-8">

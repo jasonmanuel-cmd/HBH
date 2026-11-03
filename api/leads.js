@@ -1,3 +1,4 @@
+import { COMMAND_PHASE } from '../lib/command-phase.js';
 // Vercel serverless function: POST /api/leads
 // Delivers each lead to whichever destinations are configured via environment variables:
 //   RESEND_API_KEY + LEAD_NOTIFY_EMAIL (+ optional LEAD_FROM_EMAIL)  -> email alert
@@ -391,9 +392,9 @@ export async function deliverDetails(d, env = process.env) {
   return { ok: true, delivered, failures };
 }
 
-export default async function handler(req, res, env = process.env) {
+export default async function handler(req, res, env = process.env, phase = COMMAND_PHASE) {
   res.setHeader('Cache-Control', 'no-store');
-  if (req.method === 'GET' && new URL(req.url || '/', 'http://local').searchParams.get('reliability') === '1') return res.status(200).json({ ok: true, enabled: env.LEAD_RELIABILITY_ENABLED === 'true', version: 1 });
+  if (req.method === 'GET' && new URL(req.url || '/', 'http://local').searchParams.get('reliability') === '1') return res.status(200).json({ ok: true, enabled: phase === 'protocol' && env.LEAD_RELIABILITY_ENABLED === 'true', version: 1 });
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ ok: false, error: 'Method not allowed' });
@@ -411,8 +412,8 @@ export default async function handler(req, res, env = process.env) {
   body = body && typeof body === 'object' ? body : {};
 
   // Marked commands and recovery never fall through to legacy sends, including rollback.
-  if (body.kind === 'command_status' || body.reliability_version !== undefined || env.LEAD_RELIABILITY_ENABLED === 'true') {
-    return reliableRequest(body, res, env);
+  if (body.kind === 'command_status' || body.reliability_version !== undefined || phase !== 'preactivation' || env.LEAD_RELIABILITY_ENABLED === 'true') {
+    return reliableRequest(body, res, env, phase);
   }
 
   // Honeypot: bots fill the hidden "company" field. Pretend success so they learn nothing.
@@ -462,7 +463,7 @@ export default async function handler(req, res, env = process.env) {
 }
 
 // Capability-authenticated public command protocol. All outbound work is a SQL intent.
-async function reliableRequest(body, res, env) {
+async function reliableRequest(body, res, env, phase) {
  const reply=(status,data)=>res.status(status).json(data);
  if(Buffer.byteLength(JSON.stringify(body))>40000)return reply(413,{ok:false,error:'Request too large.',state:'unresolved'});
  const statusRequest=body.kind==='command_status';
@@ -502,7 +503,7 @@ async function reliableRequest(body, res, env) {
    intent=Object.fromEntries(Object.entries(lead).filter(([key])=>!['id','consent_at'].includes(key)));
   }
   const alerts=alertIntents(lead,env,{details:kind==='details',recipients:notificationRecipients(env),ack:ACK_SMS[wantsSpanish(lead)?'es':'en'],spanish:wantsSpanish(lead)});
-  const outcome=confirmedCommand(await rpc('lead_command_execute',{request_id,owner_hash,kind,lead_id,intent,alerts,allow_new:env.LEAD_RELIABILITY_ENABLED==='true'&&env.SELLER_OPERATIONS_ENABLED!=='true'}),lead_id);
+  const outcome=confirmedCommand(await rpc('lead_command_execute',{request_id,owner_hash,kind,lead_id,intent,alerts,allow_new:phase==='protocol'&&env.LEAD_RELIABILITY_ENABLED==='true'&&env.SELLER_OPERATIONS_ENABLED!=='true'}),lead_id);
   if(outcome.state!=='committed')return reply(409,{ok:false,state:outcome.state,code:outcome.result?.code||'ABORTED',error:'This command was not applied. Please review the current inquiry before starting a new request.'});
   return reply(200,{ok:true,state:'committed',duplicate:outcome.replayed===true,...publicResult(outcome.result)});
  }catch(error){

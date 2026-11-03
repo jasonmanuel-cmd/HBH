@@ -1,3 +1,4 @@
+import { COMMAND_PHASE } from '../lib/command-phase.js';
 import { sellerOperations } from '../lib/seller-operations-api.js';
 // HQ panel API: POST/GET/PATCH/DELETE /api/hq?action=...
 // Password login (HQ_PASSWORD) → signed, HttpOnly session cookie. All data access happens here with the
@@ -321,7 +322,7 @@ export function computeStats(leads, now = Date.now()) {
 }
 
 // ---------- handler ----------
-export default async function handler(req, res, env = process.env) {
+export default async function handler(req, res, env = process.env, phase = COMMAND_PHASE) {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
   const url = new URL(req.url, 'http://x');
@@ -358,7 +359,7 @@ export default async function handler(req, res, env = process.env) {
   if (req.method !== 'GET' && req.headers?.['x-hq'] !== '1') return res.status(403).json({ ok: false, error: 'Forbidden' });
 
   try {
-    if (await sellerOperations({ action, req, res, body, session, env, sb })) return;
+    if (await sellerOperations({ action, req, res, body, session, env, sb, phase })) return;
     if (action === 'me') return res.status(200).json({ ok: true, name: session.n, sellerOperationsEnabled: env.SELLER_OPERATIONS_ENABLED === 'true' });
 
     if (action === 'health' && req.method === 'GET') {

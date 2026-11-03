@@ -13,7 +13,7 @@ const mockRes=()=>({code:200,headers:{},status(c){this.code=c;return this;},json
 function storage(){const map=new Map();return {map,getItem:k=>map.get(k)??null,setItem:(k,v)=>map.set(k,v),removeItem:k=>map.delete(k)};}
 function locks(){let tail=Promise.resolve();return {request(_name,fn){const result=tail.then(fn);tail=result.catch(()=>{});return result;}};}
 async function fixture(fn){const env={},oldFetch=globalThis.fetch,db=await installOperationsMock(env);env.SELLER_COMMAND_RECOVERY_ENABLED='true';
- const request=async(action,body,{auth=true,csrf=true}={})=>{const res=mockRes();await hq({method:body?'POST':'GET',url:`/api/hq?action=ops-${action}`,headers:{...(csrf?{'x-hq':'1'}:{}),...(auth?{cookie:`hq_session=${makeSession('Synthetic',env)}`}:{})},body},res,env);return res;};
+ const request=async(action,body,{auth=true,csrf=true}={})=>{const res=mockRes();await hq({method:body?'POST':'GET',url:`/api/hq?action=ops-${action}`,headers:{...(csrf?{'x-hq':'1'}:{}),...(auth?{cookie:`hq_session=${makeSession('Synthetic',env)}`}:{})},body},res,env,'protocol');return res;};
  try{await fn({env,db,request});}finally{globalThis.fetch=oldFetch;await db.close();}
 }
 
@@ -40,7 +40,7 @@ test('authenticated HQ route executes once, recovers after deletion and rejects 
 }));
 
 function browser(shared,fetcher,sharedLocks=locks()){
- const context={window:{},localStorage:shared,navigator:{locks:sharedLocks},crypto:{randomUUID},fetch:fetcher,AbortSignal,URLSearchParams,setTimeout,location:{pathname:'/'},Map,console};
+ const context={window:{},document:{documentElement:{dataset:{commandPhase:'protocol'}}},localStorage:shared,navigator:{locks:sharedLocks},crypto:{randomUUID},fetch:fetcher,AbortSignal,URLSearchParams,setTimeout,location:{pathname:'/'},Map,console};
  vm.runInNewContext(helper,context);return context;
 }
 const payload={address:'123 Synthetic Road',name:'Synthetic Public',phone:'6615550101',email:'public@example.invalid',form_type:'options',consent_response:true};
@@ -48,12 +48,15 @@ test('fresh browser restart recovers lost inquiry and details replies through ac
  env.SELLER_OPERATIONS_ENABLED='false';env.LEAD_RELIABILITY_ENABLED='true';env.RESEND_API_KEY='synthetic';
  await db.exec("update lead_reliability_control set enabled=true,worker_until=now()+interval '5 minutes'");
  let lose=true,commands=0;
- const transport=async(url,options={})=>{const body=options.body?JSON.parse(options.body):{};const res=mockRes();await publicHandler({method:options.method||'GET',url,body,headers:{}},res,env);if(body.reliability_version){commands++;if(lose){lose=false;throw new Error('Lost final reply');}}return Response.json(res.body,{status:res.code});};
+ const transport=async(url,options={})=>{const body=options.body?JSON.parse(options.body):{};const res=mockRes();await publicHandler({method:options.method||'GET',url,body,headers:{}},res,env,'protocol');if(body.reliability_version){commands++;if(lose){lose=false;throw new Error('Lost final reply');}}return Response.json(res.body,{status:res.code});};
  const shared=storage();let page=browser(shared,transport);
  await assert.rejects(page.window.HBHCommands.submit(payload),/Lost final/);
  const original=shared.getItem('hbh_reliable_inquiry');assert.ok(original);assert.ok(!original.includes('Synthetic'));
+ env.LEAD_RELIABILITY_ENABLED='false'; // A protocol rollback must still recover, never use legacy.
  page=browser(shared,transport);const recovered=await page.window.HBHCommands.submit({...payload,name:'Edited after restart'});assert.equal(recovered.ok,true);assert.equal(commands,1);assert.equal(shared.getItem('hbh_reliable_inquiry'),original);
+ env.LEAD_RELIABILITY_ENABLED='true';
  lose=true;await assert.rejects(page.window.HBHCommands.submit({timeline:'Soon',occupancy:'Vacant',condition_flags:[],desired_outcome:'Talk'},true),/Lost final/);
+ env.LEAD_RELIABILITY_ENABLED='false';
  page=browser(shared,transport);assert.equal((await page.window.HBHCommands.submit({timeline:'Edited'},true)).ok,true);assert.equal(commands,2);
  for(const value of shared.map.values()){const record=JSON.parse(value);assert.deepEqual(Object.keys(record).sort(),['recovery_key','request_id']);}
  assert.equal((await db.query('select count(*)::int n from lead_alert_outbox')).rows[0].n,2);
@@ -82,7 +85,7 @@ function hqBrowser(shared,transport,leadId){
  const nodes=new Map();const node=id=>{if(!nodes.has(id))nodes.set(id,{id,disabled:false,value:'',checked:false,hidden:false,innerHTML:'',textContent:'',elements:{},addEventListener(n,f){this[n]=f;},dispatchEvent(e){this[e.type]?.(e);},scrollIntoView(){},reset(){}});return nodes.get(id);};
  const form=node('#ops-workflow');form.elements.authority_confirmed={checked:false};form.elements.service_fit={checked:false};node('#ops-lead').value=leadId;
  const edit={disabled:false,dataset:{}};
- const context=browser(shared,transport);Object.assign(context,{document:{querySelector:node,querySelectorAll:s=>s.startsWith('#ops-workflow')?[edit]:[]},location:{search:''},Event:class{constructor(type){this.type=type;}},FormData:class{*[Symbol.iterator](){yield ['id',leadId];yield ['event','suppress'];yield ['detail','Synthetic UI evidence'];}}});
+ const context=browser(shared,transport);Object.assign(context,{document:{documentElement:{dataset:{commandPhase:'protocol'}},querySelector:node,querySelectorAll:s=>s.startsWith('#ops-workflow')?[edit]:[]},location:{search:''},Event:class{constructor(type){this.type=type;}},FormData:class{*[Symbol.iterator](){yield ['id',leadId];yield ['event','suppress'];yield ['detail','Synthetic UI evidence'];}}});
  vm.runInNewContext(operations,context);return {context,node,form,edit};
 }
 const settle=async()=>{for(let i=0;i<20;i++)await new Promise(r=>setTimeout(r,10));};
@@ -140,7 +143,7 @@ test('bound public controls appear after delayed configuration and actual form c
  const page=browser(shared,transport);page.Event=class{constructor(type){this.type=type;}};page.window.addEventListener=(type,fn)=>listeners.set(type,fn);page.window.dispatchEvent=e=>listeners.get(e.type)?.(e);
  const statusNode={textContent:'',classList:{add(){}},after(){}};const submitButton={textContent:'Send',disabled:false};
  const form={dataset:{formType:'options'},querySelector:s=>s==='.form-status'?statusNode:s==='button[type="submit"]'?submitButton:null,querySelectorAll:()=>[],addEventListener:(type,fn)=>{if(type==='submit')handlers.push(fn);}};
- page.document={createElement:()=>{const b={after(){}};buttons.push(b);return b;},querySelectorAll:s=>s==='form[data-lead-form]'?[form]:[],querySelector:()=>null};
+ page.document={documentElement:{dataset:{commandPhase:'protocol'}},createElement:()=>{const b={after(){}};buttons.push(b);return b;},querySelectorAll:s=>s==='form[data-lead-form]'?[form]:[],querySelector:()=>null};
  Object.assign(page,{spanish:false,attribution:()=>({}),formProps:()=>({form_type:'options'}),say:s=>s,track:(name)=>events.push(name),FormData:class{entries(){return Object.entries(payload);}},store:{get(){return null;}}});
  const source=await readFile(new URL('../static/script.js',import.meta.url),'utf8');vm.runInNewContext(source.slice(source.indexOf('// ---------- Lead forms ----------')),page);
  const first=handlers.map(fn=>fn({preventDefault(){}}));await new Promise(r=>setTimeout(r,5));assert.equal(buttons[0].hidden,true);releaseConfig();await Promise.all(first);assert.equal(buttons[0].hidden,false);assert.ok(events.includes('lead_form_error'));

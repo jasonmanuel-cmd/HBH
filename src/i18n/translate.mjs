@@ -342,7 +342,7 @@ export function translatePage(html, ctx) {
   out = out.replace(/(\shref=")(\/[^"]*)"/g, (whole, lead, path) => `${lead}${esPath(path)}"`);
   // Page identity: language, locale, canonical and social URL.
   out = out
-    .replace('<html lang="en-US">', '<html lang="es-US">')
+    .replace('<html lang="en-US"', '<html lang="es-US"')
     .replace('<meta property="og:locale" content="en_US">', '<meta property="og:locale" content="es_US">\n  <meta property="og:locale:alternate" content="en_US">')
     .replace(`<link rel="canonical" href="${pageUrl}">`, `<link rel="canonical" href="${esUrl}">`)
     .replace(`<meta property="og:url" content="${pageUrl}">`, `<meta property="og:url" content="${esUrl}">`);

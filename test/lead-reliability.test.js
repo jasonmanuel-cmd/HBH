@@ -9,7 +9,7 @@ import { processLeadAlerts,publicAlertSender } from '../lib/lead-alerts.js';
 const env={SUPABASE_URL:'https://synthetic.invalid',SUPABASE_SERVICE_ROLE_KEY:'synthetic',HQ_SESSION_SECRET:'synthetic-only',LEAD_RELIABILITY_ENABLED:'true',RESEND_API_KEY:'synthetic',LEAD_NOTIFY_EMAIL:'one@example.invalid,two@example.invalid'};
 const body=()=>({reliability_version:1,submission_id:randomUUID(),recovery_key:randomUUID(),address:'123 Synthetic St, Test CA',name:'Synthetic Person',phone:'6615550101',email:'person@example.invalid',form_type:'options',consent_response:true});
 const response=()=>({statusCode:200,setHeader(){},status(n){this.statusCode=n;return this;},json(v){this.body=v;return this;}});
-async function invoke(data,config=env,method='POST',url='/api/leads'){const res=response();await handler({method,url,body:data,headers:{}},res,config);return res;}
+async function invoke(data,config=env,method='POST',url='/api/leads'){const res=response();await handler({method,url,body:data,headers:{}},res,config,'protocol');return res;}
 async function fixture(fn){const db=await createTestDatabase(),original=globalThis.fetch;const calls=[];
  await db.exec("update lead_reliability_control set enabled=true,worker_until=now()+interval '5 minutes'");
  const fetcher=async(url,init)=>{
@@ -116,9 +116,9 @@ test('outbox lease expiry/finish fencing and uncertain sends require evidence be
  assert.equal(await rpc(db,'lead_reconcile_alert',{job_id:job.id,decision:'pending',evidence:'Synthetic provider proves nonacceptance'}),true);
  let sends=0;const send=Object.assign(async()=>{sends++;throw new Error('timeout after acceptance');},{validate(){},prepare(){return [];}});
  const localRpc=(name,args={})=>rpc(db,name,args);
- assert.equal((await processLeadAlerts({env:{},rpc:localRpc,send})).disabled,true);assert.equal(sends,0);
- await processLeadAlerts({env:{LEAD_RELIABILITY_DISPATCH_ENABLED:'true'},rpc:localRpc,send});assert.equal(sends,1);
- await processLeadAlerts({env:{LEAD_RELIABILITY_DISPATCH_ENABLED:'true'},rpc:localRpc,send});assert.equal(sends,1);
+ assert.equal((await processLeadAlerts({phase:'protocol',env:{},rpc:localRpc,send})).disabled,true);assert.equal(sends,0);
+ await processLeadAlerts({phase:'protocol',env:{LEAD_RELIABILITY_DISPATCH_ENABLED:'true'},rpc:localRpc,send});assert.equal(sends,1);
+ await processLeadAlerts({phase:'protocol',env:{LEAD_RELIABILITY_DISPATCH_ENABLED:'true'},rpc:localRpc,send});assert.equal(sends,1);
 }));
 
 test('channel snapshots preserve recipients, no webhook URL secrets; consent revoked before claim suppresses ACK',()=>fixture(async(db)=>{
@@ -173,10 +173,16 @@ test('configuration mismatch quarantines only affected job, drains other channel
  await db.exec("update lead_alert_outbox set created_at=now()-interval '1 minute' where channel='webhook'");
  const config={...env,LEAD_WEBHOOK_URL:'https://new.invalid/secret',LEAD_RELIABILITY_DISPATCH_ENABLED:'true'};let sent=0;
  const send=publicAlertSender(config,async()=>{sent++;return Response.json({id:'synthetic-receipt'});});const localRpc=(n,args={})=>rpc(db,n,args);
- await assert.rejects(processLeadAlerts({env:config,rpc:localRpc,send}),/configuration changed/);assert.equal(sent,0);
+ await assert.rejects(processLeadAlerts({phase:'protocol',env:config,rpc:localRpc,send}),/configuration changed/);assert.equal(sent,0);
  assert.equal((await db.query("select state from lead_alert_outbox where channel='webhook'")).rows[0].state,'failed');
  assert.equal((await db.query('select worker_until from lead_reliability_control')).rows[0].worker_until,null);
- await processLeadAlerts({env:config,rpc:localRpc,send});assert.equal(sent,1);
+ await processLeadAlerts({phase:'protocol',env:config,rpc:localRpc,send});assert.equal(sent,1);
  assert.equal((await db.query('select worker_until from lead_reliability_control')).rows[0].worker_until,null);
  assert.equal((await invoke(body())).statusCode,503);
+}));
+
+test('default source phase cannot admit reliable commands even with accidental runtime true; stored replay still resolves',()=>fixture(async(db)=>{
+ const b=body(),r=response();await handler({method:'POST',url:'/api/leads',headers:{},body:b},r,env);
+ assert.equal(r.statusCode,503);assert.equal((await db.query('select count(*)::int n from leads')).rows[0].n,0);
+ await invoke(b);const replay=response();await handler({method:'POST',url:'/api/leads',headers:{},body:b},replay,env);assert.equal(replay.statusCode,200);assert.equal(replay.body.duplicate,true);
 }));
