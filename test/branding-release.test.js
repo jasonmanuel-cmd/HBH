@@ -11,6 +11,7 @@ for (const file of ['index.html', 'about.html', 'contact.html']) {
   test(`${file}: English and Spanish shared branding and licensed identities`, () => {
     const en = pages.find(([f]) => f === file)[1];
     for (const html of [en, translatePage(en, { dict, siteUrl: site.url, filePath: file, report: { missing: new Set() } })]) {
+      assert.doesNotMatch(html, /Harbison Buys Homes/i, `${file}: entire body, metadata and JSON-LD use the current brand`);
       const nodes = graph(html);
       for (const type of ['RealEstateAgent', 'WebSite']) assert.equal(nodes.find(n => n['@type'] === type).name, 'Call Harbison');
       const person = nodes.find(n => n['@type'] === 'Person');

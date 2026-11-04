@@ -227,6 +227,10 @@ test('built dist outputs fingerprinted assets, HQ subroutes, hardened robots.txt
   const llms = readFileSync(new URL('../dist/llms.txt', import.meta.url), 'utf8');
   assert.match(llms, /Licensed agent: Nathanael Harbison, DRE #02059393 \(https:\/\/www2\.dre\.ca\.gov\/publicasp\/pplinfo\.asp\?License_id=02059393\)/);
   assert.match(llms, /Responsible broker: The Mora Partners Inc\., DRE #02227690 \(https:\/\/www2\.dre\.ca\.gov\/publicasp\/pplinfo\.asp\?License_id=02227690\)/);
+  assert.doesNotMatch(llms.split('## FAQ')[1], /Harbison Buys Homes/i);
+  for (const page of ['index.html', 'about.html', 'contact.html', 'es/index.html', 'es/about.html', 'es/contact.html']) {
+    assert.doesNotMatch(readFileSync(`dist/${page}`, 'utf8'), /Harbison Buys Homes/i, page);
+  }
   const files = readdirSync('dist');
   const cssFile = files.find((f) => /^styles\.[0-9a-f]{10}\.css$/.test(f));
   const jsFile = files.find((f) => /^script\.[0-9a-f]{10}\.js$/.test(f));
