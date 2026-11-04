@@ -223,6 +223,10 @@ test('family form enforces explicit consent_response when present and CSP sink r
 
 test('built dist outputs fingerprinted assets, HQ subroutes, hardened robots.txt, stable sitemap dates, and net estimator', () => {
   execSync('node build.mjs', { stdio: 'pipe' });
+  // Reuse this build to avoid concurrent test workers rebuilding the same dist directory.
+  const llms = readFileSync(new URL('../dist/llms.txt', import.meta.url), 'utf8');
+  assert.match(llms, /Licensed agent: Nathanael Harbison, DRE #02059393 \(https:\/\/www2\.dre\.ca\.gov\/publicasp\/pplinfo\.asp\?License_id=02059393\)/);
+  assert.match(llms, /Responsible broker: The Mora Partners Inc\., DRE #02227690 \(https:\/\/www2\.dre\.ca\.gov\/publicasp\/pplinfo\.asp\?License_id=02227690\)/);
   const files = readdirSync('dist');
   const cssFile = files.find((f) => /^styles\.[0-9a-f]{10}\.css$/.test(f));
   const jsFile = files.find((f) => /^script\.[0-9a-f]{10}\.js$/.test(f));

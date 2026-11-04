@@ -20,9 +20,9 @@ const strip = (s = '') => String(s).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&
 const year = new Date().getFullYear();
 // Fallback delay before gtag.js loads for visitors who never interact (see head()).
 const GA_LOAD_DELAY_MS = 4000;
-// Brand assets cut from the Harbison Buys Homes logo sheet (see static/assets).
-const logo = '/assets/logo-horizontal-v2.png'; // full color, transparent, 1172×231
-const logoReverse = '/assets/logo-header-reverse-v2.png'; // ivory + gold for navy grounds, 487×96
+// Wordmarks combine the original H-house mark with Call Harbison text.
+const logo = '/assets/call-harbison.svg'; // full color, transparent, 1172×231
+const logoReverse = '/assets/call-harbison-reverse.svg'; // ivory + gold for navy grounds, 1172×231
 const heroMark = '/assets/h-house-mark-v2.png'; // round house-H mark, transparent, 192×192
 const ogDefault = '/assets/og-default.jpg'; // 1200×630
 const headshot = '/assets/nathanael-harbison.jpg'; // 325×325
@@ -145,7 +145,7 @@ const faqLd = (url, list) => ({
   mainEntity: list.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: strip(a) } })),
 });
 
-function graph({ path, title, description, image, type = 'WebPage', crumbs, extra = [], faq, modified }) {
+function graph({ path, title, description, image, type = 'WebPage', crumbs, extra = [], faq, modified, speakableSelectors = ['h1', '.answer-box'] }) {
   const modDate = modified || contentDate(path);
   const url = `${site.url}${path === '/' ? '/' : path}`;
   const webpage = {
@@ -159,7 +159,7 @@ function graph({ path, title, description, image, type = 'WebPage', crumbs, extr
     inLanguage: 'en-US',
     dateModified: modDate,
     primaryImageOfPage: { '@type': 'ImageObject', url: image },
-    speakable: { '@type': 'SpeakableSpecification', cssSelector: ['h1', '.answer-box'] },
+    speakable: { '@type': 'SpeakableSpecification', cssSelector: speakableSelectors },
     ...(type === 'ProfilePage' ? { mainEntity: { '@id': ids.person } } : {}),
     ...(crumbs ? { breadcrumb: { '@id': `${url}#breadcrumb` } } : {}),
   };
@@ -467,7 +467,7 @@ const crumbNav = (crumbs) =>
 // ---------- Pages ----------
 
 export function homePage() {
-  const title = 'We Buy Houses in Bakersfield & Kern County | Harbison Buys Homes';
+  const title = 'We Buy Houses in Bakersfield & Kern County | Call Harbison';
   const description = 'Property problem? Call Harbison. Sell as-is or compare listing, renovation, and development — licensed, local, no obligation. Call or text (661) 472-7499.';
   const heroImg = images.hero;
   return page(
@@ -584,7 +584,7 @@ ${reassuranceStrip()}
     <div class="glance-grid">
       <div>
         <p class="eyebrow gold-dark">At a Glance</p>
-        <h2 id="glance-h">Harbison Buys Homes, <em>in brief.</em></h2>
+        <h2 id="glance-h">Call Harbison, <em>in brief.</em></h2>
         ${answerBox(`${esc(site.name)} buys houses and land as-is in Bakersfield, Tehachapi, California City, Stallion Springs, and throughout Kern County, California. Led by licensed REALTOR® ${esc(site.agent)} (DRE #${esc(site.dre)}), Harbison compares a direct offer with listing, renovation, or development so owners can choose the best path — with no repairs, showings, or obligation.`, 'In short')}
       </div>
       ${glanceTable()}
@@ -778,9 +778,9 @@ export function aboutPage() {
   <div class="container">
     ${crumbNav(crumbs)}
     <div class="about-hero">
-      <img class="headshot" src="${headshot}" alt="${esc(site.agent)}, REALTOR®, Harbison Buys Homes" width="325" height="325" fetchpriority="high">
+      <img class="headshot" src="${headshot}" alt="${esc(site.agent)}, REALTOR®, Call Harbison" width="325" height="325" fetchpriority="high">
       <div>
-        <p class="eyebrow gold">About Harbison Buys Homes</p>
+        <p class="eyebrow gold">About Call Harbison</p>
         <h1 class="page-title light">Meet <em>${esc(site.agent)}.</em></h1>
         <p class="light-soft about-lead">California-licensed REALTOR® · DRE #${esc(site.dre)} · ${esc(site.brokerage)}</p>
       </div>
@@ -796,7 +796,7 @@ export function aboutPage() {
       <dl class="principles">${about.principles.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
       <h2 class="prose-h">Verify &amp; connect</h2>
       <ul class="link-list">
-        <li><a href="https://www2.dre.ca.gov/publicasp/pplinfo.asp?License_id=${site.dre}" rel="noopener" target="_blank">Look up DRE license #${esc(site.dre)}</a> on the California Department of Real Estate site</li>
+        <li><a href="${site.agentLicenseUrl}" rel="noopener" target="_blank">Look up DRE license #${esc(site.dre)}</a> on the California Department of Real Estate site</li>
         ${site.agentProfiles.map((u) => `<li><a href="${u}" rel="noopener me" target="_blank">${esc(u.replace(/^https:\/\/(www\.)?/, ''))}</a></li>`).join('\n        ')}
       </ul>
     </article>
@@ -809,7 +809,7 @@ ${finalCta('/#lead-form')}`
 
 export function guidesIndexPage() {
   const title = pageTitle('Seller Guides for Kern County Homeowners');
-  const description = 'Plain-English guides on selling a house as-is in California, cash offers vs. listing, and selling an inherited house — from Harbison Buys Homes.';
+  const description = 'Plain-English guides on selling a house as-is in California, cash offers vs. listing, and selling an inherited house — from Call Harbison.';
   const crumbs = [['Home', '/'], ['Guides', '/guides']];
   const image = sized(images.renovate, 1200, 630);
   return page(
@@ -985,13 +985,13 @@ ${finalCta('/#lead-form')}`
 
 export function contactPage() {
   const path = '/contact';
-  const title = pageTitle('Contact Harbison Buys Homes');
+  const title = pageTitle('Contact Call Harbison');
   const description = `Call or text ${site.phone}, email ${site.email}, or send the property address. Serving Bakersfield, Tehachapi, and Kern County.`;
   const crumbs = [['Home', '/'], ['Contact', path]];
   const image = `${site.url}${ogDefault}`;
   const contactLd = { '@type': 'ContactPage', '@id': `${site.url}${path}#contact`, about: { '@id': `${site.url}/#business` } };
   return page(
-    { title, description, path, image, pageType: 'contact', ld: graph({ path, title, description, image, crumbs, extra: [contactLd] }) },
+    { title, description, path, image, pageType: 'contact', ld: graph({ path, title, description, image, crumbs, extra: [contactLd], speakableSelectors: ['h1'] }) },
     `<section class="section cream page-top">
   <div class="container form-band">
     <div>

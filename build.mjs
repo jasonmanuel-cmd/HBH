@@ -125,7 +125,8 @@ Key facts:
 - Response time: typically within 24 hours
 - Languages: English and Spanish. The whole site is also available in Spanish under /es
 - Cost to request options: free, no obligation; no commission paid to Harbison on a direct sale
-- Licensed agent: ${site.agent}, DRE #${site.dre} (${site.brokerageUrl})
+- Licensed agent: ${site.agent}, DRE #${site.dre} (${site.agentLicenseUrl})
+- Responsible broker: ${site.brokerage}, DRE #${site.brokerageDre} (${site.brokerageUrl})
 
 ## Main pages
 ${link('/', 'Home', 'overview, process, direct sale vs. listing comparison, FAQ')}

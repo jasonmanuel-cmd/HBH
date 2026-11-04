@@ -24,7 +24,7 @@ test('licensed brokerage is a distinct verified entity, not the Harbison Standar
   assert.match(about, /License_id=02059393/);
   assert.match(about, /The Mora Partners Inc\. · DRE #02227690/);
   assert.doesNotMatch(about, /Harbison Standard, a Kern County real estate brokerage/);
-  assert.ok(site.agentProfiles.includes('https://www.harbisonstandard.com/about'));
+  assert.ok(site.agentProfiles.includes('https://www.callharbison.com/about'));
 });
 
 test('call and text buttons invoke the appropriate separate phone actions in both languages', () => {

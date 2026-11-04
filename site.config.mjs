@@ -25,7 +25,7 @@ export function resolveGtmId(raw) {
 }
 
 export default {
-  name: 'Harbison Buys Homes',
+  name: 'Call Harbison',
   tagline: 'Property problem? Call Harbison.',
   // Production URL (used for canonical links, sitemap, social cards). Override with SITE_URL on Vercel.
   url: normalizeSiteUrl(process.env.SITE_URL),
@@ -37,11 +37,12 @@ export default {
   // Licensee info — California requires the DRE number on advertising.
   agent: 'Nathanael Harbison',
   dre: '02059393',
+  agentLicenseUrl: 'https://www2.dre.ca.gov/publicasp/pplinfo.asp?License_id=02059393',
   brokerage: 'The Mora Partners Inc.',
   brokerageDre: '02227690',
   brokerageUrl: 'https://www2.dre.ca.gov/publicasp/pplinfo.asp?License_id=02227690',
   agentProfiles: [
-    'https://www.harbisonstandard.com/about',
+    'https://www.callharbison.com/about',
     'https://www.facebook.com/nate85.realtor',
     'https://www.instagram.com/nathanaelharbison',
     'https://www.youtube.com/@NathanaelRealEstate',
