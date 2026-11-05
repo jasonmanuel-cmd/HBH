@@ -32,7 +32,7 @@ export const PAGE_DATES = {
   '/how-it-works': '2026-10-23',
   '/sell-loved-ones-house': '2026-10-23',
   '/areas/kern-county': '2026-10-23',
-  '/guides/cash-offer-vs-listing': '2026-10-23',
+  '/about': '2026-11-05',
   '/privacy': '2026-10-17',
 };
 export const contentDate = (path, fallback = BUILD_DATE) => PAGE_DATES[path] || fallback;
@@ -852,7 +852,7 @@ export function guidePage(g) {
     headline: g.title,
     description: g.description,
     image,
-    datePublished: g.updated,
+    datePublished: g.published || g.updated,
     dateModified: g.updated,
     author: { '@id': ids.org },
     publisher: { '@id': ids.org },
@@ -867,7 +867,7 @@ export function guidePage(g) {
       ${crumbNav(crumbs)}
       <p class="eyebrow gold-dark">Seller Guide</p>
       <h1 class="page-title guide-title">${esc(g.title)}</h1>
-      <p class="updated">By the ${esc(site.name)} team · Published <time datetime="${g.updated}">${niceDate(g.updated)}</time> · Last reviewed <time datetime="${contentDate(path, g.updated)}">${niceDate(contentDate(path, g.updated))}</time></p>
+      <p class="updated">By the ${esc(site.name)} team · Published <time datetime="${g.published || g.updated}">${niceDate(g.published || g.updated)}</time> · Last updated <time datetime="${g.updated}">${niceDate(g.updated)}</time></p>
       ${answerBox(esc(g.answer), 'The short answer')}
       <nav class="toc" aria-label="In this guide"><p class="answer-label">In this guide</p><ol>${toc}</ol></nav>
       ${g.sections.map(([h, paras], i) => `<section id="s${i + 1}"><h2 class="prose-h">${esc(h)}</h2>${paras.map((p) => (p.startsWith('<ul') || p.startsWith('<div') ? p : `<p>${p}</p>`)).join('')}</section>`).join('\n      ')}

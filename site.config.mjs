@@ -43,6 +43,7 @@ export default {
   brokerageUrl: 'https://www2.dre.ca.gov/publicasp/pplinfo.asp?License_id=02227690',
   agentProfiles: [
     'https://www.callharbison.com/about',
+    'https://www.zillow.com/profile/nate85%20realtor',
     'https://www.facebook.com/nate85.realtor',
     'https://www.instagram.com/nathanaelharbison',
     'https://www.youtube.com/@NathanaelRealEstate',

@@ -63,16 +63,17 @@ export const guides = [
     short: 'Selling a House As-Is in California',
     description: 'What “as-is” really means in California, which disclosures you still owe, how as-is offers are calculated, typical timelines and costs, and a seller checklist.',
     image: images.renovate,
-    updated,
-    answer: 'To sell a house as-is in California, you sell it in its current condition without making repairs — but you still must disclose known material defects. You can list it as-is on the open market or sell directly to a buyer like Harbison. Direct as-is sales usually close faster and skip repairs, showings, and lender inspections.',
+    published: updated,
+    updated: '2026-11-05',
+    answer: 'To sell a house as-is in California, you sell it in its current condition without agreeing to repairs, while still meeting applicable disclosure duties. You can list it as-is or consider a direct buyer. A cash purchase avoids lender requirements, but buyer inspections, access, contingencies, and timing depend on the contract.',
     sections: [
       ['What does “as-is” mean in California?', [
-        'Selling as-is means you will not make repairs or give credits for the property’s condition. The buyer accepts the home in its current state.',
+        'Selling as-is means offering the property in its current condition without agreeing in advance to repairs. Buyers may still request inspections, repairs, or credits; the contract determines what each party agrees to.',
         'As-is does not remove your duty to disclose. Most California residential sellers must complete a Transfer Disclosure Statement (TDS) and a Natural Hazard Disclosure, and homes built before 1978 require a federal lead-based paint disclosure. Some transfers — such as certain court-supervised probate sales — are exempt from the TDS form, but concealing known problems can still create liability. Ask your agent or attorney which forms apply to you.',
       ]],
       ['What are my options for selling as-is?', [
         '<strong>1. List as-is on the MLS.</strong> You reach the most buyers, but many use loans whose appraisals and inspections can stall a sale on a home with serious condition issues.',
-        '<strong>2. Sell to a direct buyer.</strong> A company like Harbison buys with its own funds, so there is no lender inspection. You trade some price for speed and certainty.',
+        '<strong>2. Sell to a direct buyer.</strong> If the purchase does not use financing, there is no lender-required appraisal or inspection. The buyer may still inspect or obtain an appraisal, and the contract controls access, contingencies, and closing timing.',
         '<strong>3. Make targeted repairs, then list.</strong> Sometimes a few high-impact fixes raise the price by more than they cost. A good buyer or agent will tell you when that is the case.',
       ]],
       ['How are as-is offers calculated?', [
@@ -97,11 +98,12 @@ export const guides = [
     short: 'Cash Offer vs. Listing',
     description: 'A side-by-side look at selling to a cash buyer versus listing with an agent in Kern County — net proceeds, timelines, risks, and when each makes sense.',
     image: images.list,
-    updated: '2026-10-23',
+    published: '2026-10-23',
+    updated: '2026-11-05',
     answer: 'Listing usually brings a higher sale price for a move-in-ready home, while a cash offer can net a similar result for a house that needs major repairs once you subtract repair costs, commissions, holding costs, and time. The right choice depends on the home’s condition, your timeline, and how much uncertainty you can accept.',
     sections: [
       ['What is the difference between a cash offer and listing?', [
-        'With a <strong>cash offer</strong>, a buyer purchases your home directly with their own funds — no appraisal, lender inspection, or showings. With a <strong>listing</strong>, an agent markets the home to the public and buyers usually finance their purchase.',
+        'With a <strong>cash offer</strong>, the purchase does not depend on buyer financing, so there is no lender-required appraisal or inspection. The buyer may still inspect, obtain an appraisal, or request property visits under the contract. With a <strong>listing</strong>, an agent markets the home to the public; buyers may pay cash or use financing.',
       ]],
       ['An illustrative example', [
         'The numbers below are hypothetical, for illustration only. Every property is different.',
@@ -124,13 +126,14 @@ export const guides = [
     short: 'Selling an Inherited House in California',
     description: 'Do you need probate to sell an inherited house in California? Plain-English answers on trusts, probate sales, taxes, Prop 19, co-heirs, and timelines.',
     image: images.classic,
-    updated,
+    published: updated,
+    updated: '2026-11-05',
     answer: 'You can sell an inherited house in California, but who can sign and when depends on how the title was held. Homes in a living trust can usually be sold by the trustee without court involvement. Homes that go through probate can often be sold by the executor during probate, sometimes without court confirmation under the Independent Administration of Estates Act.',
     sections: [
       ['Do I need probate to sell an inherited house?', [
         'Not always. It depends on how the owner held title:',
         '<ul><li><strong>Living trust:</strong> the successor trustee can typically sell without probate.</li><li><strong>Joint tenancy or community property with right of survivorship:</strong> the surviving owner takes title and can sell after recording the proper documents.</li><li><strong>Transfer-on-death deed:</strong> the named beneficiary can take title without probate.</li><li><strong>Owned solely, no trust:</strong> probate is usually required, although California has simplified procedures for smaller estates and, for deaths on or after April 1, 2025, a streamlined petition for a primary residence valued up to $750,000.</li></ul>',
-        'Thresholds change periodically, so confirm current limits with a probate attorney.',
+        'The primary-residence procedure has eligibility and filing requirements; it is not an automatic transfer. See <a href="https://selfhelp.courts.ca.gov/probate/simple-transfer">California Courts: simplified procedures to transfer an estate</a>, and confirm the applicable procedure with a probate attorney.',
       ]],
       ['Can you sell a house during probate?', [
         'Yes. If the executor or administrator has <strong>full authority</strong> under the Independent Administration of Estates Act (IAEA), they can usually sell after giving heirs a Notice of Proposed Action, without a court hearing. With <strong>limited authority</strong>, the sale must be confirmed by the court, and other buyers may overbid at the hearing.',
@@ -139,7 +142,8 @@ export const guides = [
         'California probate commonly takes nine months to a year and a half from start to finish. A trust sale can move much faster. A direct buyer can often close within weeks once the person with authority is ready to sign.',
       ]],
       ['What taxes apply when you sell an inherited home?', [
-        'Inherited property generally receives a “stepped-up” tax basis equal to its value at the date of death, which often reduces or eliminates capital gains if you sell soon after. California’s Proposition 19 limits when children can keep a parent’s lower property tax assessment — generally only if the child moves in as their primary residence. Talk to a tax professional about your situation.',
+        'Inherited property generally takes a tax basis equal to fair market value at the date of death, although exceptions and alternate valuation rules may apply. That value can be higher or lower than the prior basis. Selling soon after inheriting does not guarantee there will be no taxable gain. See <a href="https://www.irs.gov/faqs/interest-dividends-other-types-of-income/gifts-inheritances/gifts-inheritances">IRS guidance on sales of inherited property</a> and consult a tax professional.',
+        'For a qualifying family home, Proposition 19 generally requires the inheriting child to use it as a principal residence and meet filing requirements to obtain the intergenerational property-tax exclusion; value limits apply. Family farms have separate rules. See the <a href="https://boe.ca.gov/prop19/">California Board of Equalization Proposition 19 guidance</a> and ask the county assessor or a tax professional how the rules apply.',
       ]],
       ['What if the heirs disagree?', [
         'Co-heirs who disagree can often resolve it by getting clear numbers: an as-is offer, a listing estimate, and the cost of repairs. If they still cannot agree, a California court can order a partition sale — usually the slowest and most expensive route.',
