@@ -4,10 +4,10 @@ import { images } from './content.mjs';
 export const californiaCity = {
   slug: 'california-city',
   geo: [35.1258, -117.9859],
-  answer: 'Harbison Buys Homes buys houses and vacant land in California City, CA, including desert lots, homes needing repairs, and properties owned by out-of-area sellers. Harbison evaluates each parcel’s access, utilities, and zoning, and can buy as-is or help you decide whether holding, listing, or selling now makes more sense.',
+  answer: 'Call Harbison buys houses and vacant land in California City, CA, including desert lots, homes needing repairs, and properties owned by out-of-area sellers. Harbison evaluates each parcel’s access, utilities, and zoning, and can buy as-is or help you decide whether holding, listing, or selling now makes more sense.',
   name: 'California City',
   title: 'Sell Your House or Land in California City, CA',
-  description: 'Selling a house or vacant lot in California City? Harbison Buys Homes buys as-is and gives straight answers on land value, access, and utilities.',
+  description: 'Selling a house or vacant lot in California City? Call Harbison buys as-is and gives straight answers on land value, access, and utilities.',
   headline: 'California City homes &amp; land. <em>Straight answers.</em>',
   lead: 'California City covers a huge area in eastern Kern County, with established neighborhoods alongside thousands of vacant desert parcels — and value can vary widely from one lot to the next.',
   image: images.land,

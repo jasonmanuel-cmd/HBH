@@ -227,7 +227,18 @@ test('built dist outputs fingerprinted assets, HQ subroutes, hardened robots.txt
   const llms = readFileSync(new URL('../dist/llms.txt', import.meta.url), 'utf8');
   assert.match(llms, /Licensed agent: Nathanael Harbison, DRE #02059393 \(https:\/\/www2\.dre\.ca\.gov\/publicasp\/pplinfo\.asp\?License_id=02059393\)/);
   assert.match(llms, /Responsible broker: The Mora Partners Inc\., DRE #02227690 \(https:\/\/www2\.dre\.ca\.gov\/publicasp\/pplinfo\.asp\?License_id=02227690\)/);
-  assert.doesNotMatch(llms.split('## FAQ')[1], /Harbison Buys Homes/i);
+  assert.doesNotMatch(llms, /Harbison Buys Homes/i, 'all llms.txt sections use the current brand');
+  const serviceAreas = llms.split('## Service areas')[1].split('## Seller guides')[0];
+  for (const slug of ['bakersfield', 'tehachapi', 'stallion-springs', 'california-city', 'kern-county']) {
+    const en = readFileSync(`dist/areas/${slug}.html`, 'utf8');
+    const answer = en.match(/<div class="answer-box"><p class="answer-label">[^<]*<\/p><p>([\s\S]*?)<\/p><\/div>/)[1];
+    const summary = serviceAreas.split('\n').find(line => line.includes(`/areas/${slug})`));
+    assert.ok(summary?.endsWith(`: ${answer}`), `${slug}: llms summary matches visible quick answer`);
+    assert.match(summary, /Call Harbison/);
+    for (const prefix of ['', 'es/']) {
+      assert.doesNotMatch(readFileSync(`dist/${prefix}areas/${slug}.html`, 'utf8'), /Harbison Buys Homes/i, `${prefix}${slug}`);
+    }
+  }
   for (const page of ['index.html', 'about.html', 'contact.html', 'es/index.html', 'es/about.html', 'es/contact.html']) {
     assert.doesNotMatch(readFileSync(`dist/${page}`, 'utf8'), /Harbison Buys Homes/i, page);
   }

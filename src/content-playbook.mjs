@@ -211,10 +211,10 @@ export const newSituations = [
 export const stallionSprings = {
   slug: 'stallion-springs',
   geo: [35.0886, -118.6426],
-  answer: 'Harbison Buys Homes buys and helps sell homes and land in Stallion Springs, in the Tehachapi Mountains west of Tehachapi. Harbison reviews as-is condition, lot size, access, and utilities, and compares a direct sale with listing or improving the property first.',
+  answer: 'Call Harbison buys and helps sell homes and land in Stallion Springs, in the Tehachapi Mountains west of Tehachapi. Harbison reviews as-is condition, lot size, access, and utilities, and compares a direct sale with listing or improving the property first.',
   name: 'Stallion Springs',
   title: 'Sell Your House or Land in Stallion Springs, CA',
-  description: 'Selling a home or lot in Stallion Springs? Harbison Buys Homes reviews mountain properties as-is and compares a direct sale with listing.',
+  description: 'Selling a home or lot in Stallion Springs? Call Harbison reviews mountain properties as-is and compares a direct sale with listing.',
   headline: 'Stallion Springs homes &amp; land. <em>Clear options.</em>',
   lead: 'Stallion Springs sits in the Tehachapi Mountains west of Tehachapi, with custom homes, larger lots, and vacant parcels that each call for a different approach.',
   image: images.valley,
