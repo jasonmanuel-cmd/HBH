@@ -98,6 +98,14 @@ If no storing destination is configured (or if a configured Supabase CRM fails t
 
 ## Lead form (options form)
 
+Buyer, investment-property and home-value conversations now have dedicated paths at
+`/buyers`, `/investors` and `/home-value` (also in Spanish). They use the existing
+`options` form type with distinct `route_interest` labels, require response consent,
+and do not require ownership or an address. They receive a neutral confirmation,
+without seller follow-up questions. See the [search implementation and measurement
+record](docs/SEARCH-IMPLEMENTATION-2026-11-06.md) for service boundaries, source
+evidence, recovery behavior and the manual 30/60/90-day review plan.
+
 Three steps, per the site playbook: **situation → address (street, city, ZIP) → contact + consent**. The lead is created at step 3. Timeline, occupancy, condition, and goals are asked afterward on `/thank-you` and attached to the same lead (`{ kind: 'details' }` → `/api/leads`). Transactional consent (required) and marketing consent (optional) are stored separately. The database lives in the Supabase project **harbison-buys-homes** (shared with the Lead Desk app; the website only adds `leads`, `partners`, `lead_events`, `ad_spend`, and `v_*` views). `schema.sql` and migrations 002–004 were applied on 2026-09-24 as `website_001`–`website_004`.
 
 Analytics events (GTM/GA4, no personal data): `phone_click`, `cta_click`, `lead_form_view`, `lead_form_start`, `lead_form_step_complete`, `lead_form_submit`, `lead_form_error`, `lead_form_success`, `generate_lead`, `guide_view`, `situation_page_view`, `location_page_view`.

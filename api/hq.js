@@ -18,7 +18,7 @@ import { notificationRecipients } from './leads.js';
 export const STATUSES = ['new', 'contact_attempted', 'connected', 'qualified', 'appointment_set', 'property_reviewed', 'options_presented', 'nurture', 'under_contract', 'closed_won', 'closed_lost', 'not_a_fit', 'spam'];
 const CLOSED = ['closed_won', 'closed_lost', 'not_a_fit', 'spam'];
 export const OUTCOMES = ['direct_purchase', 'listing', 'buyer_purchase', 'referral_out', 'none'];
-export const ROUTES = ['direct', 'listing', 'renovate', 'development', 'not_ready'];
+export const ROUTES = ['direct', 'listing', 'renovate', 'development', 'not_ready', 'buyer', 'investor', 'home_value'];
 const PARTNER_CATEGORIES = ['placement', 'senior_community', 'estate_sale', 'fiduciary', 'elder_law', 'move_manager', 'other'];
 const PARTNER_STATUSES = ['prospect', 'contacted', 'meeting_set', 'active', 'paused', 'declined'];
 const PURGE_CONFIRMATION = 'DELETE';

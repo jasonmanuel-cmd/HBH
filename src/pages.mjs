@@ -5,6 +5,8 @@ import {
   thankYouPage, notFoundPage, privacyPage, termsPage, familyPage, partnerGuidePage,
 } from './templates.mjs';
 import { family } from './family.mjs';
+import { inquiryPages } from './content-search.mjs';
+import { inquiryPage } from './templates.mjs';
 
 /** @returns {Array<[file: string, html: string, path: string|null, lastmod?: string]>} */
 export function buildPages() {
@@ -13,6 +15,7 @@ export function buildPages() {
     ['about.html', aboutPage(), '/about'],
     ['how-it-works.html', howItWorksPage(), '/how-it-works'],
     ['contact.html', contactPage(), '/contact'],
+    ...inquiryPages.map(item => [`${item.slug}.html`, inquiryPage(item), `/${item.slug}`, '2026-11-06']),
     [`${family.path.slice(1)}.html`, familyPage(), family.path],
     ['family-property-guide.html', partnerGuidePage(), null],
     ['situations/index.html', situationsIndexPage(), '/situations'],

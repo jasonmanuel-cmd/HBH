@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import hq,{makeSession} from '../api/hq.js';
-import publicHandler from '../api/leads.js';
+import publicHandler, { leadIpLimiter, leadPhoneLimiter } from '../api/leads.js';
 import { installOperationsMock } from '../dev/operations-mock.mjs';
 import { rpc } from '../dev/test-database.mjs';
 const helper=await readFile(new URL('../static/command-recovery.js',import.meta.url),'utf8');
@@ -44,6 +44,31 @@ function browser(shared,fetcher,sharedLocks=locks()){
  vm.runInNewContext(helper,context);return context;
 }
 const payload={address:'123 Synthetic Road',name:'Synthetic Public',phone:'6615550101',email:'public@example.invalid',form_type:'options',consent_response:true};
+
+test('cross-path recovery retains the original inquiry; explicit new buyer/investor/value inquiries have no seller capability',()=>fixture(async({db,env})=>{
+ env.SELLER_OPERATIONS_ENABLED='false';env.LEAD_RELIABILITY_ENABLED='true';env.RESEND_API_KEY='synthetic';
+ await db.exec("update lead_reliability_control set enabled=true,worker_until=now()+interval '5 minutes'");
+ let lose=true,commands=0;
+ const transport=async(url,options={})=>{const body=options.body?JSON.parse(options.body):{};const res=mockRes();await publicHandler({method:options.method||'GET',url,body,headers:{}},res,env,'protocol');if(body.reliability_version){commands++;if(lose){lose=false;throw new Error('Lost reply');}}return Response.json(res.body,{status:res.code});};
+ const shared=storage();leadIpLimiter.reset();leadPhoneLimiter.reset();
+ let page=browser(shared,transport);await assert.rejects(page.window.HBHCommands.submit(payload),/Lost reply/);
+ page=browser(shared,transport);page.location.pathname='/investors';
+ const original=await page.window.HBHCommands.submit({...payload,address:'',route_interest:'investor'});
+ assert.equal(original.duplicate,true);assert.equal(commands,1);assert.equal(await page.window.HBHCommands.sellerDetailsAvailable(),true);
+ for(const route of ['buyer','investor','home_value']){
+  leadIpLimiter.reset();leadPhoneLimiter.reset();await page.window.HBHCommands.startNew();
+  const result=await page.window.HBHCommands.submit({...payload,address:'',route_interest:route});
+  assert.equal(result.state,'committed');assert.equal(result.details_token,'');
+  assert.equal(await page.window.HBHCommands.sellerDetailsAvailable(),false);
+  const saved=(await db.query('select address,route_interest,consent_response,consent_marketing from leads where id=$1',[result.id])).rows[0];
+  assert.equal(saved.address,'');assert.equal(saved.route_interest,route);assert.equal(saved.consent_response,true);assert.equal(saved.consent_marketing,false);
+  page=browser(shared,transport);page.location.pathname='/es/buyers';
+  assert.equal((await page.window.HBHCommands.submit({...payload,route_interest:'direct'})).duplicate,true);
+  assert.equal(await page.window.HBHCommands.sellerDetailsAvailable(),false);
+  await assert.rejects(page.window.HBHCommands.submit({occupancy:'Vacant'},true),/expired/);
+ }
+ assert.equal(commands,4);
+}));
 test('fresh browser restart recovers lost inquiry and details replies through actual SQL route; storage stays opaque',()=>fixture(async({db,env})=>{
  env.SELLER_OPERATIONS_ENABLED='false';env.LEAD_RELIABILITY_ENABLED='true';env.RESEND_API_KEY='synthetic';
  await db.exec("update lead_reliability_control set enabled=true,worker_until=now()+interval '5 minutes'");

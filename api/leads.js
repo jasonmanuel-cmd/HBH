@@ -35,6 +35,7 @@ const detailsSecret = (env) => env.HQ_SESSION_SECRET || env.CRM_INGEST_SECRET ||
 const signDetails = (payload, secret) => createHmac('sha256', `lead-details|${secret}`).update(payload).digest('base64url');
 
 export function makeDetailsToken({ id, phone, address, details_revision, details_expires_at }, env = process.env, now = Date.now()) {
+  if (!address) return ''; // Address-free inquiries never receive seller-detail capabilities.
   const secret = detailsSecret(env);
   if (!secret) return '';
   const payload = Buffer.from(JSON.stringify({ id: id || null, phone, address, ...(details_revision === undefined ? {} : { details_revision }), exp: details_expires_at ?? now + DETAILS_TTL_MS })).toString('base64url');
@@ -104,7 +105,13 @@ export function parseLead(body) {
   if (lead.consent_response || lead.consent_marketing) lead.consent_at = new Date().toISOString();
   lead.channel = classifyChannel(lead);
   const errors = [];
-  if (lead.address.length < 5) errors.push('address');
+  const generalInquiry = lead.form_type === 'options' && ['buyer', 'investor', 'home_value'].includes(lead.route_interest);
+  // Existing text columns support address-free inquiries, just as the Standard bridge does.
+  if (generalInquiry) {
+    lead.situation = { buyer: 'Home purchase inquiry', investor: 'Investment property inquiry', home_value: 'Home value inquiry' }[lead.route_interest];
+    lead.address = lead.street = lead.city = lead.zip = '';
+  }
+  if (!generalInquiry && lead.address.length < 5) errors.push('address');
   if (lead.name.length < 2) errors.push('name');
   if (lead.phone.replace(/\D/g, '').length < 10) errors.push('phone');
   if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) errors.push('email');
@@ -162,7 +169,7 @@ async function sendEmail(lead, env) {
       from: env.LEAD_FROM_EMAIL || 'Harbison Leads <onboarding@resend.dev>',
       to: notificationRecipients(env),
       reply_to: lead.email || undefined,
-      subject: `New ${lead.form_type === 'family_transition' ? 'family property' : 'property'} lead [${lead.channel}]${wantsSpanish(lead) ? ' [ES]' : ''}: ${lead.address}`,
+      subject: `New ${lead.form_type === 'family_transition' ? 'family property' : 'property'} lead [${lead.channel}]${wantsSpanish(lead) ? ' [ES]' : ''}: ${lead.address || lead.situation}`,
       html: `<h2 style="font-family:Georgia,serif;color:#031f2b">New property lead</h2><table>${rows}</table><p><a href="tel:${escapeHtml(lead.phone)}">Call ${escapeHtml(lead.name)}</a>${hqLink}</p>`,
     }),
   });
@@ -185,7 +192,7 @@ async function saveToSupabase(lead, env) {
   if (res.ok) return readInsertResult(res, lead, env);
   const text = await res.text();
   // Migration 002 not run yet? Save the core lead instead of losing it.
-  if (res.status === 400 && /column/i.test(text) && env.SELLER_OPERATIONS_ENABLED !== 'true') {
+  if (res.status === 400 && /column/i.test(text) && env.SELLER_OPERATIONS_ENABLED !== 'true' && !['buyer', 'investor', 'home_value'].includes(lead.route_interest)) {
     console.warn('[leads] Supabase missing new columns — run supabase/migrations/002_family_transition.sql. Saving core fields.');
     const core = Object.fromEntries(LEGACY_FIELDS.map((k) => [k, lead[k] || null]));
     const retry = await fetchWithRetry(endpoint, {
@@ -422,7 +429,7 @@ export default async function handler(req, res, env = process.env, phase = COMMA
   if (body.kind === 'details') {
     if (body.details_token && detailsSecret(env)) {
       const verified = readDetailsToken(body.details_token, env);
-      if (!verified) return res.status(401).json({ ok: false, error: 'Invalid or expired lead reference.' });
+      if (!verified || !verified.address) return res.status(401).json({ ok: false, error: 'Invalid or expired lead reference.' });
       body = { ...body, id: verified.id, phone: verified.phone, address: verified.address };
     }
     const d = parseDetails(body);
@@ -492,7 +499,7 @@ async function reliableRequest(body, res, env, phase) {
   let lead,intent,lead_id,kind;
   if(body.kind==='details'){
    const verified=readDetailsToken(body.details_token,env);
-   if(!verified||!uuid(verified.id)||!Number.isInteger(verified.details_revision))return reply(401,{ok:false,error:'Invalid or expired lead reference.',state:'unresolved'});
+   if(!verified||!verified.address||!uuid(verified.id)||!Number.isInteger(verified.details_revision))return reply(401,{ok:false,error:'Invalid or expired lead reference.',state:'unresolved'});
    if(body.expected_revision!==verified.details_revision)return reply(409,{ok:false,error:'Details reference changed.',state:'unresolved'});
    lead=parseDetails({...body,id:verified.id,phone:verified.phone,address:verified.address});
    lead_id=verified.id.toLowerCase();kind='details';intent={...lead,id:lead_id,expected_revision:body.expected_revision};

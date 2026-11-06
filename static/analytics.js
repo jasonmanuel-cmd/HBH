@@ -36,8 +36,8 @@
   try { host = document.referrer ? new URL(document.referrer).hostname : null; } catch {}
   const referrerType = !host || host === location.hostname ? 'direct' : /google|bing|duckduckgo|yahoo/.test(host) ? 'search'
     : /youtube|facebook|instagram|linkedin|tiktok|reddit/.test(host) ? 'social' : 'referral';
-  const params = new URLSearchParams(location.search);
-  if (first) send('start', { referrerHost: host, referrerType, utm: Object.fromEntries(['source', 'medium', 'campaign'].map((k) => [k, params.get(`utm_${k}`)])) });
+  // Raw campaign parameters may contain contact data; retain them only with the inquiry in CRM.
+  if (first) send('start', { referrerHost: host, referrerType });
   send('pageview', { title: document.title });
 
   const MAX_SECONDS = 1800;

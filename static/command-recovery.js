@@ -66,5 +66,6 @@
   button.onclick=async()=>{button.disabled=true;try{const r=await resolve(details);if(r.state==='committed'){statusNode.textContent='Original request was saved.';if(!details)location.href=location.pathname.startsWith('/es')?'/es/thank-you':'/thank-you';}else statusNode.textContent='Original request was not applied. You can review and submit again.';}catch(e){statusNode.textContent=e.message;}finally{button.disabled=false;show();}};
   window.addEventListener?.('hbh-command-state',show);form.addEventListener('submit',()=>setTimeout(show,0));show();
  }
- window.HBHCommands={read,write,remove,lock,submit,resolve,startNew,bind};
+ const sellerDetailsAvailable=async()=>{try{const ref=await inquiry();return Boolean(ref.details_token);}catch{return false;}};
+ window.HBHCommands={read,write,remove,lock,submit,resolve,startNew,bind,sellerDetailsAvailable};
 })();

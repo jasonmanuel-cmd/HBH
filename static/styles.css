@@ -483,3 +483,6 @@ main>section:not(:first-child),.local-band{content-visibility:auto;contain-intri
   .menu-toggle{min-width:44px}
   .lang-switch{padding:0 10px;font-size:.76rem}
 }
+/* Keep the investor introduction above the existing property-options card. */
+.inquiry-card { margin-bottom: 1.25rem; }
+.details-card > summary { cursor: pointer; font-weight: 700; margin-bottom: 1rem; }

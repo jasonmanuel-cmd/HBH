@@ -8,7 +8,7 @@ const STAGES = {
   nurture: 'Nurture', under_contract: 'Under contract', closed_won: 'Closed — won', closed_lost: 'Closed — lost',
   not_a_fit: 'Not a fit', spam: 'Spam',
 };
-const ROUTES = { direct: 'Sell direct', listing: 'List', renovate: 'Renovate then sell', development: 'Development', not_ready: 'Not ready yet' };
+const ROUTES = { direct: 'Sell direct', listing: 'List', renovate: 'Renovate then sell', development: 'Development', not_ready: 'Not ready yet', buyer: 'Home purchase inquiry', investor: 'Investment property inquiry', home_value: 'Home value inquiry' };
 const BRANDS = { harbison_standard: 'Harbison Standard', call_harbison: 'Call Harbison' };
 const brandOf = (l) => (l.form_type === 'harbison_standard' ? 'harbison_standard' : 'call_harbison');
 const pillClass = (s) => (s === 'new' ? 'new' : s === 'closed_won' ? 'won' : ['closed_lost', 'not_a_fit', 'spam'].includes(s) ? 'lost' : ['appointment_set', 'options_presented', 'under_contract'].includes(s) ? 'hot' : '');

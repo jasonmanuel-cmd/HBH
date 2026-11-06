@@ -19,6 +19,12 @@ export default async function handler(req, res, env = process.env) {
   if (!path.startsWith('/') || path.startsWith('//') || /^\/(hq|api)(\/|$)/.test(path)) return res.status(400).json({ ok: false });
   const ip = clientIp(req) || 'unknown';
   const visitor = createHmac('sha256', env.CRM_INGEST_SECRET).update(`call_harbison:${new Date().toISOString().slice(0, 10)}:${ip}`).digest('hex');
+  // Explicit transport allowlist: never forward inquiry fields or arbitrary campaign/title text.
+  const payload = { sid: body.sid, type: body.type, site: 'call_harbison', path };
+  if (/^[a-f0-9-]{36}$/i.test(body.pageToken || '')) payload.pageToken = body.pageToken;
+  if (Number.isFinite(body.durationSeconds)) payload.durationSeconds = Math.max(0, Math.min(1800, Math.round(body.durationSeconds)));
+  if (['direct', 'search', 'social', 'referral'].includes(body.referrerType)) payload.referrerType = body.referrerType;
+  if (typeof body.referrerHost === 'string' && /^[a-z0-9.-]{1,253}$/i.test(body.referrerHost)) payload.referrerHost = body.referrerHost;
   try {
     const response = await fetch('https://www.harbisonstandard.com/api/track', {
       method: 'POST', signal: AbortSignal.timeout(10000), redirect: 'error',
@@ -30,7 +36,7 @@ export default async function handler(req, res, env = process.env) {
         'x-analytics-region': String(req.headers?.['x-vercel-ip-country-region'] || ''),
         'x-analytics-city': String(req.headers?.['x-vercel-ip-city'] || ''),
       },
-      body: JSON.stringify({ ...body, site: 'call_harbison', path }),
+      body: JSON.stringify(payload),
     });
     const result = await response.json();
     return res.status(response.status).json({ ok: result.ok === true, stored: result.stored === true });

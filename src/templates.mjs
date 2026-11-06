@@ -3,6 +3,7 @@ import { COMMAND_PHASE } from '../lib/command-phase.js';
 import { images, situations as baseSituations, areas as baseAreas, faqs as baseFaqs } from './content.mjs';
 import { californiaCity, extraFaqs, glance, about, guides as baseGuides } from './content-extra.mjs';
 import { family, familyForm, partnerGuide } from './family.mjs';
+import { localSections, foreclosureGuide, inquiryPages } from './content-search.mjs';
 import {
   supportingPromise, heroCopy, reassurance, processSteps, routes, compareDisclosure, whyHarbison, transparency, safeguards,
   offerExplanation, offerExample, walkthrough, formSituations, situationFormMap, detailOptions,
@@ -13,7 +14,7 @@ export const situations = [...baseSituations, ...newSituations];
 // Bakersfield, Tehachapi, Stallion Springs, California City, Kern County
 export const areas = [...baseAreas.slice(0, 2), stallionSprings, californiaCity, ...baseAreas.slice(2)];
 export const faqs = [...baseFaqs.slice(0, 4), ...extraFaqs, ...baseFaqs.slice(4)];
-export const guides = [...baseGuides.map((g) => ({ ...g, meaning: guideMeaning[g.slug] })), ...newGuides];
+export const guides = [...baseGuides.map((g) => ({ ...g, meaning: guideMeaning[g.slug] })), ...newGuides, foreclosureGuide];
 
 const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const strip = (s = '') => String(s).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
@@ -40,6 +41,11 @@ export const PAGE_DATES = {
   '/situations/problem-tenants': '2026-11-06',
   '/situations/life-change': '2026-11-06',
   '/situations/relocation': '2026-11-06',
+  '/situations/inherited-property': '2026-11-06',
+  '/situations/land-development': '2026-11-06',
+  '/buyers': '2026-11-06',
+  '/investors': '2026-11-06',
+  '/home-value': '2026-11-06',
   '/about': '2026-11-05',
   '/privacy': '2026-10-17',
 };
@@ -199,7 +205,7 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   // gtag.js itself (~177 KB, the biggest main-thread cost on phones) loads on the first interaction
   // or GA_LOAD_DELAY_MS after the load event; it then sends everything already queued.
   const ga = site.gaId
-    ? `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(site.gaId)}');
+    ? `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(site.gaId)}',{page_location:location.origin+location.pathname,page_referrer:document.referrer?new URL(document.referrer).origin:''});
   (function(){var loaded=false;function load(){if(loaded)return;loaded=true;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${esc(site.gaId)}';document.head.appendChild(s)}
   ['pointerdown','keydown','touchstart','scroll'].forEach(function(e){addEventListener(e,load,{once:true,passive:true})});
   addEventListener('load',function(){setTimeout(load,${GA_LOAD_DELAY_MS})})})();</script>`
@@ -501,7 +507,7 @@ export function homePage() {
         ${heroCopy.trust.map(([s, t]) => `<li><strong>${esc(s)}</strong><span>${esc(t)}</span></li>`).join('\n        ')}
       </ul>
     </div>
-    ${leadForm({ pageType: 'home' })}
+    <div><aside class="lead-card inquiry-card"><h2>I'm interested in investing</h2><p>Discuss purchasing or evaluating investment property in Kern County.</p><a class="btn btn-gold btn-full" href="/investors" data-cta="investor_inquiry">Explore investment property</a><p><a class="link" href="/buyers">Buying a home?</a> · <a class="link" href="/home-value">Understand home value</a></p></aside>${leadForm({ pageType: 'home' })}</div>
   </div>
 </section>
 
@@ -649,6 +655,7 @@ function detailPage({ item, path, crumbs, eyebrow, extra = '', form = {}, pageTy
       ${answerBox(esc(item.answer))}
       <h2 class="prose-h">${esc(item.title)}</h2>
       ${item.body.map((p) => `<p>${esc(p)}</p>`).join('\n      ')}
+      ${(localSections[item.slug] || []).map(([h, paragraphs]) => `<section${item.slug === 'land-development' ? ' id="tehachapi-land"' : ''}><h2>${esc(h)}</h2>${paragraphs.map(p => `<p>${p}</p>`).join('')}</section>`).join('')}
       ${extra}
       <p class="updated">Last updated ${niceDate(contentDate(path))} · Reviewed by the ${esc(site.name)} team</p>
     </article>
@@ -894,6 +901,34 @@ ${finalCta()}`
   );
 }
 
+export function inquiryPage(item) {
+  const path = `/${item.slug}`;
+  const title = pageTitle(item.title);
+  return page({ title, description: item.description, path, pageType: 'inquiry',
+    ld: graph({ path, title, description: item.description, modified: '2026-11-06' }) },
+    `<section class="section cream page-top"><div class="container detail-grid"><article class="prose">
+      ${crumbNav([['Home', '/'], [item.title, path]])}<h1 class="page-title">${esc(item.title)}</h1>
+      ${item.paragraphs.map(p => `<p>${esc(p)}</p>`).join('')}
+      <p><a href="/situations/land-development">Land and development due diligence</a> · <a href="/how-it-works#estimator">Illustrative net-proceeds calculator</a></p>
+      <h2>Choose your next conversation</h2><ul>${inquiryPages.filter(p => p.slug !== item.slug).map(p => `<li><a href="/${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul>
+    </article><aside class="lead-card" id="lead-form"><h2>Start a conversation</h2>
+      <form data-lead-form data-form-type="options" method="post" action="/api/leads" novalidate>
+        <input type="hidden" name="form_type" value="options"><input type="hidden" name="route_interest" value="${item.route}">
+        <input type="hidden" name="situation" value="${esc(item.situation)}"><input type="hidden" name="page_type" value="inquiry">
+        <label for="inquiry-name">Name</label><input id="inquiry-name" name="name" autocomplete="name" required>
+        <label for="inquiry-phone">Phone</label><input id="inquiry-phone" name="phone" type="tel" autocomplete="tel" required>
+        <label for="inquiry-email">Email (optional)</label><input id="inquiry-email" name="email" type="email" autocomplete="email">
+        <label for="inquiry-area">Area of interest (optional)</label><select id="inquiry-area" name="location_interest"><option value="">Choose an area</option>${areas.map(a => `<option value="${a.slug}">${esc(a.name)}</option>`).join('')}</select>
+        <p>No property ownership or address is required to ask a question. Share property details privately during follow-up.</p>
+        <label class="check"><input type="checkbox" name="consent_response" value="yes" required><span>${esc(site.name)} may contact me by phone, text, or email about this inquiry.</span></label>
+        <label class="check"><input type="checkbox" name="consent_marketing" value="yes"><span>Also send me occasional property tips and market updates. (optional)</span></label>
+        <label class="hp" aria-hidden="true">Company<input name="company" tabindex="-1" autocomplete="off"></label>
+        <button type="submit" class="btn btn-gold btn-full">Send my inquiry</button>
+        <p class="form-note">Consent is not a condition of any sale. Msg &amp; data rates may apply; reply STOP to opt out. We never share your number for others' marketing. See our <a href="/privacy">Privacy Policy</a>.</p>
+        <p class="form-status" role="status" aria-live="polite"></p>
+      </form></aside></div></section>`);
+}
+
 function simplePage({ title, description, path, heading, body, noindex = false, pageType = 'page' }) {
   return page(
     { title: pageTitle(title), description, path, noindex, pageType, hasForm: false, ld: noindex ? null : graph({ path, title: pageTitle(title), description, image: `${site.url}${ogDefault}` }) },
@@ -916,17 +951,17 @@ const detailChecks = (name, list) => `<div class="choice-grid">${list
 
 export function thankYouPage() {
   return page(
-    { title: pageTitle('Thank You'), description: 'We received your property information.', path: '/thank-you', noindex: true, hasForm: false, pageType: 'thank_you' },
+    { title: pageTitle('Thank You'), description: 'We received your inquiry.', path: '/thank-you', noindex: true, hasForm: false, pageType: 'thank_you' },
     `<section class="section cream page-top">
   <div class="container detail-grid">
     <div class="prose">
       <p class="eyebrow gold-dark">Request received</p>
-      <h1 class="page-title">We received your <em>property information.</em></h1>
-      <p class="lead">We’ll review the address and situation before contacting you. If a direct sale, listing, renovation, or development path appears relevant, we’ll explain why. There is no obligation to move forward.</p>
+      <h1 class="page-title">We received your <em>inquiry.</em></h1>
+      <p class="lead">The team will review your request before contacting you about the next step. There is no obligation to move forward. If you recovered an earlier request, this confirms that original request; use Start another inquiry on the form to send a separate request.</p>
       <p>We typically respond within 24 hours. If there’s a specific deadline or issue we should know about, call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>.</p>
       <div class="hero-actions ty-actions"><a class="btn btn-gold" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a class="btn btn-gold" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a><a class="btn btn-ghost-dark" href="/guides">Read the seller guides</a><a class="btn btn-ghost-dark" href="/how-it-works">How it works</a></div>
     </div>
-    <aside class="lead-card details-card" aria-label="Optional property details">
+    <details class="lead-card details-card" aria-label="Optional property details" hidden><summary>Add details about a property you want to sell (optional)</summary>
       <p class="eyebrow gold">Optional · 30 seconds</p>
       <h2>Help us prepare for your call</h2>
       <form data-details-form method="post" action="/api/leads" novalidate>
@@ -937,7 +972,7 @@ export function thankYouPage() {
         <button class="btn btn-gold btn-full" type="submit">Add to My Request</button>
         <p class="form-status" role="status" aria-live="polite"></p>
       </form>
-    </aside>
+    </details>
   </div>
 </section>`
   );

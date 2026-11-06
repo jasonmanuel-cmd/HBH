@@ -13,7 +13,7 @@ test('gtag.js is not requested by a script tag in the page source', () => {
 
 test('the gtag() stub and config still run first, right after <head>', () => {
   assert.match(headStart, /window\.dataLayer=window\.dataLayer\|\|\[\];function gtag\(\)\{dataLayer\.push\(arguments\)\}/);
-  assert.match(headStart, new RegExp(`gtag\\('config','${site.gaId}'\\)`));
+  assert.match(headStart, new RegExp(`gtag\\('config','${site.gaId}',\\{`));
 });
 
 test('gtag.js is loaded on first interaction or shortly after the load event', () => {

@@ -79,15 +79,10 @@ const pageType = document.body.dataset.pageType || 'page';
 const device = () => (matchMedia('(max-width: 640px)').matches ? 'mobile' : matchMedia('(max-width: 980px)').matches ? 'tablet' : 'desktop');
 window.dataLayer = window.dataLayer || [];
 const track = (event, props = {}) => {
-  const a = attribution();
   const payload = {
     page_path: location.pathname,
     page_type: pageType,
-    source: a.utm_source || '',
-    medium: a.utm_medium || '',
-    campaign: a.utm_campaign || '',
-    content: a.utm_content || '',
-    term: a.utm_term || '',
+    // Arbitrary campaign/query values can contain personal data. Keep attribution in CRM only.
     device_type: device(),
     ...props,
   };
@@ -302,9 +297,11 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
   if (commandPhase === 'protocol') window.HBHCommands?.bind(form);
   const status = form.querySelector('.form-status');
   const button = form.querySelector('button[type="submit"]');
+  let submitting = false;
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (submitting) return;
     form.querySelectorAll('.invalid').forEach((el) => el.classList.remove('invalid'));
     status.className = 'form-status';
 
@@ -320,7 +317,8 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     if (hasConsentCheckbox && !data.consent_response) data.consent_response = '';
 
     const missing = [];
-    if ((data.address || '').trim().length < 5) missing.push('address');
+    const generalInquiry = data.form_type === 'options' && ['buyer', 'investor', 'home_value'].includes(data.route_interest);
+    if (!generalInquiry && (data.address || '').trim().length < 5) missing.push('address');
     if ((data.name || '').trim().length < 2 || (data.first_name !== undefined && !(data.first_name || '').trim())) missing.push('name');
     if ((data.phone || '').replace(/\D/g, '').length < 10) missing.push('phone');
     if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) missing.push('email');
@@ -328,13 +326,14 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     if (hasConsentCheckbox && data.consent_response !== 'yes') missing.push('consent_response');
     if (missing.length) return showErrors(missing);
 
+    submitting = true;
     try {
       const reliable = await submitCommand(data, false, () => track('lead_form_submit', formProps(form)));
       if (!reliable.legacy) {
-        if (!reliable.duplicate) { track('lead_form_success', formProps(form)); track('generate_lead', { form_type: data.form_type || 'standard' }); }
+        if (!reliable.duplicate) { track('lead_form_success', formProps(form)); track('generate_lead', { ...formProps(form), qualification: 'unqualified' }); }
         location.href = spanish ? '/es/thank-you' : '/thank-you'; return;
       }
-    } catch (error) { track('lead_form_error', { ...formProps(form), step: 'submit' }); status.textContent = error.message; status.classList.add('error'); return; }
+    } catch (error) { submitting = false; track('lead_form_error', { ...formProps(form), step: 'submit' }); status.textContent = error.message; status.classList.add('error'); return; }
 
     // Persist only a random reference (not contact data) across uncertain retries/reloads.
     // Keep the same reference even if fields change after a failed attempt: the server
@@ -355,6 +354,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     } catch {
       status.textContent = say('This browser cannot send the form securely. Please use the call or text links instead.', 'Este navegador no puede enviar el formulario de forma segura. Use los enlaces para llamar o enviar un texto.');
       status.classList.add('error');
+      submitting = false;
       return;
     }
     form.dataset.submissionId = data.submission_id;
@@ -376,8 +376,10 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
       });
       const json = await res.json().catch(() => ({}));
       if (res.ok && json.ok) {
-        track('lead_form_success', formProps(form));
-        track('generate_lead', { form_type: data.form_type || 'standard' });
+        if (!json.duplicate) {
+          track('lead_form_success', formProps(form));
+          track('generate_lead', { ...formProps(form), qualification: 'unqualified' });
+        }
         if (submissionStorage) store.set('hbh_lead', { id: json.id || null, phone: data.phone, address: data.address, details_token: json.details_token || '' }, submissionStorage);
         try { submissionStorage?.removeItem(submissionKey); } catch {}
         delete form.dataset.submissionId;
@@ -398,6 +400,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
       status.textContent = status.textContent.trim();
       status.classList.add('error');
     } finally {
+      submitting = false;
       clearTimeout(requestTimer);
       button.disabled = false;
       button.textContent = label;
@@ -419,14 +422,22 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     });
     form.querySelector('.invalid')?.focus();
     status.textContent =
-      names.length === 1 && names[0] === 'consent_response' ? say('Please check the box so we can contact you about this property.', 'Por favor, marque la casilla para que podamos comunicarnos con usted sobre esta propiedad.')
+      names.length === 1 && names[0] === 'consent_response' ? say('Please check the box so we can respond to your inquiry.', 'Marque la casilla para que podamos responder a su consulta.')
       : fields.includes('relationship') && fields.length === 1 ? say('Please tell us your relationship to the property.', 'Por favor, indíquenos su relación con la propiedad.')
-      : say('Please check the highlighted fields — we need the property address, your name, and a valid phone number.', 'Por favor, revise los campos resaltados: necesitamos la dirección de la propiedad, su nombre y un número de teléfono válido.');
+      : say('Please check the highlighted fields and enter valid contact information.', 'Revise los campos resaltados e ingrese información de contacto válida.');
     status.classList.add('error');
   }
 });
 
 // ---------- Thank-you page: optional details ----------
+const detailsCard = document.querySelector('.details-card');
+if (detailsCard) {
+  if (commandPhase === 'protocol') window.HBHCommands?.sellerDetailsAvailable().then(allowed => { detailsCard.hidden = !allowed; });
+  else if (commandPhase === 'preactivation') {
+    const saved = store.get('hbh_lead', sessionStorage);
+    detailsCard.hidden = !(saved?.address && saved?.details_token);
+  }
+}
 document.querySelectorAll('form[data-details-form]').forEach((form) => {
   if (commandPhase === 'protocol') window.HBHCommands?.bind(form, true);
   const status = form.querySelector('.form-status');
