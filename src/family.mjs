@@ -28,7 +28,7 @@ export const family = {
   paths: {
     direct: {
       name: 'Sell as-is',
-      rows: ['Minimal preparation', 'No repairs required', 'Belongings can stay', 'One walkthrough, no showings', 'Closing date you choose', 'Price reflects condition and convenience'],
+      rows: ['Minimal preparation', 'As-is terms in writing', 'Belongings handled by agreement', 'Walkthrough and access by agreement', 'Closing date agreed in writing', 'Price reflects condition and convenience'],
     },
     listing: {
       name: 'Traditional listing',

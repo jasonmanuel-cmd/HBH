@@ -33,3 +33,16 @@ Primary references used for the content corrections:
 - https://selfhelp.courts.ca.gov/probate/simple-transfer
 - https://www.irs.gov/faqs/interest-dividends-other-types-of-income/gifts-inheritances/gifts-inheritances
 - https://boe.ca.gov/prop19/
+
+## Accuracy follow-up — November 6, 2026
+
+The homepage and shared comparison still promised no showings, one walkthrough and a seller-chosen closing date after the guide had correctly qualified buyer access and contract conditions. This follow-up aligns the repeated claims across the homepage, process, family, area and affected situation pages, two guides, Spanish translations and the supplemental llms.txt map.
+
+- Distinguish the initial review (no cleaning or repairs needed) from later access, inspections, repair terms and closing conditions in a written agreement.
+- Describe closing as a mutually agreed date subject to contract, title and escrow, including the relocation headline.
+- Ask sellers to have an independent broker or attorney review proposed terms before signing; this does not claim that a professional has reviewed this site.
+- Label the comparison's hypothetical timeline as illustrative, not a measured or promised result.
+- Update only substantively changed page dates, preserving guide publication dates and unmodified pages' dates.
+- Keep existing design, forms, consent and operational settings. No platform reviews, ratings or new case-study claims were imported; external profiles and webmaster accounts remain unchanged.
+
+Baseline verification: all 154 tests passed and 69 pages built. Added regression checks cover the removed promises, English/Spanish qualifications, illustrative timing and modification-date consistency. Final tests, build, remote commit and production checks are recorded in the delivery report. Broker/legal review of the content and actual transaction terms remains recommended.

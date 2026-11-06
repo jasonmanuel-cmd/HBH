@@ -28,10 +28,18 @@ const ogDefault = '/assets/og-default.jpg'; // 1200×630
 const headshot = '/assets/nathanael-harbison.jpg'; // 325×325
 const BUILD_DATE = '2026-09-24';
 export const PAGE_DATES = {
-  '/': '2026-10-23',
-  '/how-it-works': '2026-10-23',
-  '/sell-loved-ones-house': '2026-10-23',
-  '/areas/kern-county': '2026-10-23',
+  '/': '2026-11-06',
+  '/how-it-works': '2026-11-06',
+  '/sell-loved-ones-house': '2026-11-06',
+  '/areas/kern-county': '2026-11-06',
+  '/areas/bakersfield': '2026-11-06',
+  '/areas/tehachapi': '2026-11-06',
+  '/areas/stallion-springs': '2026-11-06',
+  '/areas/california-city': '2026-11-06',
+  '/situations/needs-major-repairs': '2026-11-06',
+  '/situations/problem-tenants': '2026-11-06',
+  '/situations/life-change': '2026-11-06',
+  '/situations/relocation': '2026-11-06',
   '/about': '2026-11-05',
   '/privacy': '2026-10-17',
 };
@@ -388,15 +396,16 @@ const compareTable = () => `<div class="compare-wrap">
         <caption class="sr-only">Selling directly to Harbison compared with a traditional listing</caption>
         <thead><tr><th scope="col"><span class="sr-only">Factor</span></th><th scope="col">Sell Direct to Harbison</th><th scope="col">Traditional Listing</th></tr></thead>
         <tbody>
-          <tr><th scope="row">Repairs</th><td>None — sold as-is</td><td>Often needed to attract buyers</td></tr>
-          <tr><th scope="row">Showings</th><td>One walkthrough</td><td>Open houses and repeat showings</td></tr>
-          <tr><th scope="row">Timeline</th><td>You pick the closing date, subject to title</td><td>Depends on market and buyer financing</td></tr>
+          <tr><th scope="row">Repairs</th><td>As-is terms in writing</td><td>Optional; may affect price or financing</td></tr>
+          <tr><th scope="row">Showings</th><td>Initial walkthrough; further access by agreement</td><td>Showings and open houses may be used</td></tr>
+          <tr><th scope="row">Timeline</th><td>Agreed date, subject to contract, title and escrow</td><td>Depends on market and buyer financing</td></tr>
           <tr><th scope="row">Commissions</th><td>None paid to Harbison</td><td>Typically paid to agents</td></tr>
           <tr><th scope="row">Price</th><td>Reflects condition, costs, and convenience</td><td>Can be higher, especially for move-in-ready homes</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="disclosure">${esc(compareDisclosure)}</p>`;
+    <p class="disclosure">${esc(compareDisclosure)}</p>
+    <p class="disclosure">Property access, inspections, repairs and closing timing depend on the written agreement, title and escrow. Ask an independent broker or attorney to review the proposed terms before signing.</p>`;
 
 const netEstimator = (ctaHref = '#lead-form') => `<div class="estimator" id="estimator" data-net-estimator>
       <p class="eyebrow gold-dark">Interactive Net Proceeds Estimator</p>
@@ -585,7 +594,7 @@ ${reassuranceStrip()}
       <div>
         <p class="eyebrow gold-dark">At a Glance</p>
         <h2 id="glance-h">Call Harbison, <em>in brief.</em></h2>
-        ${answerBox(`${esc(site.name)} buys houses and land as-is in Bakersfield, Tehachapi, California City, Stallion Springs, and throughout Kern County, California. Led by licensed REALTOR® ${esc(site.agent)} (DRE #${esc(site.dre)}), Harbison compares a direct offer with listing, renovation, or development so owners can choose the best path — with no repairs, showings, or obligation.`, 'In short')}
+        ${answerBox(`${esc(site.name)} buys houses and land as-is in Bakersfield, Tehachapi, California City, Stallion Springs, and throughout Kern County, California. Led by licensed REALTOR® ${esc(site.agent)} (DRE #${esc(site.dre)}), Harbison compares a direct offer with listing, renovation, or development so owners can choose the best path — with no repairs needed to request options and no obligation to accept an offer.`, 'In short')}
       </div>
       ${glanceTable()}
     </div>
@@ -707,7 +716,7 @@ export function areaPage(a) {
   return detailPage({
     item: {
       ...a,
-      helps: ['Sell as-is — no repairs or cleaning', 'No showings or open houses', 'Pick your closing date', 'Honest comparison of every option', `Licensed local agent — DRE #${site.dre}`],
+      helps: ['No repairs or cleaning needed for the initial review', 'Property access arranged by agreement', 'Closing date agreed in writing', 'Honest comparison of every option', `Licensed local agent — DRE #${site.dre}`],
     },
     path: `/areas/${a.slug}`,
     crumbs: [['Home', '/'], [a.name, `/areas/${a.slug}`]],
@@ -974,7 +983,7 @@ export function howItWorksPage() {
       <dl class="principles safeguards">${safeguards.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
 
       <h2 class="prose-h">Closing</h2>
-      <p>Every sale closes through a licensed title or escrow company, which holds funds, handles payoffs, and records the deed. Signatures can often be done remotely. You choose the closing date, subject to title and any required approvals.</p>
+      <p>Every sale closes through a licensed title or escrow company, which holds funds, handles payoffs, and records the deed. Signatures can often be done remotely. Buyer and seller agree on a closing date, subject to the contract, title, escrow and any required approvals.</p>
     </article>
     <aside class="help-card"><h2>Ready to start?</h2><ul>${reassurance.map((r) => `<li>${esc(r)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="/#lead-form" data-cta="how_it_works">Get My Property Options →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a class="btn btn-ghost btn-full" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a></aside>
   </div>

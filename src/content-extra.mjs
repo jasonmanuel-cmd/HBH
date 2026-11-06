@@ -31,10 +31,10 @@ export const glance = [
   ['Where we buy', 'Bakersfield, Tehachapi, California City, Stallion Springs, and throughout Kern County, CA.'],
   ['What we buy', 'Houses in any condition, inherited and probate properties, rentals with tenants, fire- or water-damaged homes, unfinished remodels, and land.'],
   ['Your options', 'Direct cash sale, traditional listing, renovate-then-sell, or development — we compare them with you.'],
-  ['Repairs & showings', 'None required for a direct sale. Sell as-is after one walkthrough.'],
+  ['Repairs & showings', 'No cleaning or repairs needed for the initial review. Any later access, inspections or repairs depend on the agreement.'],
   ['Cost to ask', 'Free and no obligation. No commission paid to Harbison on a direct sale.'],
   ['Response time', 'Typically within 24 hours. Call or text (661) 472-7499.'],
-  ['Closing', 'You choose the date. Direct sales can often close in a few weeks.'],
+  ['Closing', 'Buyer and seller agree on a target date, subject to contract, title and escrow.'],
 ];
 
 export const about = {
@@ -99,7 +99,7 @@ export const guides = [
     description: 'A side-by-side look at selling to a cash buyer versus listing with an agent in Kern County — net proceeds, timelines, risks, and when each makes sense.',
     image: images.list,
     published: '2026-10-23',
-    updated: '2026-11-05',
+    updated: '2026-11-06',
     answer: 'Listing usually brings a higher sale price for a move-in-ready home, while a cash offer can net a similar result for a house that needs major repairs once you subtract repair costs, commissions, holding costs, and time. The right choice depends on the home’s condition, your timeline, and how much uncertainty you can accept.',
     sections: [
       ['What is the difference between a cash offer and listing?', [
@@ -107,8 +107,8 @@ export const guides = [
       ]],
       ['An illustrative example', [
         'The numbers below are hypothetical, for illustration only. Every property is different.',
-        '<div class="compare-wrap"><table class="compare"><thead><tr><th scope="col">Worth $350,000 fixed up; needs $40,000 of work</th><th scope="col">Fix &amp; list</th><th scope="col">Cash offer as-is</th></tr></thead><tbody><tr><th scope="row">Sale price</th><td>$350,000</td><td>$265,000</td></tr><tr><th scope="row">Repairs</th><td>−$40,000</td><td>$0</td></tr><tr><th scope="row">Commissions (example: 5%)</th><td>−$17,500</td><td>$0</td></tr><tr><th scope="row">Closing costs (approx.)</th><td>−$5,000</td><td>−$1,500</td></tr><tr><th scope="row">Holding costs</th><td>−$8,000</td><td>−$1,000</td></tr><tr><th scope="row">Estimated net</th><td><strong>≈ $279,500</strong></td><td><strong>≈ $262,500</strong></td></tr><tr><th scope="row">Typical timeline</th><td>4–6 months</td><td>2–4 weeks</td></tr></tbody></table></div>',
-        'In this example listing nets more — but only if repairs stay on budget, the home sells at full price, and the buyer’s financing holds. Cost overruns or a price reduction can erase the gap quickly.',
+        '<div class="compare-wrap"><table class="compare"><thead><tr><th scope="col">Worth $350,000 fixed up; needs $40,000 of work</th><th scope="col">Fix &amp; list</th><th scope="col">Cash offer as-is</th></tr></thead><tbody><tr><th scope="row">Sale price</th><td>$350,000</td><td>$265,000</td></tr><tr><th scope="row">Repairs</th><td>−$40,000</td><td>$0</td></tr><tr><th scope="row">Commissions (example: 5%)</th><td>−$17,500</td><td>$0</td></tr><tr><th scope="row">Closing costs (approx.)</th><td>−$5,000</td><td>−$1,500</td></tr><tr><th scope="row">Holding costs</th><td>−$8,000</td><td>−$1,000</td></tr><tr><th scope="row">Estimated net</th><td><strong>≈ $279,500</strong></td><td><strong>≈ $262,500</strong></td></tr><tr><th scope="row">Illustrative timeline</th><td>4–6 months</td><td>2–4 weeks</td></tr></tbody></table></div>',
+        'In this example listing nets more — but only if repairs stay on budget, the home sells at full price, and the buyer’s financing holds. Cost overruns or a price reduction can erase the gap quickly. Timing is illustrative too: the closing date must be agreed in writing and depends on the contract, title and escrow.',
       ]],
       ['When does a cash offer make more sense?', [
         '<ul><li>The home needs major repairs you cannot fund or manage</li><li>You need to close on a specific date</li><li>The property is inherited, vacant, or out of the area</li><li>Tenants, damage, or open permits make showings difficult</li><li>You value certainty over squeezing out the last dollar</li></ul>',

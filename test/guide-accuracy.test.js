@@ -16,13 +16,14 @@ const nodes = (html) => [...html.matchAll(/<script type="application\/ld\+json">
 
 test('revised guides preserve publication dates and agree on visible, Article, WebPage and sitemap dates', () => {
   const revised = {
-    'sell-house-as-is-california': '2026-09-22',
-    'cash-offer-vs-listing': '2026-10-23',
-    'sell-inherited-house-california': '2026-09-22',
+    'sell-house-as-is-california': ['2026-09-22', '2026-11-05'],
+    'cash-offer-vs-listing': ['2026-10-23', '2026-11-06'],
+    'sell-inherited-house-california': ['2026-09-22', '2026-11-05'],
+    'what-affects-a-cash-offer': ['2026-09-24', '2026-11-06'],
   };
-  for (const [slug, published] of Object.entries(revised)) {
+  for (const [slug, [published, modified]] of Object.entries(revised)) {
     const row = pages.find(([file]) => file === `guides/${slug}.html`);
-    assert.equal(row[3], '2026-11-05', 'build uses this value for sitemap lastmod');
+    assert.equal(row[3], modified, 'build uses this value for sitemap lastmod');
     for (const html of variants(slug)) {
       const article = nodes(html).find((n) => n['@type'] === 'Article');
       const webPage = nodes(html).find((n) => n['@type'] === 'WebPage');

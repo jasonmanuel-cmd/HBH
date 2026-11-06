@@ -19,7 +19,7 @@ export const heroCopy = {
 
 export const reassurance = [
   'No repairs required to start',
-  'No showings required for a direct sale',
+  'Property access arranged by agreement',
   'Clear written next steps',
   'No obligation to accept an offer',
 ];
@@ -33,7 +33,7 @@ export const processSteps = [
 
 // The five paths. `route` is stored on the lead as route_interest.
 export const routes = [
-  { route: 'direct', name: 'Sell Direct', text: 'Get a written as-is offer and choose your closing date. No repairs, cleaning, or showings.', image: 'home', alt: 'Single-family home exterior' },
+  { route: 'direct', name: 'Sell Direct', text: 'Request a written as-is offer and discuss a closing date. No cleaning or repairs are needed for the initial review.', image: 'home', alt: 'Single-family home exterior' },
   { route: 'listing', name: 'List on the Market', text: 'If retail exposure is likely to net more, our licensed agent can list the property instead.', image: 'list', alt: 'Bright living room prepared for listing' },
   { route: 'renovate', name: 'Renovate Then Sell', text: 'A few targeted repairs can change the outcome. We estimate which ones are worth doing — and which are not.', image: 'renovate', alt: 'Contractor reviewing renovation plans' },
   { route: 'development', name: 'Explore Development', text: 'Some lots are worth more for what could be built. We review zoning, access, and utilities.', image: 'land', alt: 'Open land with development potential' },
@@ -263,9 +263,10 @@ export const newGuides = [
     slug: 'what-affects-a-cash-offer',
     title: 'What Affects a Cash Offer on a House?',
     short: 'What Affects a Cash Offer?',
+    published: updated,
     description: 'How cash offers are calculated, what raises or lowers them, why they are usually below retail, and the questions to ask any cash buyer.',
     image: images.home,
-    updated,
+    updated: '2026-11-06',
     answer: 'A cash offer starts with what the house should sell for after repairs, then subtracts the cost of those repairs, the buyer’s costs to buy, hold, finance, and resell, and a margin for risk. Condition, location, title issues, occupancy, and your closing timeline all move the number. A fair buyer should be able to show you each assumption.',
     meaning: 'Ask for the assumptions, not just the number. If a buyer cannot tell you the value range, repair scope, and costs behind an offer, you cannot tell whether it is fair — or compare it with listing.',
     sections: [
@@ -277,7 +278,7 @@ export const newGuides = [
         '<ul><li>Condition and the size of the repair scope</li><li>The after-repair value supported by nearby sales</li><li>Location and buyer demand</li><li>Occupancy — tenants, family members, or contents left behind</li><li>Title issues, liens, or unpermitted work</li><li>How soon you need to close</li><li>Property type — land and multi-unit properties are valued differently</li></ul>',
       ]],
       ['Why a cash offer is usually below retail', [
-        'A direct buyer takes on the repairs, the carrying costs, and the risk of reselling. In exchange, you skip preparation, showings, lender inspections, and the uncertainty of a financed sale. The discount is the price of that convenience and certainty — which is why it should be explained, not hidden.',
+        'A direct as-is buyer may take on repairs, carrying costs, and resale risk. You may avoid preparing and publicly marketing the property. A purchase without financing avoids lender requirements, but buyer inspections, property access, contingencies, and closing timing still depend on the contract. The discount reflects those costs and trade-offs, not a guarantee that the sale will close.',
       ]],
       ['Questions to ask any cash buyer', [
         '<ul><li>Are you the buyer, or will you assign the contract to someone else?</li><li>What value and repair assumptions is the offer based on?</li><li>Is the price firm after the walkthrough, and what could change it?</li><li>Who pays closing costs, and which title or escrow company will handle closing?</li><li>What happens to the deposit if either side cancels?</li><li>Can I take time to review this with family or an advisor?</li></ul>',
