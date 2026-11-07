@@ -224,6 +224,10 @@ export const stallionSprings = {
     'We also look at vacant lots, including parcels owned by out-of-area sellers who have not seen the property in years.',
   ],
   places: ['Stallion Springs', 'Cummings Valley', 'Bear Valley Springs', 'Tehachapi', 'Golden Hills'],
+  faqs: [
+    ['Who should I ask about water for a Stallion Springs lot?', 'Ask the Stallion Springs Community Services District about the specific parcel: whether it has a meter, what a connection would require and current charges. District-wide information does not settle service for an individual vacant lot.'],
+    ['Can you review a Stallion Springs lot I have not seen in years?', 'Yes. Send the parcel number or address. We can look at the lot in person, report on access and condition, and compare a direct sale with listing it.'],
+  ],
 };
 
 const updated = '2026-09-24';

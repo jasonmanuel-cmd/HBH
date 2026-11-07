@@ -17,6 +17,10 @@ export const californiaCity = {
     'We are active in eastern Kern County and can evaluate your property whether you live nearby or across the country.',
   ],
   places: ['California City', 'Mojave', 'Boron', 'Rosamond', 'North Edwards', 'Randsburg'],
+  faqs: [
+    ['What makes one California City lot worth more than another?', 'Mostly road access, distance to utilities and zoning, more than acreage alone. Two lots of the same size can be valued very differently, so we look at the specific parcel before giving any number.'],
+    ['Do I need to visit California City to sell my lot?', 'Usually not. We can review the parcel in person for you, and much of the sale can be handled through a licensed title or escrow company. Signing requirements depend on the escrow.'],
+  ],
 };
 
 export const extraFaqs = [
