@@ -234,6 +234,11 @@ export const areas = [
       'We are local, which means we can see the property in person, understand its neighborhood, and give you a practical answer quickly.',
     ],
     places: ['Downtown', 'East Bakersfield', 'Oildale', 'Rosedale', 'Southwest', 'Northwest', 'Seven Oaks', 'Lamont'],
+    faqs: [
+      ['Do you buy houses in Oildale, Rosedale and Lamont?', 'Yes. We review properties across the Bakersfield area, including Oildale, Rosedale and Lamont. Some of these addresses are outside Bakersfield city limits, which changes which office answers zoning and permit questions, so we confirm the jurisdiction early.'],
+      ['Should I list my Bakersfield house or take a direct offer?', 'It depends on the condition of the house, your timeline and what you would net. We put a direct as-is offer next to a listing estimate, after repairs, commissions, closing costs and holding time, so you can compare the two in writing before choosing.'],
+      ['Can I sell a Bakersfield rental with tenants still living there?', 'Often, yes. Tell us about the lease and who lives in the home. Tenants keep their rights under the lease and California law through a sale, so we review the lease before discussing access or timing. This is general information, not legal advice.'],
+    ],
   },
   {
     slug: 'tehachapi',
@@ -250,6 +255,11 @@ export const areas = [
       'We look at the whole picture — including land and development potential — and give you a straightforward read on your options.',
     ],
     places: ['Tehachapi', 'Golden Hills', 'Bear Valley Springs', 'Stallion Springs', 'Alpine Forest', 'Sand Canyon'],
+    faqs: [
+      ['Is my Tehachapi property in the city or the county?', 'Check before relying on a zoning rule or utility assumption. City of Tehachapi Planning answers for parcels inside city limits, and Kern County Planning answers for unincorporated parcels such as those in Golden Hills and Bear Valley Springs. Kern County asks for the parcel number (APN) or the address.'],
+      ['Do a well and septic system change how a Tehachapi home sells?', 'They can. Buyers and lenders often want records for the well, the septic system and any shared water or road agreements. Bring what you have; we note what still needs checking by a qualified inspector so it does not surprise anyone later in escrow.'],
+      ['Do you buy cabins and vacant land around Tehachapi, not just houses?', 'Yes. We review cabins, mountain homes and vacant parcels, and look at access, utilities and usable land along with the house itself, then compare a direct sale with listing.'],
+    ],
   },
   {
     slug: 'kern-county',
@@ -266,6 +276,11 @@ export const areas = [
       'Not sure if your location qualifies? Send the address. If it is not a fit for us, we will tell you quickly.',
     ],
     places: ['Bakersfield', 'Tehachapi', 'California City', 'Stallion Springs', 'Arvin', 'Delano', 'Lamont', 'McFarland', 'Shafter', 'Wasco', 'Taft', 'Ridgecrest', 'Lake Isabella'],
+    faqs: [
+      ['Do you buy in smaller Kern County towns like Delano, Wasco, Taft or Ridgecrest?', 'Send the address. We review houses and land across Kern County, and if a property is not a fit for us we will say so quickly rather than make you wait.'],
+      ['I live out of the area. Can I sell my Kern County property without traveling?', 'Often, yes. Much of a sale can be handled through a licensed title or escrow company. Whether you need to sign in person or in front of a notary depends on the escrow and title requirements for your transaction.'],
+      ['Where do I find my Kern County parcel number (APN)?', 'It is usually printed on your property tax bill, and the Kern County Assessor-Recorder can look it up. Having the APN ready speeds up zoning, access and parcel questions for both city and county properties.'],
+    ],
   },
 ];
 

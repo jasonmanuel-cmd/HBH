@@ -8,12 +8,32 @@ export const localSections = {
       'A cash purchase removes a financing dependency; it does not guarantee a closing date. Title problems, loan payoffs, estate authority, occupants, inspections and escrow can affect timing. Ask for the price, deposit, contingencies, access, closing-cost allocation and target date in writing. There is no guaranteed offer or deadline.',
       'Start with the address, known condition issues and your preferred timeline. Request a direct-offer review and a listing comparison before choosing. You do not need to repair the house to begin, and requesting options does not obligate you to sell.',
     ]],
+    ['Inside Bakersfield city limits, or unincorporated Kern County?', [
+      'A Bakersfield mailing address does not always mean the property is inside the City of Bakersfield. Communities such as Oildale and Lamont are unincorporated, so zoning, permits and code questions go to Kern County rather than the city. Confirm the jurisdiction before relying on a zoning rule, a permit history or a plan for an addition or second unit.',
+      'For addresses inside the city, the City of Bakersfield Development Services Department covers building and planning. For unincorporated parcels, Kern County Planning and Natural Resources answers zoning questions and asks for the parcel number (APN) or address. If a home has additions or conversions with no permit on file, that affects value and next steps, but it does not automatically prevent a sale.',
+      '<a href="https://www.bakersfieldcity.us/development-services">City of Bakersfield Development Services</a> · <a href="https://kernplanning.com/public-inquiries-and-faq/">Kern County zoning inquiries</a> · <a href="https://www.kerncounty.com/services/property-land-and-taxes/property-tax-portal">Kern County property tax information</a>',
+    ]],
+    ['What to have ready for a Bakersfield property review', [
+      'The address and parcel number, a recent property tax bill, the mortgage statement or payoff contact, and any repair estimates, inspection reports or permits you already have. For a rental, the current lease and rent amount. For an inherited home, the documents that show who has authority to sign.',
+      'None of this is required to start. It simply lets us give you a more useful comparison between a direct as-is offer and a listing, with fewer assumptions behind the numbers.',
+    ]],
   ],
   tehachapi: [
     ['A Tehachapi address is only the starting point', [
       'Confirm whether the parcel falls inside the City of Tehachapi or under county jurisdiction before using a zoning rule or assuming utility service. The City Planning Department handles city plans and development review; Kern County Planning asks for the assessor parcel number (APN) or address when answering zoning questions.',
       'Bring utility bills, well or septic records, access agreements and permit history if available. A nearby utility line does not establish that a parcel has a connection or capacity. Repair scope, usable land and documented access help distinguish a mountain home from an in-town comparable sale.',
       '<a href="https://liveuptehachapi.com/326/Planning-Department">City of Tehachapi Planning</a> · <a href="https://kernplanning.com/public-inquiries-and-faq/">Kern County parcel and zoning inquiries</a> · <a href="/situations/land-development#tehachapi-land">Tehachapi land due diligence</a>',
+    ]],
+  ],
+  'kern-county': [
+    ['One county, many jurisdictions', [
+      'Kern County stretches from the San Joaquin Valley floor over the Tehachapi Mountains and into the Mojave Desert, and the right approach changes with the setting. A tract home in Shafter, a farm-area house near Delano, a cabin near Lake Isabella and a desert lot near Ridgecrest each raise different questions about access, utilities, condition and who is likely to buy.',
+      'Incorporated cities such as Bakersfield, Delano, Ridgecrest and Tehachapi handle their own planning and permits. Properties in unincorporated communities go to Kern County. Check which one applies before relying on a zoning rule or a permit record.',
+    ]],
+    ['Owners who live outside Kern County', [
+      'If you inherited a Kern County property or moved away years ago, send the address or parcel number and whatever you know about the property. We can look at it in person, tell you what we found and lay out a direct sale next to a listing, without you needing to travel for the first review.',
+      'Property tax, assessment and recorded-document questions go through the Kern County Assessor-Recorder and Treasurer-Tax Collector, which publish a shared property tax information page.',
+      '<a href="https://www.kerncounty.com/services/property-land-and-taxes/property-tax-portal">Kern County property tax information</a> · <a href="https://kernplanning.com/public-inquiries-and-faq/">Kern County zoning inquiries</a> · <a href="/guides/sell-inherited-house-california">Selling an inherited house in California</a>',
     ]],
   ],
   'stallion-springs': [
