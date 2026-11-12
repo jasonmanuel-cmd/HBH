@@ -118,6 +118,10 @@ export const situationFormMap = {
   'life-change': 'I am unsure what to do',
   'failed-listing': 'I am considering listing',
   'land-development': 'Other',
+  'behind-on-mortgage': 'I am unsure what to do',
+  'code-violations-unpermitted-work': 'The property needs major repairs',
+  'hoarding-contents': 'Other',
+  'liens-back-taxes': 'Other',
 };
 
 // Optional follow-up questions on the thank-you page (the lead already exists by then).
