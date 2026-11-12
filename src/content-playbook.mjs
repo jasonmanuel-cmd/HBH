@@ -122,7 +122,6 @@ export const situationFormMap = {
   'code-violations-unpermitted-work': 'The property needs major repairs',
   'hoarding-contents': 'Other',
   'liens-back-taxes': 'Other',
-  'mobile-manufactured-home': 'Other',
 };
 
 // Optional follow-up questions on the thank-you page (the lead already exists by then).

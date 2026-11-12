@@ -102,29 +102,4 @@ export const moreSituations = [
       ['What happens to back property taxes when I sell?', 'Unpaid taxes are generally paid from the proceeds at closing. Ask the Kern County Treasurer-Tax Collector or a tax professional for your exact balance and any penalties.'],
     ],
   },
-  {
-    slug: 'mobile-manufactured-home',
-    answer: 'Call Harbison reviews Kern County mobile and manufactured homes case by case. Whether a home can be sold, and how, depends on whether it sits on land you own or in a park, and on its title and registration records. We will tell you quickly if a property is not a fit for a direct purchase.',
-    name: 'Mobile & Manufactured Homes',
-    title: 'Sell a Mobile or Manufactured Home in Kern County',
-    description: 'Selling a mobile or manufactured home in Bakersfield or Kern County? Find out what we review and whether a cash as-is offer or a listing fits.',
-    headline: 'Mobile or manufactured home? <em>Tell us what you have.</em>',
-    lead: 'A mobile or manufactured home is sold differently depending on whether it is on land you own or in a park.',
-    image: images.suburban,
-    body: [
-      'Start with the basics: whether the home and the land are both owned, whether it sits in a mobile home park, its age and condition, and what the title and registration records show.',
-      'Parks can have their own rules and approval steps for a sale, and older homes can be harder to finance, which affects how a buyer can pay. We review each case and tell you whether a direct purchase or a listing fits better.',
-      'Ask an attorney or the state housing department about title, registration and park requirements for your home. We do not give legal advice.',
-    ],
-    helps: [
-      'Case-by-case review of owned-land and park homes',
-      'Clear answer if it is not a fit',
-      'Comparison with listing when that fits better',
-      'Help gathering title and park documents',
-    ],
-    faqs: [
-      ['Do you buy mobile homes in parks?', 'It depends on the park rules, the home and its records. Send us the details and we tell you whether a direct purchase is possible or whether another route makes more sense.'],
-      ['Is it harder to sell a manufactured home than a house?', 'It can be, because financing, age and park or title requirements narrow the buyer pool. A homeowner on owned land often has more options than a park resident.'],
-    ],
-  },
 ];
