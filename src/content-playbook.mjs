@@ -1,6 +1,6 @@
 // Content from the CallHarbison.com Site Development Playbook and the Phase 1 HomeVestors research.
 // Rules carried over from those documents: no guarantees of price or speed, no fake urgency or competing
-// offers, explain the direct-sale discount, and show every realistic path — not just a cash offer.
+// offers, explain the direct-sale discount, and show every realistic path. Not just a cash offer.
 import site from '../site.config.mjs';
 import { images } from './content.mjs';
 
@@ -8,10 +8,10 @@ export const supportingPromise = 'Clear options for complicated properties and c
 
 export const heroCopy = {
   eyebrow: 'Bakersfield • Tehachapi • Kern County',
-  sub: 'Whether your property needs repairs, has tenants, was inherited, is vacant, or needs to be sold on a different timeline, we help you compare the clearest path forward.',
+  sub: 'Need to sell a house in Bakersfield or Kern County? Request a written cash offer on the property as it is. No cleaning or repairs are needed for the first review. You can also compare listing, renovating, or developing.',
   trust: [
-    ['As-is review', 'No repairs to start'],
-    ['Direct sale or other paths', 'Not just a cash offer'],
+    ['As-is cash offer', 'No repairs to start'],
+    ['Cash or another path', 'You compare, then decide'],
     ['Local and licensed', `DRE #${site.dre}`],
     ['No obligation', 'You decide'],
   ],
@@ -26,8 +26,8 @@ export const reassurance = [
 
 export const processSteps = [
   ['Tell us the address.', `Use the form or call or text ${site.phone}. The form asks for the property address, your name, phone number, and permission to respond.`],
-  ['We review the property and situation.', 'Condition, timeline, occupancy, and what you want out of the sale — in person or by video.'],
-  ['You compare your options.', 'A direct offer if it fits, and a listing, repair, or development path when those are realistic — in writing, with the assumptions.'],
+  ['We review the property and situation.', 'Condition, timeline, occupancy, and what you want out of the sale. In person or by video.'],
+  ['You compare your options.', 'A direct offer if it fits, and a listing, repair, or development path when those are realistic. In writing, with the assumptions.'],
   ['You decide what comes next.', 'Take the time you need. Talk it over with family or an advisor. There is no obligation.'],
 ];
 
@@ -35,7 +35,7 @@ export const processSteps = [
 export const routes = [
   { route: 'direct', name: 'Sell Direct', text: 'Request a written as-is offer and discuss a closing date. No cleaning or repairs are needed for the initial review.', image: 'home', alt: 'Single-family home exterior' },
   { route: 'listing', name: 'List on the Market', text: 'If retail exposure is likely to net more, our licensed agent can list the property instead.', image: 'list', alt: 'Bright living room prepared for listing' },
-  { route: 'renovate', name: 'Renovate Then Sell', text: 'A few targeted repairs can change the outcome. We estimate which ones are worth doing — and which are not.', image: 'renovate', alt: 'Contractor reviewing renovation plans' },
+  { route: 'renovate', name: 'Renovate Then Sell', text: 'A few targeted repairs can change the outcome. We estimate which ones are worth doing, and which are not.', image: 'renovate', alt: 'Contractor reviewing renovation plans' },
   { route: 'development', name: 'Explore Development', text: 'Some lots are worth more for what could be built. We review zoning, access, and utilities.', image: 'land', alt: 'Open land with development potential' },
   { route: 'not_ready', name: 'Not Ready Yet', text: 'Get the information now and decide later. We follow up only as often as you ask us to.', image: 'valley', alt: 'Kern County valley landscape' },
 ];
@@ -65,16 +65,16 @@ export const transparency = [
 export const safeguards = [
   ['A written explanation before you sign', 'Every offer comes with the value range, repair scope, costs, and closing terms it is based on.'],
   ['Independent advice is welcome', 'Especially for inherited, divorce, guardianship, or high-equity situations, we encourage you to have family, an attorney, or another agent review anything before signing.'],
-  ['Authority is confirmed first', 'We confirm who can legally sign — owners, heirs, trustees, or someone holding power of attorney — before any agreement.'],
+  ['Authority is confirmed first', 'We confirm who can legally sign, whether that is an owner, heir, trustee, or someone holding power of attorney, before any agreement.'],
   ['We pause when something is unclear', 'If anyone involved seems confused or pressured, we stop and make sure everyone understands before going further.'],
   ['No pressure tactics', 'No same-day signing demands, fake deadlines, invented competing buyers, or threats about what a city or lender will do.'],
-  ['Our role is stated plainly', `On a direct purchase, Harbison is the buyer — not your agent — and ${site.agent}’s license status is disclosed in writing.`],
+  ['Our role is stated plainly', `On a direct purchase, Harbison is the buyer, not your agent, and ${site.agent}’s license status is disclosed in writing.`],
   ['“Stop” means stop', 'Ask us not to call or text and we will stop, immediately.'],
 ];
 
 export const offerExplanation = 'A direct purchase price reflects the property’s condition, expected repairs, transaction costs, financing, holding time, resale risk, and the convenience of selling without preparing and marketing the property. A traditional listing may produce a higher gross price, but may require repairs, showings, time, commissions, and uncertainty.';
 
-// Illustrative only — not a formula, a comp, or a promise.
+// Illustrative only, not a formula, a comp, or a promise.
 export const offerExample = [
   ['Estimated value after repairs', '$320,000'],
   ['Repairs (roof, kitchen, flooring, paint)', '−$30,000'],
@@ -86,7 +86,7 @@ export const offerExample = [
 ];
 
 export const walkthrough = [
-  'A walkthrough is one visit — in person or by video — with you or whoever you choose to have there.',
+  'A walkthrough is one visit, in person or by video, with you or whoever you choose to have there.',
   'We look at the roof, foundation, plumbing, electrical, HVAC, kitchens, baths, and anything you already know needs work. We ask before taking photos.',
   'Most of the time is spent listening: what outcome you want, your timeline, and what matters most.',
   'You do not need to clean, repair, or empty anything first.',
@@ -135,17 +135,17 @@ export const newSituations = [
     answer: 'You can sell a Kern County rental property whether it is occupied or vacant. Harbison reviews single-family rentals, duplexes, and small multifamily properties as-is, compares a direct sale with a listing to investors or owner-occupants, and works within existing leases and California tenant protections.',
     name: 'Sell a Rental Property',
     title: 'Sell a Rental Property in Kern County',
-    description: 'Selling a rental in Bakersfield or Kern County? Compare a direct as-is sale with listing to investors — occupied or vacant, with leases handled through escrow.',
-    headline: 'Ready to stop being a landlord? <em>Compare your exits.</em>',
+    description: 'Selling a rental in Bakersfield or Kern County? Compare a direct as-is sale with listing to investors. Occupied or vacant, with leases handled through escrow.',
+    headline: 'Ready to stop being a landlord? <em>Compare your options.</em>',
     lead: 'Whether the property is performing, half-vacant, or needs work, selling a rental involves leases, tenants, deposits, and taxes that a typical home sale doesn’t.',
     image: images.suburban,
     body: [
       'We look at the property the way both an investor and an owner-occupant would, so you can see which buyer is likely to pay more: a direct sale to Harbison, a listing marketed to investors, or a listing after the tenants move out.',
       'Leases, security deposits, and rent prorations transfer through escrow. Selling with tenants in place is common; delivering the property vacant depends on the lease and on California law, including the just-cause rules that apply to many tenancies.',
-      'Selling investment property can have tax consequences, such as depreciation recapture, and some owners use a 1031 exchange. Talk with a CPA before you sell — we can work around the timeline they recommend.',
+      'Selling investment property can have tax consequences, such as depreciation recapture, and some owners use a 1031 exchange. Talk with a CPA before you sell. We can work around the timeline they recommend.',
     ],
     helps: [
-      'Occupied or vacant — no turnover required',
+      'Occupied or vacant, no turnover required',
       'Single-family, duplex, and small multifamily',
       'Lease and rent review',
       'Direct sale or listing to investors',
@@ -158,7 +158,7 @@ export const newSituations = [
   },
   {
     slug: 'failed-listing',
-    answer: 'If your Kern County listing expired or was withdrawn without selling, you can relist with a new price and preparation plan, sell directly as-is, or wait. Harbison looks at why it did not sell — price, condition, access, or financing — and compares a relaunch with a direct sale so you can choose.',
+    answer: 'If your Kern County listing expired or was withdrawn without selling, you can relist with a new price and preparation plan, sell directly as-is, or wait. Harbison looks at why it did not sell (price, condition, access, or financing) and compares a relaunch with a direct sale so you can choose.',
     name: 'Listing Didn’t Sell',
     title: 'House Didn’t Sell? Options After an Expired Listing',
     description: 'Listing expired or withdrawn in Bakersfield or Kern County? Find out why it didn’t sell and compare a relaunch with a direct as-is sale.',
@@ -168,13 +168,13 @@ export const newSituations = [
     body: [
       'Before deciding anything, it helps to understand what the market told you. How many showings did the home get? Did offers fall apart on inspection or appraisal? Those answers point to different fixes.',
       'Sometimes a relaunch with a new price, targeted repairs, or better presentation is the right move. Sometimes the property’s condition means most financed buyers cannot close, and a direct as-is sale makes more sense.',
-      'If your listing agreement is still active, we will not interfere with it. We can talk once it has expired or been withdrawn — or you are welcome to share this page with your current agent.',
+      'If your listing agreement is still active, we will not interfere with it. We can talk once it has expired or been withdrawn, or you are welcome to share this page with your current agent.',
     ],
     helps: [
       'Review of showing and offer history',
       'Relaunch plan and direct sale, side by side',
       'As-is purchase if financing kept falling through',
-      `Licensed agent for a relisting — DRE #${site.dre}`,
+      `Licensed agent for a relisting, DRE #${site.dre}`,
     ],
     faqs: [
       ['Why didn’t my house sell?', 'The most common reasons are price relative to condition, limited access for showings, weak photos or marketing, and buyer financing that failed on inspection or appraisal. The showing and offer history usually points to the cause.'],
@@ -187,12 +187,12 @@ export const newSituations = [
     name: 'Land & Development',
     title: 'Sell Land or a Development Property in Kern County',
     description: 'Selling vacant land, acreage, or a large lot in Kern County? Harbison reviews zoning, access, utilities, and development potential before you decide.',
-    headline: 'Land or a big lot? <em>See what it could be.</em>',
-    lead: 'Sometimes a property’s value is less about the house and more about the land underneath it — its zoning, size, access, and utilities.',
+    headline: 'Land or a big lot? <em>Find out what it is worth.</em>',
+    lead: 'Sometimes a property’s value is less about the house and more about the land underneath it: its zoning, size, access, and utilities.',
     image: images.land,
     body: [
       'Land is valued differently from houses. Zoning, road access, distance to water, sewer, and power, slope, and whether a parcel can legally be split all change what a buyer will pay.',
-      'With construction and development perspective, we can tell you whether a parcel looks like a candidate for a lot split, new construction, or additional units — or whether a straightforward sale is the better path. Any development plan depends on city or county approval.',
+      'With construction and development perspective, we can tell you whether a parcel looks like a candidate for a lot split, new construction, or additional units, or whether a straightforward sale is the better path. Any development plan depends on city or county approval.',
       'We look at vacant parcels, acreage, infill lots, and older homes on oversized lots across the valley, mountain, and desert areas of Kern County.',
     ],
     helps: [
@@ -211,11 +211,11 @@ export const newSituations = [
 export const stallionSprings = {
   slug: 'stallion-springs',
   geo: [35.0886, -118.6426],
-  answer: 'Call Harbison buys and helps sell homes and land in Stallion Springs, in the Tehachapi Mountains west of Tehachapi. Harbison reviews as-is condition, lot size, access, and utilities, and compares a direct sale with listing or improving the property first.',
+  answer: 'Call Harbison pays cash for homes and land in Stallion Springs, in the Tehachapi Mountains west of Tehachapi. Harbison reviews as-is condition, lot size, access, and utilities, and compares a direct sale with listing or improving the property first.',
   name: 'Stallion Springs',
-  title: 'Sell Your House or Land in Stallion Springs, CA',
+  title: 'Sell Your House or Land for Cash in Stallion Springs, CA',
   description: 'Selling a home or lot in Stallion Springs? Call Harbison reviews mountain properties as-is and compares a direct sale with listing.',
-  headline: 'Stallion Springs homes &amp; land. <em>Clear options.</em>',
+  headline: 'Sell your Stallion Springs home or land <em>for cash.</em>',
   lead: 'Stallion Springs sits in the Tehachapi Mountains west of Tehachapi, with custom homes, larger lots, and vacant parcels that each call for a different approach.',
   image: images.valley,
   body: [
@@ -235,6 +235,39 @@ const updated = '2026-09-24';
 // Guide additions. `meaning` feeds the "What this means for your property" block.
 export const newGuides = [
   {
+    slug: 'cash-home-buyers-bakersfield',
+    title: 'Cash Home Buyers in Bakersfield: How to Choose One',
+    short: 'Cash Home Buyers in Bakersfield',
+    description: 'Who buys houses for cash in Bakersfield, how a cash sale works, how to spot a risky buyer, and the questions to ask before you sign.',
+    image: images.home,
+    updated: '2026-11-12',
+    answer: 'A cash home buyer in Bakersfield purchases your house with its own money instead of a bank loan, usually as-is and without lender-required appraisals or inspections. Cash sales can close in weeks, but the price is usually below what a fully repaired, listed home could bring. Check who the actual buyer is, whether they are licensed, and get the numbers in writing before you sign.',
+    meaning: 'Get at least two written numbers before you choose: a cash offer and a realistic listing estimate. The better choice is the one that fits your timeline, the condition of the house, and how much uncertainty you can accept.',
+    sections: [
+      ['What is a cash home buyer?', [
+        'A cash home buyer is a person or company that pays for a house without financing the purchase through a mortgage. Because no lender is involved, there is no loan approval and no lender-required appraisal or inspection that can delay or cancel the sale. The buyer may still inspect the property under the contract.',
+        'Most cash buyers purchase as-is, so you typically do not repair, clean, or stage the house first. Access, inspections, and repairs still follow the written agreement. In exchange, the price reflects the condition of the property and the buyer’s costs and risk.',
+      ]],
+      ['Who buys houses for cash in Bakersfield?', [
+        '<ul><li><strong>Local investors</strong> who renovate and resell or keep the home as a rental</li><li><strong>Home-buying companies</strong> that advertise “we buy houses” and often assign contracts to other investors</li><li><strong>Builders and developers</strong> looking at lots and older homes on larger parcels</li><li><strong>Licensed agents who buy directly</strong>, like Harbison, who can also compare the cash offer with a listing</li></ul>',
+      ]],
+      ['How do you tell a legitimate cash buyer from a risky one?', [
+        '<ul><li>They tell you plainly whether they are the buyer or plan to assign the contract</li><li>They disclose any real estate license in writing</li><li>Closing goes through a licensed title or escrow company, not a private account</li><li>They explain how the offer was calculated</li><li>They never demand a same-day signature or claim another buyer will take the house</li><li>You are free to ask an attorney, relative, or another agent to review the paperwork</li></ul>',
+      ]],
+      ['What does a cash sale save, and what does it cost?', [
+        'A cash sale usually saves repairs, cleaning, showings, agent commissions, and months of holding costs. It usually costs you some sale price, because the buyer takes on repairs, carrying costs, and resale risk.',
+        'For a house in good shape, listing often nets more. For a house that needs a roof, foundation work, or a full remodel, the gap can be small once repairs and carrying costs are counted. Our <a href="/guides/cash-offer-vs-listing">cash offer vs. listing guide</a> has a worked example.',
+      ]],
+      ['When does selling for cash make sense?', [
+        '<ul><li>The house needs repairs you cannot fund or manage</li><li>You need to close by a specific date</li><li>The property is inherited, vacant, or you live out of the area</li><li>Tenants, damage, or open permits make showings difficult</li><li>You value certainty over the last dollar of price</li></ul>',
+      ]],
+      ['How Harbison buys houses for cash', [
+        'Call Harbison is led by Nathanael Harbison, a California-licensed REALTOR® (DRE #02059393). When Harbison buys directly, Harbison is the buyer, the license is disclosed in writing, and closing goes through a licensed title or escrow company. You receive the offer with its assumptions, and a listing comparison when that is a realistic option. There is no obligation to accept.',
+      ]],
+    ],
+    related: ['needs-major-repairs', 'vacant-property', 'inherited-property'],
+  },
+  {
     slug: 'renovate-or-sell-as-is',
     title: 'Should I Renovate Before Selling or Sell As-Is?',
     short: 'Renovate or Sell As-Is?',
@@ -246,19 +279,19 @@ export const newGuides = [
     sections: [
       ['Which repairs usually pay off?', [
         'Buyers pay for what they can see and for what their lender requires. Fresh paint, flooring, lighting, yard cleanup, and fixing obvious defects often return a good share of their cost.',
-        'Big-ticket items — roofs, foundations, HVAC, sewer lines — tend to be expected rather than rewarded. Fixing them prevents a lower price more often than it raises the price.',
+        'Big-ticket items such as roofs, foundations, HVAC, and sewer lines tend to be expected rather than rewarded. Fixing them prevents a lower price more often than it raises the price.',
       ]],
       ['The three numbers to compare', [
-        '<ul><li><strong>As-is value</strong> — what the home sells for today, in its current condition.</li><li><strong>After-repair value</strong> — what it would sell for once updated.</li><li><strong>All-in renovation cost</strong> — materials, labor, permits, a contingency (10–20% is common), plus the mortgage, taxes, insurance, and utilities you carry while the work happens.</li></ul>',
+        '<ul><li><strong>As-is value</strong>, what the home sells for today, in its current condition.</li><li><strong>After-repair value</strong>, what it would sell for once updated.</li><li><strong>All-in renovation cost</strong>, materials, labor, permits, a contingency (10–20% is common), plus the mortgage, taxes, insurance, and utilities you carry while the work happens.</li></ul>',
       ]],
       ['The hidden costs of renovating to sell', [
-        '<ul><li>Contractor availability and delays</li><li>Permit timelines and inspections</li><li>Surprises behind the walls — old wiring, plumbing, or water damage</li><li>Months of holding costs</li><li>Your own time managing the project</li></ul>',
+        '<ul><li>Contractor availability and delays</li><li>Permit timelines and inspections</li><li>Surprises behind the walls, like old wiring, plumbing, or water damage</li><li>Months of holding costs</li><li>Your own time managing the project</li></ul>',
       ]],
       ['When selling as-is makes more sense', [
         '<ul><li>The house needs major systems or structural work</li><li>You do not have the cash or time to run a project</li><li>You live outside the area</li><li>The property is inherited and several people must agree on spending</li></ul>',
       ]],
       ['A middle path: targeted repairs', [
-        'Many homes land in between. A short list of high-return fixes done before listing can widen the buyer pool without a full remodel. With a construction perspective, Harbison can help you decide which items belong on that list — and which do not.',
+        'Many homes land in between. A short list of high-return fixes done before listing can widen the buyer pool without a full remodel. With a construction perspective, Harbison can help you decide which items belong on that list, and which do not.',
       ]],
     ],
     related: ['needs-major-repairs', 'unfinished-remodel', 'failed-listing'],
@@ -272,14 +305,14 @@ export const newGuides = [
     image: images.home,
     updated: '2026-11-06',
     answer: 'A cash offer starts with what the house should sell for after repairs, then subtracts the cost of those repairs, the buyer’s costs to buy, hold, finance, and resell, and a margin for risk. Condition, location, title issues, occupancy, and your closing timeline all move the number. A fair buyer should be able to show you each assumption.',
-    meaning: 'Ask for the assumptions, not just the number. If a buyer cannot tell you the value range, repair scope, and costs behind an offer, you cannot tell whether it is fair — or compare it with listing.',
+    meaning: 'Ask for the assumptions, not just the number. If a buyer cannot tell you the value range, repair scope, and costs behind an offer, you cannot tell whether it is fair or compare it with listing.',
     sections: [
       ['The basic math', [
-        'The example below is illustrative only — not a formula Harbison uses on every property, and not a promise about any home.',
+        'The example below is illustrative only. It is not a formula Harbison uses on every property, and it is not a promise about any home.',
         '<div class="compare-wrap"><table class="compare offer-table"><thead><tr><th scope="col">Line item</th><th scope="col">Example</th></tr></thead><tbody><tr><th scope="row">Estimated value after repairs</th><td>$320,000</td></tr><tr><th scope="row">Repairs</th><td>−$30,000</td></tr><tr><th scope="row">Costs to resell</th><td>−$22,000</td></tr><tr><th scope="row">Holding and financing</th><td>−$10,000</td></tr><tr><th scope="row">Costs to buy</th><td>−$3,000</td></tr><tr><th scope="row">Contingency and buyer margin</th><td>−$35,000</td></tr><tr><th scope="row">Illustrative offer</th><td><strong>≈ $220,000</strong></td></tr></tbody></table></div>',
       ]],
       ['What raises or lowers an offer', [
-        '<ul><li>Condition and the size of the repair scope</li><li>The after-repair value supported by nearby sales</li><li>Location and buyer demand</li><li>Occupancy — tenants, family members, or contents left behind</li><li>Title issues, liens, or unpermitted work</li><li>How soon you need to close</li><li>Property type — land and multi-unit properties are valued differently</li></ul>',
+        '<ul><li>Condition and the size of the repair scope</li><li>The after-repair value supported by nearby sales</li><li>Location and buyer demand</li><li>Occupancy, tenants, family members, or contents left behind</li><li>Title issues, liens, or unpermitted work</li><li>How soon you need to close</li><li>Property type (land and multi-unit properties are valued differently)</li></ul>',
       ]],
       ['Why a cash offer is usually below retail', [
         'A direct as-is buyer may take on repairs, carrying costs, and resale risk. You may avoid preparing and publicly marketing the property. A purchase without financing avoids lender requirements, but buyer inspections, property access, contingencies, and closing timing still depend on the contract. The discount reflects those costs and trade-offs, not a guarantee that the sale will close.',
@@ -288,7 +321,7 @@ export const newGuides = [
         '<ul><li>Are you the buyer, or will you assign the contract to someone else?</li><li>What value and repair assumptions is the offer based on?</li><li>Is the price firm after the walkthrough, and what could change it?</li><li>Who pays closing costs, and which title or escrow company will handle closing?</li><li>What happens to the deposit if either side cancels?</li><li>Can I take time to review this with family or an advisor?</li></ul>',
       ]],
       ['How Harbison presents offers', [
-        'We put the offer in writing with the assumptions behind it — the estimated value range, repair scope, costs, and closing options — and we show how it compares with listing when that is a realistic path. There are no deadlines designed to pressure you and no invented competing offers.',
+        'We put the offer in writing with the assumptions behind it: the estimated value range, repair scope, costs, and closing options. We also show how it compares with listing when that is a realistic path. There are no deadlines designed to pressure you and no invented competing offers.',
       ]],
     ],
     related: ['needs-major-repairs', 'vacant-property', 'inherited-property'],
@@ -297,20 +330,20 @@ export const newGuides = [
     slug: 'direct-sale-walkthrough',
     title: 'What Happens During a Direct-Sale Walkthrough?',
     short: 'The Direct-Sale Walkthrough',
-    description: 'What to expect before, during, and after a direct-sale walkthrough in Kern County — and the red flags to watch for with any buyer.',
+    description: 'What to expect before, during, and after a direct-sale walkthrough in Kern County, plus the red flags to watch for with any buyer.',
     image: images.classic,
     updated,
-    answer: 'A direct-sale walkthrough is a single visit — in person or by video — where the buyer looks at the property’s condition, asks about your goals and timeline, and notes repairs. You do not need to clean or repair anything first. Afterward, you should receive a written explanation of your options, not a demand to sign on the spot.',
+    answer: 'A direct-sale walkthrough is a single visit, in person or by video, where the buyer looks at the property’s condition, asks about your goals and timeline, and notes repairs. You do not need to clean or repair anything first. Afterward, you should receive a written explanation of your options, not a demand to sign on the spot.',
     meaning: 'The walkthrough is information-gathering for both sides. You should leave it knowing what happens next and when, and you should never feel you have to decide that day.',
     sections: [
       ['Before the visit', [
-        '<ul><li>Confirm who owns the property and who should be there — co-owners, heirs, or someone with power of attorney.</li><li>If tenants live there, they must receive proper written notice before the visit.</li><li>Gather anything helpful: repair records, permits, HOA details, a mortgage payoff estimate.</li><li>No cleaning or staging required.</li></ul>',
+        '<ul><li>Confirm who owns the property and who should be there, such as co-owners, heirs, or someone with power of attorney.</li><li>If tenants live there, they must receive proper written notice before the visit.</li><li>Gather anything helpful: repair records, permits, HOA details, a mortgage payoff estimate.</li><li>No cleaning or staging required.</li></ul>',
       ]],
       ['During the visit', [
         'We walk the property with you and note the roof, foundation, plumbing, electrical, HVAC, kitchens, baths, and anything you already know needs work. We ask before taking photos. Most of the time is spent listening: what outcome you want, your timeline, and what matters most.',
       ]],
       ['After the visit', [
-        'You receive your options in writing — a direct offer if it fits, and a listing or repair comparison when that is realistic — with the assumptions behind the numbers. Take the time you need; you can review it with family, an attorney, or another agent.',
+        'You receive your options in writing: a direct offer if it fits, and a listing or repair comparison when that is realistic, with the assumptions behind the numbers. Take the time you need; you can review it with family, an attorney, or another agent.',
       ]],
       ['Red flags at any walkthrough', [
         '<ul><li>Pressure to sign the same day</li><li>A price that changes without a clear reason</li><li>Claims that the city, a lender, or another buyer will take the property unless you act now</li><li>Vague answers about who the actual buyer is</li><li>Discouraging you from getting independent advice</li></ul>',
@@ -322,7 +355,7 @@ export const newGuides = [
 
 // "What this means for your property" for the original three guides.
 export const guideMeaning = {
-  'sell-house-as-is-california': 'Selling as-is removes the repair work, not the paperwork. Before you compare offers, list what you know about the property’s condition — it speeds up disclosures and makes every offer more accurate.',
+  'sell-house-as-is-california': 'Selling as-is removes the repair work, not the paperwork. Before you compare offers, list what you know about the property’s condition. It speeds up disclosures and makes every offer more accurate.',
   'cash-offer-vs-listing': 'Run both numbers for your house: a written as-is offer and a realistic listing net after repairs, commissions, and months of holding costs. Then weigh the gap against how much time, money, and uncertainty you can take on.',
-  'sell-inherited-house-california': 'Start by confirming who has authority to sell — trustee, executor, or the heirs on title. Once that is clear, you can compare selling as-is, cleaning up and listing, renting, or keeping the home without losing time.',
+  'sell-inherited-house-california': 'Start by confirming who has authority to sell: the trustee, the executor, or the heirs on title. Once that is clear, you can compare selling as-is, cleaning up and listing, renting, or keeping the home without losing time.',
 };

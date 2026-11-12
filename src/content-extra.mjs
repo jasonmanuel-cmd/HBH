@@ -1,15 +1,15 @@
-// About page, guides, and quick facts. Keep every statement true — search and AI engines quote these.
+// About page, guides, and quick facts. Keep every statement true. Search and AI engines quote these.
 import { images } from './content.mjs';
 
 export const californiaCity = {
   slug: 'california-city',
   geo: [35.1258, -117.9859],
-  answer: 'Call Harbison buys houses and vacant land in California City, CA, including desert lots, homes needing repairs, and properties owned by out-of-area sellers. Harbison evaluates each parcel’s access, utilities, and zoning, and can buy as-is or help you decide whether holding, listing, or selling now makes more sense.',
+  answer: 'Call Harbison buys houses and vacant land for cash in California City, CA, including desert lots, homes needing repairs, and properties owned by out-of-area sellers. Harbison evaluates each parcel’s access, utilities, and zoning, and can buy as-is or help you decide whether holding, listing, or selling now makes more sense.',
   name: 'California City',
-  title: 'Sell Your House or Land in California City, CA',
-  description: 'Selling a house or vacant lot in California City? Call Harbison buys as-is and gives straight answers on land value, access, and utilities.',
-  headline: 'California City homes &amp; land. <em>Straight answers.</em>',
-  lead: 'California City covers a huge area in eastern Kern County, with established neighborhoods alongside thousands of vacant desert parcels — and value can vary widely from one lot to the next.',
+  title: 'Sell Your House or Land for Cash in California City, CA',
+  description: 'Selling a house or vacant lot in California City? Call Harbison pays cash as-is and gives a clear read on land value, access, and utilities.',
+  headline: 'Sell your California City home or land <em>for cash.</em>',
+  lead: 'California City covers a huge area in eastern Kern County, with established neighborhoods alongside thousands of vacant desert parcels, and value can vary widely from one lot to the next.',
   image: images.land,
   body: [
     'Many California City lot owners bought years ago, live out of the area, and are not sure what their parcel is worth today. Road access, distance to utilities, and zoning often matter more than acreage alone.',
@@ -26,15 +26,19 @@ export const californiaCity = {
 export const extraFaqs = [
   ['Is Harbison a licensed real estate agent?', 'Yes. Call Harbison is led by Nathanael Harbison, a California-licensed REALTOR® (DRE #02059393) with The Mora Partners Inc. When Harbison buys a property directly, that licensed status is disclosed to you in writing.'],
   ['What areas do you serve?', 'Bakersfield, Tehachapi, California City, Stallion Springs, and communities throughout Kern County, California.'],
+  ['Do you really pay cash for houses in Bakersfield?', 'Yes. When Harbison buys a house directly, the purchase is made with our own funds. A purchase without financing avoids lender requirements, but inspections, access, and closing timing still follow the written agreement, title, and escrow. Closing goes through a licensed title or escrow company.'],
+  ['How fast can I get a cash offer?', 'Send the address or call or text (661) 472-7499. We typically reply within 24 hours. After a walkthrough, in person or by video, you receive your options in writing. No price or closing date is guaranteed before that review.'],
+  ['Will a cash offer be lower than listing my house?', 'Often, yes, because a direct buyer takes on repairs, holding costs, and resale risk. For a house that needs major work, the gap can be small once you count repairs, commissions, and months of carrying costs. We show you both numbers.'],
   ['How quickly will I hear back?', 'Typically within 24 hours. You can also call or text (661) 472-7499.'],
 ];
 
 // Short, extractable facts for search engines and AI answer engines.
 export const glance = [
-  ['Who we are', 'Call Harbison, led by Nathanael Harbison — California-licensed REALTOR® (DRE #02059393) with The Mora Partners Inc.'],
+  ['Who we are', 'Call Harbison, led by Nathanael Harbison. California-licensed REALTOR® (DRE #02059393) with The Mora Partners Inc.'],
   ['Where we buy', 'Bakersfield, Tehachapi, California City, Stallion Springs, and throughout Kern County, CA.'],
   ['What we buy', 'Houses in any condition, inherited and probate properties, rentals with tenants, fire- or water-damaged homes, unfinished remodels, and land.'],
-  ['Your options', 'Direct cash sale, traditional listing, renovate-then-sell, or development — we compare them with you.'],
+  ['Your options', 'Direct cash sale, traditional listing, renovate-then-sell, or development. We compare them with you.'],
+  ['How we pay', 'Cash purchase without buyer financing, closed through a licensed title or escrow company under a written agreement.'],
   ['Repairs & showings', 'No cleaning or repairs needed for the initial review. Any later access, inspections or repairs depend on the agreement.'],
   ['Cost to ask', 'Free and no obligation. No commission paid to Harbison on a direct sale.'],
   ['Response time', 'Typically within 24 hours. Call or text (661) 472-7499.'],
@@ -43,16 +47,16 @@ export const glance = [
 
 export const about = {
   title: 'About Nathanael Harbison',
-  description: 'Call Harbison is led by Nathanael Harbison, a California-licensed REALTOR® (DRE #02059393) helping Kern County owners sell as-is, list, renovate, or develop.',
+  description: 'Call Harbison is led by Nathanael Harbison, a California-licensed REALTOR® (DRE #02059393) who buys Kern County houses for cash and helps owners list, renovate, or develop.',
   paragraphs: [
     'Call Harbison is led by Nathanael Harbison, a California-licensed REALTOR® (DRE #02059393) with The Mora Partners Inc. (DRE #02227690). Nathanael works with sellers, buyers, and investors across Bakersfield, Tehachapi, California City, Stallion Springs, and the surrounding communities.',
-    'Because Nathanael is both a licensed agent and a direct buyer, Harbison can do something most “we buy houses” companies cannot: put a direct offer side by side with a traditional listing, a renovation plan, or a development strategy — and tell you honestly which one is likely to serve you best.',
-    'His experience includes residential sales across price ranges, investment-property analysis, and special situations such as probate and inherited homes, divorce settlements, short sales, and time-sensitive moves. The approach is simple: listen first, give straight market feedback, and never push a transaction.',
+    'Because Nathanael is both a licensed agent and a direct buyer, Harbison can do something most “we buy houses” companies cannot: put a cash offer side by side with a traditional listing, a renovation plan, or a development strategy, and tell you honestly which one is likely to serve you best.',
+    'His experience includes residential sales across price ranges, investment-property analysis, and special situations such as probate and inherited homes, divorce settlements, short sales, and time-sensitive moves. He listens first, gives plain market feedback, and never pushes a transaction.',
   ],
   principles: [
-    ['Options, not pressure', 'We show every realistic path — direct sale, listing, renovation, or development — and let you choose.'],
+    ['Options, not pressure', 'We show every realistic path: direct sale, listing, renovation, or development. You choose.'],
     ['Construction perspective', 'We evaluate condition and repair scope the way a builder does, so offers reflect the real work involved.'],
-    ['Local judgment', 'Active in Kern County real estate, with working knowledge of neighborhoods, pricing, and buyer pools.'],
+    ['Local knowledge', 'Active in Kern County real estate, with working knowledge of neighborhoods, pricing, and buyer pools.'],
     ['Transparency', 'You see how a number was reached. When we buy directly, Nathanael’s license status is disclosed in writing.'],
   ],
 };
@@ -73,7 +77,7 @@ export const guides = [
     sections: [
       ['What does “as-is” mean in California?', [
         'Selling as-is means offering the property in its current condition without agreeing in advance to repairs. Buyers may still request inspections, repairs, or credits; the contract determines what each party agrees to.',
-        'As-is does not remove your duty to disclose. Most California residential sellers must complete a Transfer Disclosure Statement (TDS) and a Natural Hazard Disclosure, and homes built before 1978 require a federal lead-based paint disclosure. Some transfers — such as certain court-supervised probate sales — are exempt from the TDS form, but concealing known problems can still create liability. Ask your agent or attorney which forms apply to you.',
+        'As-is does not remove your duty to disclose. Most California residential sellers must complete a Transfer Disclosure Statement (TDS) and a Natural Hazard Disclosure, and homes built before 1978 require a federal lead-based paint disclosure. Some transfers, such as certain court-supervised probate sales, are exempt from the TDS form, but concealing known problems can still create liability. Ask your agent or attorney which forms apply to you.',
       ]],
       ['What are my options for selling as-is?', [
         '<strong>1. List as-is on the MLS.</strong> You reach the most buyers, but many use loans whose appraisals and inspections can stall a sale on a home with serious condition issues.',
@@ -81,17 +85,17 @@ export const guides = [
         '<strong>3. Make targeted repairs, then list.</strong> Sometimes a few high-impact fixes raise the price by more than they cost. A good buyer or agent will tell you when that is the case.',
       ]],
       ['How are as-is offers calculated?', [
-        'Most direct buyers start with the after-repair value (what the home would sell for fully fixed up), then subtract estimated repairs, holding and selling costs, and a margin for risk. The more accurate the repair estimate, the fairer the offer — which is why construction experience matters.',
+        'Most direct buyers start with the after-repair value (what the home would sell for fully fixed up), then subtract estimated repairs, holding and selling costs, and a margin for risk. The more accurate the repair estimate, the fairer the offer, which is why construction experience matters.',
         'Ask any buyer to walk you through their numbers. Harbison will.',
       ]],
       ['How long does an as-is sale take?', [
         'A direct cash sale with clear title can often close in about two to four weeks. A financed sale on the open market typically takes 30–45 days once in escrow, plus however long it takes to find a buyer.',
       ]],
       ['What does it cost to sell as-is?', [
-        'Common seller costs in California include escrow and title fees, the county documentary transfer tax (in Kern County, $1.10 per $1,000 of value), any liens or loan payoffs, and — on a listed sale — agent commissions, which are negotiable. On a direct sale to Harbison, you pay no commission to Harbison.',
+        'Common seller costs in California include escrow and title fees, the county documentary transfer tax (in Kern County, $1.10 per $1,000 of value), any liens or loan payoffs, and, on a listed sale, agent commissions (which are negotiable). On a direct sale to Harbison, you pay no commission to Harbison.',
       ]],
       ['As-is seller checklist', [
-        '<ul><li>Gather your mortgage payoff, property tax, and HOA information</li><li>List every issue you know about — roof, foundation, plumbing, permits</li><li>Confirm smoke/CO detectors and water-heater strapping (California requires compliance statements)</li><li>Decide what belongings you want to keep</li><li>Get at least one direct offer and one listing opinion to compare</li></ul>',
+        '<ul><li>Gather your mortgage payoff, property tax, and HOA information</li><li>List every issue you know about: roof, foundation, plumbing, permits</li><li>Confirm smoke/CO detectors and water-heater strapping (California requires compliance statements)</li><li>Decide what belongings you want to keep</li><li>Get at least one direct offer and one listing opinion to compare</li></ul>',
       ]],
     ],
     related: ['needs-major-repairs', 'unfinished-remodel', 'fire-water-damage'],
@@ -100,7 +104,7 @@ export const guides = [
     slug: 'cash-offer-vs-listing',
     title: 'Cash Offer vs. Listing Your House: Which Nets More?',
     short: 'Cash Offer vs. Listing',
-    description: 'A side-by-side look at selling to a cash buyer versus listing with an agent in Kern County — net proceeds, timelines, risks, and when each makes sense.',
+    description: 'A side-by-side look at selling to a cash buyer versus listing with an agent in Kern County. Net proceeds, timelines, risks, and when each makes sense.',
     image: images.list,
     published: '2026-10-23',
     updated: '2026-11-06',
@@ -112,7 +116,7 @@ export const guides = [
       ['An illustrative example', [
         'The numbers below are hypothetical, for illustration only. Every property is different.',
         '<div class="compare-wrap"><table class="compare"><thead><tr><th scope="col">Worth $350,000 fixed up; needs $40,000 of work</th><th scope="col">Fix &amp; list</th><th scope="col">Cash offer as-is</th></tr></thead><tbody><tr><th scope="row">Sale price</th><td>$350,000</td><td>$265,000</td></tr><tr><th scope="row">Repairs</th><td>−$40,000</td><td>$0</td></tr><tr><th scope="row">Commissions (example: 5%)</th><td>−$17,500</td><td>$0</td></tr><tr><th scope="row">Closing costs (approx.)</th><td>−$5,000</td><td>−$1,500</td></tr><tr><th scope="row">Holding costs</th><td>−$8,000</td><td>−$1,000</td></tr><tr><th scope="row">Estimated net</th><td><strong>≈ $279,500</strong></td><td><strong>≈ $262,500</strong></td></tr><tr><th scope="row">Illustrative timeline</th><td>4–6 months</td><td>2–4 weeks</td></tr></tbody></table></div>',
-        'In this example listing nets more — but only if repairs stay on budget, the home sells at full price, and the buyer’s financing holds. Cost overruns or a price reduction can erase the gap quickly. Timing is illustrative too: the closing date must be agreed in writing and depends on the contract, title and escrow.',
+        'In this example listing nets more, but only if repairs stay on budget, the home sells at full price, and the buyer’s financing holds. Cost overruns or a price reduction can erase the gap quickly. Timing is illustrative too: the closing date must be agreed in writing and depends on the contract, title and escrow.',
       ]],
       ['When does a cash offer make more sense?', [
         '<ul><li>The home needs major repairs you cannot fund or manage</li><li>You need to close on a specific date</li><li>The property is inherited, vacant, or out of the area</li><li>Tenants, damage, or open permits make showings difficult</li><li>You value certainty over squeezing out the last dollar</li></ul>',
@@ -150,10 +154,10 @@ export const guides = [
         'For a qualifying family home, Proposition 19 generally requires the inheriting child to use it as a principal residence and meet filing requirements to obtain the intergenerational property-tax exclusion; value limits apply. Family farms have separate rules. See the <a href="https://boe.ca.gov/prop19/">California Board of Equalization Proposition 19 guidance</a> and ask the county assessor or a tax professional how the rules apply.',
       ]],
       ['What if the heirs disagree?', [
-        'Co-heirs who disagree can often resolve it by getting clear numbers: an as-is offer, a listing estimate, and the cost of repairs. If they still cannot agree, a California court can order a partition sale — usually the slowest and most expensive route.',
+        'Co-heirs who disagree can often resolve it by getting clear numbers: an as-is offer, a listing estimate, and the cost of repairs. If they still cannot agree, a California court can order a partition sale, usually the slowest and most expensive route.',
       ]],
       ['Your options for an inherited house', [
-        '<ul><li><strong>Sell as-is</strong> — leave belongings and repairs behind</li><li><strong>Clean up and list</strong> — often nets more on a house in decent condition</li><li><strong>Rent it out</strong> — keeps the asset but adds landlord responsibilities</li><li><strong>Move in</strong> — may preserve the property tax base under Prop 19</li></ul>',
+        '<ul><li><strong>Sell as-is</strong>, leave belongings and repairs behind</li><li><strong>Clean up and list</strong>, often nets more on a house in decent condition</li><li><strong>Rent it out</strong>, keeps the asset but adds landlord responsibilities</li><li><strong>Move in</strong>, may preserve the property tax base under Prop 19</li></ul>',
       ]],
     ],
     related: ['inherited-property', 'vacant-property', 'life-change'],

@@ -63,7 +63,7 @@ for (const file of ['index.html', 'about.html', 'contact.html']) {
   });
 }
 test('new wordmarks preserve original mark pixels and contain visible Call Harbison text', () => {
-  const original = readFileSync(new URL('../static/assets/h-house-mark-v2.png', import.meta.url)).toString('base64');
+  const original = readFileSync(new URL('../static/assets/h-house-mark-v3.png', import.meta.url)).toString('base64');
   for (const file of ['call-harbison.svg', 'call-harbison-reverse.svg']) {
     const svg = readFileSync(new URL(`../static/assets/${file}`, import.meta.url), 'utf8');
     assert.ok(svg.includes(`data:image/png;base64,${original}`));

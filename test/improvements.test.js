@@ -270,7 +270,7 @@ test('built dist outputs fingerprinted assets, HQ subroutes, hardened robots.txt
   assert.equal((robots.match(/Disallow: \/thank-you/g) || []).length, 2, 'every robots block disallows /thank-you');
 
   const sitemap = readFileSync('dist/sitemap.xml', 'utf8');
-  assert.ok(sitemap.includes('<loc>https://www.callharbison.com/contact</loc><lastmod>2026-09-24</lastmod>'), 'unchanged pages retain stable historical lastmod dates');
+  assert.ok(sitemap.includes('<loc>https://www.callharbison.com/contact</loc><lastmod>2026-11-12</lastmod>'), 'pages without their own date use the current content date');
   assert.ok(sitemap.includes('<loc>https://www.callharbison.com/about</loc><lastmod>2026-11-05</lastmod>'), 'About records its substantive identity-link update');
   assert.ok(home.includes('/_vercel/speed-insights/script.js'), 'zero-dependency Vercel Speed Insights script included');
 });
