@@ -396,7 +396,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
         ? err.message
         : spanish
           ? `Algo salió mal al enviar su solicitud; no se perdió nada de lo que escribió. Por favor, inténtelo de nuevo${phone ? `, o llame o envíe un texto al ${phone.textContent}` : ''}.`
-          : `Something went wrong sending your request — nothing you typed was lost. Please try again${phone ? `, or call or text ${phone.textContent}` : ''}.`;
+          : `Something went wrong sending your request. Nothing you typed was lost. Please try again${phone ? `, or call or text ${phone.textContent}` : ''}.`;
       status.textContent = status.textContent.trim();
       status.classList.add('error');
     } finally {
@@ -455,7 +455,7 @@ document.querySelectorAll('form[data-details-form]').forEach((form) => {
       desired_outcome: fd.get('desired_outcome') || '',
     };
     if (!payload.timeline && !payload.occupancy && !payload.condition_flags.length && !payload.desired_outcome) {
-      status.textContent = say('Choose at least one answer, or skip this — it’s optional.', 'Elija al menos una respuesta, o sáltese este paso: es opcional.');
+      status.textContent = say('Choose at least one answer, or skip this, it’s optional.', 'Elija al menos una respuesta, o sáltese este paso: es opcional.');
       status.className = 'form-status error';
       return;
     }
@@ -466,7 +466,7 @@ document.querySelectorAll('form[data-details-form]').forEach((form) => {
         status.textContent = say('Added to your request. Thank you.', 'Se agregó a su solicitud. Gracias.'); status.className = 'form-status ok'; button.disabled = true; return; }
     } catch (error) { status.textContent = error.message; status.className = 'form-status error'; return; }
     if (!payload.phone) {
-      status.textContent = say('Thanks — please mention these details when we call.', 'Gracias. Por favor, mencione estos detalles cuando le llamemos.');
+      status.textContent = say('Thanks. Please mention these details when we call.', 'Gracias. Por favor, mencione estos detalles cuando le llamemos.');
       status.className = 'form-status';
       return;
     }

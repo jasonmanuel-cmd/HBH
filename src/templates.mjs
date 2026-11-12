@@ -22,30 +22,30 @@ const year = new Date().getFullYear();
 // Fallback delay before gtag.js loads for visitors who never interact (see head()).
 const GA_LOAD_DELAY_MS = 4000;
 // Wordmarks combine the original H-house mark with Call Harbison text.
-const logo = '/assets/call-harbison.svg'; // full color, transparent, 1172×231
-const logoReverse = '/assets/call-harbison-reverse.svg'; // ivory + gold for navy grounds, 1172×231
-const heroMark = '/assets/h-house-mark-v2.png'; // round house-H mark, transparent, 192×192
+const logo = '/assets/call-harbison.svg'; // navy and gold, transparent, 945×225
+const logoReverse = '/assets/call-harbison-reverse.svg'; // gold for navy grounds, transparent, 945×225
+const heroMark = '/assets/h-house-mark-v3.png'; // gold ruler-house H mark, transparent, 256×256
 const ogDefault = '/assets/og-default.jpg'; // 1200×630
 const headshot = '/assets/nathanael-harbison.jpg'; // 325×325
-const BUILD_DATE = '2026-09-24';
+const BUILD_DATE = '2026-11-12';
 export const PAGE_DATES = {
-  '/': '2026-11-06',
-  '/how-it-works': '2026-11-06',
-  '/sell-loved-ones-house': '2026-11-06',
-  '/areas/kern-county': '2026-11-06',
-  '/areas/bakersfield': '2026-11-06',
-  '/areas/tehachapi': '2026-11-06',
-  '/areas/stallion-springs': '2026-11-06',
-  '/areas/california-city': '2026-11-06',
-  '/situations/needs-major-repairs': '2026-11-06',
-  '/situations/problem-tenants': '2026-11-06',
-  '/situations/life-change': '2026-11-06',
-  '/situations/relocation': '2026-11-06',
-  '/situations/inherited-property': '2026-11-06',
-  '/situations/land-development': '2026-11-06',
-  '/buyers': '2026-11-06',
-  '/investors': '2026-11-06',
-  '/home-value': '2026-11-06',
+  '/': '2026-11-12',
+  '/how-it-works': '2026-11-12',
+  '/sell-loved-ones-house': '2026-11-12',
+  '/areas/kern-county': '2026-11-12',
+  '/areas/bakersfield': '2026-11-12',
+  '/areas/tehachapi': '2026-11-12',
+  '/areas/stallion-springs': '2026-11-12',
+  '/areas/california-city': '2026-11-12',
+  '/situations/needs-major-repairs': '2026-11-12',
+  '/situations/problem-tenants': '2026-11-12',
+  '/situations/life-change': '2026-11-12',
+  '/situations/relocation': '2026-11-12',
+  '/situations/inherited-property': '2026-11-12',
+  '/situations/land-development': '2026-11-12',
+  '/buyers': '2026-11-12',
+  '/investors': '2026-11-12',
+  '/home-value': '2026-11-12',
   '/about': '2026-11-05',
   '/privacy': '2026-10-17',
 };
@@ -58,7 +58,7 @@ const img = (url, alt, w, h, { eager = false, cls = '' } = {}) =>
   `<img${cls ? ` class="${cls}"` : ''} src="${sized(url, w, h)}" srcset="${sized(url, Math.round(w / 1.5), Math.round(h / 1.5))} ${Math.round(w / 1.5)}w, ${sized(url, w, h)} ${w}w" sizes="(max-width: 640px) 92vw, ${w}px" alt="${esc(alt)}" width="${w}" height="${h}" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async">`;
 
 // Hero photo as a real <img> so the browser finds it early (LCP). On phones the photo sat under a ~90%
-// overlay, so it isn't downloaded there at all (a 1×1 placeholder source) — the headline becomes the LCP.
+// overlay, so it isn't downloaded there at all (a 1×1 placeholder source). The headline becomes the LCP.
 const BLANK = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 const heroSources = (url) => ({
   mobile: `${BLANK} 1w`,
@@ -95,24 +95,25 @@ const orgLd = () => ({
   '@id': ids.org,
   name: site.name,
   slogan: site.tagline,
-  description: `${site.name} buys houses and land as-is in Bakersfield, Tehachapi, California City, and throughout Kern County, California, and helps owners compare a direct sale with listing, renovation, or development.`,
+  description: `${site.name} is a cash home buyer in Bakersfield, Tehachapi, California City, and throughout Kern County, California. It buys houses and land as-is for cash and helps owners compare a direct sale with listing, renovation, or development.`,
   url: `${site.url}/`,
-  logo: { '@type': 'ImageObject', url: `${site.url}${logo}`, width: 1172, height: 231 },
+  logo: { '@type': 'ImageObject', url: `${site.url}${logo}`, width: 945, height: 225 },
   image: `${site.url}${ogDefault}`,
   telephone: site.phoneHref,
   email: site.email,
   address: { '@type': 'PostalAddress', addressLocality: site.city, addressRegion: site.state, addressCountry: 'US' },
+  geo: { '@type': 'GeoCoordinates', latitude: 35.3733, longitude: -119.0187 },
   areaServed: areas.map(placeLd),
   founder: { '@id': ids.person },
   employee: { '@id': ids.person },
   contactPoint: { '@type': 'ContactPoint', telephone: site.phoneHref, email: site.email, contactType: 'customer service', areaServed: 'US-CA', availableLanguage: ['English', 'Spanish'] },
-  knowsAbout: ['Selling a house as-is', 'Cash home buying', 'Inherited and probate property', 'Real estate listing', 'Home renovation', 'Land development', 'Kern County real estate'],
+  knowsAbout: ['Selling a house as-is', 'Cash home buying', 'We buy houses for cash', 'Sell my house fast', 'Inherited and probate property', 'Real estate listing', 'Home renovation', 'Land development', 'Kern County real estate'],
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
     name: 'Property solutions',
     itemListElement: situations.map((s) => ({ '@type': 'Offer', itemOffered: { '@type': 'Service', name: s.title, url: `${site.url}/situations/${s.slug}` } })),
   },
-  ...(site.businessProfiles.length ? { sameAs: site.businessProfiles } : {}),
+  sameAs: [...site.businessProfiles, ...site.agentProfiles],
 });
 
 const personLd = () => ({
@@ -263,7 +264,7 @@ function header(cta) {
   return `<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="container nav-wrap">
-    <a class="brand" href="/" aria-label="${esc(site.name)} home"><img src="${logoReverse}" alt="${esc(site.name)}" width="233" height="46"></a>
+    <a class="brand" href="/" aria-label="${esc(site.name)} home"><img src="${logoReverse}" alt="${esc(site.name)}" width="193" height="46"></a>
     <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button>
     <nav class="nav" id="site-nav" aria-label="Main">
       <a href="/how-it-works">How It Works</a>
@@ -274,7 +275,7 @@ function header(cta) {
       <a href="/contact">Contact</a>
       <a class="nav-phone" href="tel:${site.phoneHref}">${esc(site.phone)}</a>
     </nav>
-    <a class="btn btn-gold header-cta" href="${cta}" data-cta="header">Get My Options</a>
+    <a class="btn btn-gold header-cta" href="${cta}" data-cta="header">Get My Cash Offer</a>
   </div>
 </header>`;
 }
@@ -289,14 +290,14 @@ function footer(cta) {
     .join(' · ');
   return `<footer class="footer" id="contact">
   <div class="container footer-grid">
-    <div><img class="footer-logo" src="${logoReverse}" alt="${esc(site.name)}" width="243" height="48" loading="lazy"><p><strong class="footer-tag">${esc(site.tagline)}</strong><br>${esc(supportingPromise)}</p><p class="footer-social">${socials}</p></div>
-    <div><h2 class="footer-h">Explore</h2><a href="/how-it-works">How It Works</a><a href="/situations">Situations</a><a href="${family.path}">Selling a Loved One’s House</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
+    <div><img class="footer-logo" src="${logoReverse}" alt="${esc(site.name)}" width="202" height="48" loading="lazy"><p><strong class="footer-tag">${esc(site.tagline)}</strong><br>${esc(supportingPromise)}</p><p class="footer-social">${socials}</p></div>
+    <div><h2 class="footer-h">Explore</h2><a href="/how-it-works">How It Works</a><a href="/situations">Situations</a><a href="${family.path}">Selling a Loved One’s House</a><a href="/guides/cash-home-buyers-bakersfield">Cash Home Buyers</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
     <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/contact">Contact page</a><a href="/#lead-form">Request property options</a></div>
     <div><h2 class="footer-h">Service Area</h2>${areas.map((a) => `<a href="/areas/${a.slug}">${esc(a.name)}</a>`).join('')}</div>
   </div>
   <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)} · DRE #${esc(site.brokerageDre)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/accessibility">Accessibility</a></span></div>
 </footer>
-<div class="mobile-bar"><a href="tel:${site.phoneHref}" class="btn btn-outline">Call</a><a href="sms:${site.phoneHref}" class="btn btn-outline">Text</a><a href="${cta}" class="btn btn-gold" data-cta="mobile_bar">Get My Options</a></div>
+<div class="mobile-bar"><a href="tel:${site.phoneHref}" class="btn btn-outline">Call</a><a href="sms:${site.phoneHref}" class="btn btn-outline">Text</a><a href="${cta}" class="btn btn-gold" data-cta="mobile_bar">Get My Cash Offer</a></div>
 <script src="/command-recovery.js" defer></script><script src="/script.js" defer></script><script src="/analytics.js" defer></script>`;
 }
 
@@ -320,7 +321,7 @@ ${footer(cta)}
 // Progressive options form (playbook §4): situation → address → contact. The lead is created at step 3;
 // timeline, occupancy, condition, and goals are asked afterwards on the thank-you page.
 // `situation` preselects step 1 and opens the form on the address step.
-function leadForm({ situation = '', heading = 'Get Your Property Options', city = '', location = '', pageType = 'page' } = {}) {
+function leadForm({ situation = '', heading = 'Get Your Cash Offer', city = '', location = '', pageType = 'page' } = {}) {
   const preset = formSituations.includes(situation) ? situation : '';
   const choice = formSituations
     .map((o) => `<label class="choice"><input type="radio" name="situation" value="${esc(o)}"${o === preset ? ' checked' : ''}><span>${esc(o)}</span></label>`)
@@ -361,7 +362,7 @@ function leadForm({ situation = '', heading = 'Get Your Property Options', city 
           <label class="check"><input type="checkbox" name="consent_response" value="yes" required><span>${esc(site.name)} may contact me by phone, text, or email about this property.</span></label>
           <label class="check"><input type="checkbox" name="consent_marketing" value="yes"><span>Also send me occasional seller tips and market updates. <span class="muted">(optional)</span></span></label>
           <label class="hp" aria-hidden="true">Company<input name="company" tabindex="-1" autocomplete="off"></label>
-          <div class="fstep-nav"><button class="btn btn-ghost" type="button" data-back>Back</button><button class="btn btn-gold" type="submit">Get My Property Options →</button></div>
+          <div class="fstep-nav"><button class="btn btn-ghost" type="button" data-back>Back</button><button class="btn btn-gold" type="submit">Get My Cash Offer →</button></div>
           <p class="form-note">Consent is not a condition of any sale. Msg &amp; data rates may apply; reply STOP to opt out. We never share your number for others’ marketing. See our <a href="/privacy">Privacy Policy</a>.</p>
         </fieldset>
         <p class="form-status" role="status" aria-live="polite"></p>
@@ -378,8 +379,8 @@ const faqList = (list) => `<div class="faq-list">${list
 
 const finalCta = (href = '#lead-form') => `<section class="section final-cta">
   <div class="container final-cta-grid">
-    <div><p class="eyebrow gold-dark">Ready When You Are</p><h2>Not sure what to do with the property?</h2><p>Start with the address. We’ll help you find the clearest next step — or call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>.</p></div>
-    <a class="btn btn-gold big" href="${href}" data-cta="final">Get My Property Options →</a>
+    <div><p class="eyebrow gold-dark">Ready When You Are</p><h2>Want a cash offer on your house?</h2><p>Send us the address and we’ll review it. You can also call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>.</p></div>
+    <a class="btn btn-gold big" href="${href}" data-cta="final">Get My Cash Offer →</a>
   </div>
 </section>`;
 
@@ -453,7 +454,7 @@ const netEstimator = (ctaHref = '#lead-form') => `<div class="estimator" id="est
         </table>
       </div>
       <div class="est-foot">
-        <p class="note-small">Illustrative estimate only — not an appraisal, formula, or offer. Actual offers and listing results depend on neighborhood comps, exact repair scope, title, and market demand.</p>
+        <p class="note-small">Illustrative estimate only, not an appraisal, formula, or offer. Actual offers and listing results depend on neighborhood comps, exact repair scope, title, and market demand.</p>
         <a class="btn btn-gold" href="${ctaHref}" data-cta="estimator">Get Real Numbers for My Property →</a>
       </div>
     </div>`;
@@ -464,7 +465,7 @@ const transparencyList = () => `<ul class="promise-list">${transparency.map((t) 
 const pathsBlock = () => `<h3>Possible paths</h3><ul class="path-mini">${routes
   .map((r) => `<li><strong>${esc(r.name)}.</strong> ${esc(r.text)}</li>`)
   .join('')}</ul>
-      <p class="note-small"><strong>What we don’t provide:</strong> legal, tax, or financial advice. For probate, trusts, taxes, or tenant disputes, we’ll suggest you check with an attorney or CPA — and we’re happy to coordinate with them.</p>`;
+      <p class="note-small"><strong>What we don’t provide:</strong> legal, tax, or financial advice. For probate, trusts, taxes, or tenant disputes, we’ll suggest you check with an attorney or CPA, and we’re happy to coordinate with them.</p>`;
 
 const glanceTable = () => `<dl class="glance">${glance.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>`;
 
@@ -482,8 +483,8 @@ const crumbNav = (crumbs) =>
 // ---------- Pages ----------
 
 export function homePage() {
-  const title = 'We Buy Houses in Bakersfield & Kern County | Call Harbison';
-  const description = 'Property problem? Call Harbison. Sell as-is or compare listing, renovation, and development — licensed, local, no obligation. Call or text (661) 472-7499.';
+  const title = 'We Buy Houses for Cash in Bakersfield, CA | Call Harbison';
+  const description = 'Compare a cash as-is offer on your Bakersfield or Kern County house with listing. Written terms, local licensed agent, no obligation. Call (661) 472-7499.';
   const heroImg = images.hero;
   return page(
     {
@@ -500,9 +501,9 @@ export function homePage() {
   <div class="container hero-grid">
     <div class="hero-copy">
       <div class="hero-brand"><img class="hero-mark" src="${heroMark}" alt="" width="96" height="96" decoding="async"><p class="eyebrow">${esc(heroCopy.eyebrow)}</p></div>
-      <h1><span class="h1-kicker">We buy houses in Bakersfield &amp; Kern County</span>Property<br>Problem?<br><em>Call Harbison.</em></h1>
+      <h1><span class="h1-kicker">We buy houses for cash in Bakersfield &amp; Kern County</span>Property<br>Problem?<br><em>Call Harbison.</em></h1>
       <p class="hero-lead">${esc(heroCopy.sub)}</p>
-      <div class="hero-actions"><a class="btn btn-gold" href="#lead-form" data-cta="hero">Get My Property Options</a><a class="btn btn-outline" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a class="btn btn-outline" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a></div>
+      <div class="hero-actions"><a class="btn btn-gold" href="#lead-form" data-cta="hero">Get My Cash Offer</a><a class="btn btn-outline" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a class="btn btn-outline" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a></div>
       <ul class="hero-benefits" aria-label="Why owners choose Harbison">
         ${heroCopy.trust.map(([s, t]) => `<li><strong>${esc(s)}</strong><span>${esc(t)}</span></li>`).join('\n        ')}
       </ul>
@@ -517,8 +518,8 @@ ${reassuranceStrip()}
   <div class="container">
     <div class="section-head center">
       <p class="eyebrow gold-dark">How It Works</p>
-      <h2>A clear path starts <em>with the property.</em></h2>
-      <p>No runaround and no pressure — four steps, and you decide at the end. <a class="link" href="/how-it-works">More on how it works →</a></p>
+      <h2>How it works, <em>step by step.</em></h2>
+      <p>Four steps, no pressure, and you decide at the end. <a class="link" href="/how-it-works">More on how it works →</a></p>
     </div>
     ${steps()}
   </div>
@@ -528,12 +529,12 @@ ${reassuranceStrip()}
   <div class="container">
     <div class="section-head split">
       <div>
-        <p class="eyebrow gold-dark">More Than a Cash Buyer</p>
-        <h2>One property. <em>Several possible paths.</em></h2>
+        <p class="eyebrow gold-dark">Cash Offer or Another Path</p>
+        <h2>A cash sale is <em>one of several options.</em></h2>
       </div>
       <div class="section-copy">
         <p>A direct purchase may be right. A traditional listing, a renovation plan, or a development review may be better.</p>
-        <p><strong>The goal is not to force one solution. It is to identify the right one.</strong></p>
+        <p><strong>If listing or renovating would net you more than a cash sale, we will tell you.</strong></p>
       </div>
     </div>
     ${routeCards()}
@@ -544,8 +545,8 @@ ${reassuranceStrip()}
   <div class="container">
     <div class="section-head">
       <p class="eyebrow gold">Common Situations</p>
-      <h2 class="light">Every house has <em>a story.</em></h2>
-      <p class="light-soft">These are some of the property situations we can review.</p>
+      <h2 class="light">Houses we <em>buy for cash.</em></h2>
+      <p class="light-soft">We review cash offers on properties in all of these situations.</p>
     </div>
     ${situationGrid}
   </div>
@@ -555,7 +556,7 @@ ${reassuranceStrip()}
   <div class="container">
     <div class="section-head center">
       <p class="eyebrow gold-dark">Side by Side</p>
-      <h2>Direct sale vs. <em>traditional listing.</em></h2>
+      <h2>Cash sale vs. <em>traditional listing.</em></h2>
       <p>Both can be the right answer. <a class="link" href="/how-it-works#estimator">Try the interactive net estimator →</a></p>
     </div>
     ${compareTable()}
@@ -566,7 +567,7 @@ ${reassuranceStrip()}
   <div class="local-photo" style="--local:url('${sized(images.local, 1200, 900)}')" role="img" aria-label="Kern County landscape"></div>
   <div class="local-copy why">
     <p class="eyebrow gold">Why Harbison</p>
-    <h2 class="light">Local roots.<br><em>Larger possibilities.</em></h2>
+    <h2 class="light">Nathanael Harbison,<br><em>Kern County REALTOR®.</em></h2>
     <dl class="why-list">${whyHarbison.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
     <a class="btn btn-gold" href="/about">Meet Nathanael →</a>
   </div>
@@ -576,8 +577,8 @@ ${reassuranceStrip()}
   <div class="container promise-grid">
     <div>
       <p class="eyebrow gold-dark">Seller Transparency</p>
-      <h2>A more transparent <em>way to sell.</em></h2>
-      <p class="section-copy">Selling a property, especially in a hard moment, deserves clear information and room to decide. These are commitments, not fine print.</p>
+      <h2>What we promise <em>every seller.</em></h2>
+      <p class="section-copy">These are the commitments we make before we talk numbers.</p>
       <p><a class="link" href="/how-it-works#promise">Read our full seller promise →</a></p>
     </div>
     ${transparencyList()}
@@ -587,8 +588,8 @@ ${reassuranceStrip()}
 <section class="section cream" aria-labelledby="guides-h">
   <div class="container">
     <div class="section-head split">
-      <div><p class="eyebrow gold-dark">Seller Guides</p><h2 id="guides-h">Straight answers <em>before you sell.</em></h2></div>
-      <div class="section-copy"><p>Plain-English guides to the questions Kern County owners ask most — written to help you decide, whether or not you work with us.</p><p><a class="link" href="/guides">All guides →</a></p></div>
+      <div><p class="eyebrow gold-dark">Seller Guides</p><h2 id="guides-h">Seller guides for <em>Kern County owners.</em></h2></div>
+      <div class="section-copy"><p>Plain-English guides to the questions Kern County owners ask most. Written to help you decide, whether or not you work with us.</p><p><a class="link" href="/guides">All guides →</a></p></div>
     </div>
     ${guideCards(guides.slice(0, 3))}
   </div>
@@ -599,8 +600,8 @@ ${reassuranceStrip()}
     <div class="glance-grid">
       <div>
         <p class="eyebrow gold-dark">At a Glance</p>
-        <h2 id="glance-h">Call Harbison, <em>in brief.</em></h2>
-        ${answerBox(`${esc(site.name)} buys houses and land as-is in Bakersfield, Tehachapi, California City, Stallion Springs, and throughout Kern County, California. Led by licensed REALTOR® ${esc(site.agent)} (DRE #${esc(site.dre)}), Harbison compares a direct offer with listing, renovation, or development so owners can choose the best path — with no repairs needed to request options and no obligation to accept an offer.`, 'In short')}
+        <h2 id="glance-h">Cash home buyer in <em>Bakersfield, CA.</em></h2>
+        ${answerBox(`${esc(site.name)} pays cash for houses and land as-is in Bakersfield, Tehachapi, California City, Stallion Springs, and throughout Kern County, California. Led by licensed REALTOR® ${esc(site.agent)} (DRE #${esc(site.dre)}), Call Harbison compares a cash offer with listing, renovation, or development so owners can choose the best path, with the terms explained in writing.`, 'In short')}
       </div>
       ${glanceTable()}
     </div>
@@ -611,7 +612,7 @@ ${reassuranceStrip()}
   <div class="container narrow">
     <div class="section-head center">
       <p class="eyebrow gold-dark">Questions</p>
-      <h2>Frequently asked <em>questions.</em></h2>
+      <h2>Questions about <em>selling for cash.</em></h2>
     </div>
     ${faqList(faqs)}
   </div>
@@ -667,7 +668,7 @@ function detailPage({ item, path, crumbs, eyebrow, extra = '', form = {}, pageTy
   <div class="container">
     <div class="section-head center">
       <p class="eyebrow gold">A Simple Process</p>
-      <h2 class="light">A clear path starts <em>with the property.</em></h2>
+      <h2 class="light">How it works, <em>step by step.</em></h2>
     </div>
     ${steps(true)}
   </div>
@@ -692,7 +693,7 @@ export function situationPage(s) {
   const others = situations.filter((o) => o.slug !== s.slug);
   const url = `${site.url}/situations/${s.slug}`;
   const familyLink = ['life-change', 'inherited-property', 'relocation'].includes(s.slug)
-    ? `<h3>Helping a loved one move?</h3><ul class="link-list"><li><a href="${family.path}">Selling a loved one’s house in Kern County — as-is vs. listing</a></li></ul>`
+    ? `<h3>Helping a loved one move?</h3><ul class="link-list"><li><a href="${family.path}">Selling a loved one’s house in Kern County: as-is vs. listing</a></li></ul>`
     : '';
   const extra = `${pathsBlock()}${familyLink}${guideLinks(relatedGuidesFor(s.slug))}
       <h3>Where we buy</h3><ul class="chip-list">${areas.map((a) => `<li><a href="/areas/${a.slug}">${esc(a.name)}</a></li>`).join('')}</ul>
@@ -723,7 +724,7 @@ export function areaPage(a) {
   return detailPage({
     item: {
       ...a,
-      helps: ['No repairs or cleaning needed for the initial review', 'Property access arranged by agreement', 'Closing date agreed in writing', 'Honest comparison of every option', `Licensed local agent — DRE #${site.dre}`],
+      helps: ['No repairs or cleaning needed for the initial review', 'Property access arranged by agreement', 'Closing date agreed in writing', 'We compare every option with you', `Licensed local agent, DRE #${site.dre}`],
     },
     path: `/areas/${a.slug}`,
     crumbs: [['Home', '/'], [a.name, `/areas/${a.slug}`]],
@@ -736,8 +737,8 @@ export function areaPage(a) {
 }
 
 export function situationsIndexPage() {
-  const title = pageTitle('Property Situations We Help With');
-  const description = `Inherited homes, major repairs, vacant properties, problem tenants, fire damage and more — see how ${site.name} helps ${site.region} owners sell as-is.`;
+  const title = pageTitle('Situations We Buy Houses for Cash In');
+  const description = `Inherited homes, major repairs, vacant properties, problem tenants, fire damage and more. See how ${site.name} buys ${site.region} houses for cash, as-is.`;
   const crumbs = [['Home', '/'], ['Situations', '/situations']];
   return page(
     {
@@ -756,8 +757,8 @@ export function situationsIndexPage() {
     ${crumbNav(crumbs)}
     <div class="section-head">
       <p class="eyebrow gold">Common Situations</p>
-      <h1 class="page-title light">Every house has <em>a story.</em></h1>
-      <p class="light-soft">Pick the situation closest to yours to see how we can help — or just <a class="link-gold" href="#lead-form">send us the address</a>.</p>
+      <h1 class="page-title light">Situations where we <em>buy houses for cash.</em></h1>
+      <p class="light-soft">Pick the situation closest to yours to see how we can help. Or just <a class="link-gold" href="#lead-form">send us the address</a>.</p>
     </div>
     <div class="card-grid">
       ${situations
@@ -806,7 +807,7 @@ export function aboutPage() {
 <section class="section cream">
   <div class="container detail-grid">
     <article class="prose">
-      ${answerBox(`${esc(site.agent)} is a California-licensed REALTOR® (DRE #${esc(site.dre)}) with ${esc(site.brokerage)} who leads ${esc(site.name)}. He helps Kern County property owners sell as-is, list, renovate, or develop — and compares those options honestly before anyone commits.`, 'Who is Nathanael Harbison?')}
+      ${answerBox(`${esc(site.agent)} is a California-licensed REALTOR® (DRE #${esc(site.dre)}) with ${esc(site.brokerage)} who leads ${esc(site.name)}. He helps Kern County property owners sell as-is, list, renovate, or develop, and compares those options honestly before anyone commits.`, 'Who is Nathanael Harbison?')}
       ${about.paragraphs.map((p) => `<p>${esc(p)}</p>`).join('\n      ')}
       <h2 class="prose-h">How we work</h2>
       <dl class="principles">${about.principles.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
@@ -816,7 +817,7 @@ export function aboutPage() {
         ${site.agentProfiles.map((u) => `<li><a href="${u}" rel="noopener me" target="_blank">${esc(u.replace(/^https:\/\/(www\.)?/, ''))}</a></li>`).join('\n        ')}
       </ul>
     </article>
-    <aside class="help-card"><h2>Talk with Nathanael</h2><ul><li>Call or text ${esc(site.phone)}</li><li>${esc(site.email)}</li><li>Replies typically within 24 hours</li><li>Serving ${areas.map((a) => esc(a.name)).join(', ')}</li></ul><a class="btn btn-gold btn-full" href="/#lead-form">Get My Options →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a></aside>
+    <aside class="help-card"><h2>Talk with Nathanael</h2><ul><li>Call or text ${esc(site.phone)}</li><li>${esc(site.email)}</li><li>Replies typically within 24 hours</li><li>Serving ${areas.map((a) => esc(a.name)).join(', ')}</li></ul><a class="btn btn-gold btn-full" href="/#lead-form">Get My Cash Offer →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a></aside>
   </div>
 </section>
 ${finalCta('/#lead-form')}`
@@ -825,7 +826,7 @@ ${finalCta('/#lead-form')}`
 
 export function guidesIndexPage() {
   const title = pageTitle('Seller Guides for Kern County Homeowners');
-  const description = 'Plain-English guides on selling a house as-is in California, cash offers vs. listing, and selling an inherited house — from Call Harbison.';
+  const description = 'Plain-English guides on cash home buyers, selling a house as-is in California, cash offers vs. listing, and selling an inherited house. From Call Harbison.';
   const crumbs = [['Home', '/'], ['Guides', '/guides']];
   const image = sized(images.renovate, 1200, 630);
   return page(
@@ -845,8 +846,8 @@ export function guidesIndexPage() {
   <div class="container">
     ${crumbNav(crumbs)}
     <p class="eyebrow gold-dark">Seller Guides</p>
-    <h1 class="page-title">Straight answers <em>before you sell.</em></h1>
-    <p class="page-intro">Clear, practical guides for Kern County property owners. Not legal or tax advice — but a solid place to start.</p>
+    <h1 class="page-title">Seller guides for <em>Kern County owners.</em></h1>
+    <p class="page-intro">Clear, practical guides for Kern County property owners. They are not legal or tax advice, but they are a solid place to start.</p>
     ${guideCards()}
   </div>
 </section>
@@ -890,7 +891,7 @@ export function guidePage(g) {
       ${g.slug === 'cash-offer-vs-listing' ? netEstimator('#lead-form') : ''}
       ${g.meaning ? `<aside class="meaning"><h2>What this means for your property</h2><p>${esc(g.meaning)}</p><a class="btn btn-gold" href="#lead-form" data-cta="guide_meaning">Get Options for My Property →</a></aside>` : ''}
       <aside class="author-box"><img class="author-photo" src="${headshot}" alt="${esc(site.agent)}" width="64" height="64" loading="lazy"><div><p class="answer-label">About the author</p><p>Written by the ${esc(site.name)} team, led by ${esc(site.agent)}, California-licensed REALTOR® (DRE #${esc(site.dre)}) with ${esc(site.brokerage)} <a class="link" href="/about">About Nathanael →</a></p></div></aside>
-      <p class="disclaimer">This guide is educational and does not replace legal, tax, or financial advice. Laws and thresholds change — consult a qualified attorney, CPA, or your agent about your specific situation.</p>
+      <p class="disclaimer">This guide is educational and does not replace legal, tax, or financial advice. Laws and thresholds change. Consult a qualified attorney, CPA, or your agent about your specific situation.</p>
       <h3>Related situations</h3><ul class="chip-list">${related.map((s) => `<li><a href="/situations/${s.slug}">${esc(s.name)}</a></li>`).join('')}</ul>
       <h3>More guides</h3><ul class="link-list">${guides.filter((o) => o.slug !== g.slug).map((o) => `<li><a href="/guides/${o.slug}">${esc(o.title)}</a></li>`).join('')}</ul>
     </article>
@@ -980,18 +981,18 @@ export function thankYouPage() {
 
 export function howItWorksPage() {
   const path = '/how-it-works';
-  const title = pageTitle('How It Works: Selling With Harbison');
-  const description = 'How Harbison reviews a property, how direct offers are figured, what happens at the walkthrough, and the seller promise behind every conversation.';
+  const title = pageTitle('How Selling Your House for Cash Works');
+  const description = 'How Harbison reviews a property, how cash offers are figured, what happens at the walkthrough, and the seller promise behind every conversation.';
   const crumbs = [['Home', '/'], ['How It Works', path]];
   const image = sized(images.renovate, 1200, 630);
   return page(
-    { title, description, path, image, pageType: 'how_it_works', hasForm: false, ld: graph({ path, title, description, image, crumbs }) },
+    { title, description, path, image, pageType: 'how_it_works', hasForm: false, ld: graph({ path, title, description, image, crumbs, extra: [{ '@type': 'HowTo', '@id': `${site.url}${path}#howto`, name: 'How to get a cash offer for your Kern County house', step: processSteps.map(([name, text], i) => ({ '@type': 'HowToStep', position: i + 1, name, text })) }] }) },
     `<section class="section navy page-top">
   <div class="container">
     ${crumbNav(crumbs)}
     <p class="eyebrow gold">How It Works</p>
-    <h1 class="page-title light">A clear path starts <em>with the property.</em></h1>
-    <p class="light-soft page-intro">${esc(supportingPromise)} Here is exactly what happens — and what doesn’t.</p>
+    <h1 class="page-title light">How selling to <em>Harbison works.</em></h1>
+    <p class="light-soft page-intro">${esc(supportingPromise)} Here is exactly what happens, and what doesn’t.</p>
     ${steps(true)}
   </div>
 </section>
@@ -999,7 +1000,7 @@ export function howItWorksPage() {
 <section class="section cream">
   <div class="container detail-grid">
     <article class="prose">
-      ${answerBox(`Start with the address. ${esc(site.name)} reviews the property and your situation, then shows you the realistic paths — a direct sale, a listing, repairs first, or a development review — in writing, with the assumptions behind any number. You decide, with no obligation and no deadline.`, 'The short version')}
+      ${answerBox(`Start with the address. ${esc(site.name)} reviews the property and your situation, then shows you the realistic paths: a direct sale, a listing, repairs first, or a development review. You get it in writing, with the assumptions behind any number. You decide, with no obligation and no deadline.`, 'The short version')}
       <h2 class="prose-h" id="walkthrough">The walkthrough</h2>
       ${walkthrough.map((p) => `<p>${esc(p)}</p>`).join('')}
       <p><a class="link" href="/guides/direct-sale-walkthrough">What to expect at a walkthrough →</a></p>
@@ -1007,7 +1008,7 @@ export function howItWorksPage() {
       <h2 class="prose-h" id="offers">How a direct offer is figured</h2>
       <p>${esc(offerExplanation)}</p>
       <div class="compare-wrap"><table class="compare offer-table"><caption class="sr-only">Illustrative direct-offer breakdown</caption><thead><tr><th scope="col">Illustrative example</th><th scope="col">Amount</th></tr></thead><tbody>${offerExample.map(([k, v], i) => `<tr${i === offerExample.length - 1 ? ' class="total"' : ''}><th scope="row">${esc(k)}</th><td>${esc(v)}</td></tr>`).join('')}</tbody></table></div>
-      <p class="note-small">This is an example to show how the pieces fit together — not a formula applied to every property, a valuation of any home, or a promise of any offer. Every property’s numbers are different, and we show you yours.</p>
+      <p class="note-small">This is an example to show how the pieces fit together. It is not a formula applied to every property, a valuation of any home, or a promise of any offer. Every property’s numbers are different, and we show you yours.</p>
 
       <h2 class="prose-h">Direct sale or listing?</h2>
       ${compareTable()}
@@ -1020,7 +1021,7 @@ export function howItWorksPage() {
       <h2 class="prose-h">Closing</h2>
       <p>Every sale closes through a licensed title or escrow company, which holds funds, handles payoffs, and records the deed. Signatures can often be done remotely. Buyer and seller agree on a closing date, subject to the contract, title, escrow and any required approvals.</p>
     </article>
-    <aside class="help-card"><h2>Ready to start?</h2><ul>${reassurance.map((r) => `<li>${esc(r)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="/#lead-form" data-cta="how_it_works">Get My Property Options →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a class="btn btn-ghost btn-full" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a></aside>
+    <aside class="help-card"><h2>Ready to start?</h2><ul>${reassurance.map((r) => `<li>${esc(r)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="/#lead-form" data-cta="how_it_works">Get My Cash Offer →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a class="btn btn-ghost btn-full" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a></aside>
   </div>
 </section>
 ${finalCta('/#lead-form')}`
@@ -1029,7 +1030,7 @@ ${finalCta('/#lead-form')}`
 
 export function contactPage() {
   const path = '/contact';
-  const title = pageTitle('Contact Call Harbison');
+  const title = pageTitle('Contact Call Harbison: Get a Cash Offer');
   const description = `Call or text ${site.phone}, email ${site.email}, or send the property address. Serving Bakersfield, Tehachapi, and Kern County.`;
   const crumbs = [['Home', '/'], ['Contact', path]];
   const image = `${site.url}${ogDefault}`;
@@ -1086,7 +1087,7 @@ export function notFoundPage() {
     path: '/404',
     noindex: true,
     heading: 'Page <em>not found.</em>',
-    body: `<p class="lead">That page doesn’t exist — but we can still help with your property.</p><p><a class="btn btn-gold" href="/">Go to home</a> <a class="btn btn-ghost-dark" href="/situations">See situations</a></p>`,
+    body: `<p class="lead">That page doesn’t exist. But we can still help with your property.</p><p><a class="btn btn-gold" href="/">Go to home</a> <a class="btn btn-ghost-dark" href="/situations">See situations</a></p>`,
   });
 }
 
@@ -1129,7 +1130,7 @@ export function termsPage() {
     body: `<p class="muted-note">Last updated: ${niceDate(contentDate('/terms'))}</p>
     <p>By using this website you agree to these terms.</p>
     <h2 class="prose-h">No offer or advice</h2>
-    <p>Content on this site is for general information only. Nothing here is an offer to purchase any property, and no binding agreement exists until a written purchase agreement is signed by all parties. We do not provide legal, tax, or financial advice — please consult a qualified professional about your situation.</p>
+    <p>Content on this site is for general information only. Nothing here is an offer to purchase any property, and no binding agreement exists until a written purchase agreement is signed by all parties. We do not provide legal, tax, or financial advice. Please consult a qualified professional about your situation.</p>
     <h2 class="prose-h">License disclosure</h2>
     <p>${esc(site.agent)} is a California-licensed real estate agent (DRE #${esc(site.dre)}) with ${esc(site.brokerage)} When ${esc(site.name)} offers to purchase a property directly, that licensed status is disclosed to the seller in writing.</p>
     <h2 class="prose-h">Submissions</h2>
@@ -1193,7 +1194,7 @@ function familyLeadForm() {
 }
 
 // Click-to-load YouTube (no third-party JS until the viewer asks for it). Renders nothing until a video ID
-// is set in src/family.mjs — no "coming soon" placeholders on the live site.
+// is set in src/family.mjs. No "coming soon" placeholders on the live site.
 const videoBlock = (v, { large = false } = {}) => (v.id
   ? `<figure class="video${large ? ' video-lg' : ''}"><button class="video-btn" type="button" data-yt="${esc(v.id)}" aria-label="Play video: ${esc(v.title || v.q)}" style="--thumb:url('https://i.ytimg.com/vi/${esc(v.id)}/hqdefault.jpg')"><span class="play" aria-hidden="true">▶</span></button><figcaption>${esc(v.title || v.q)}</figcaption></figure>`
   : '');
@@ -1285,7 +1286,7 @@ export function familyPage() {
       <div class="section-head"><h2>Questions families <em>ask Nathanael.</em></h2></div>
       ${f.videos.some((v) => v.id)
         ? `<div class="video-grid">${f.videos.map((v) => videoBlock(v)).join('')}</div>`
-        : `<ul class="question-links">${f.videos.map((v) => `<li><a href="#${faqId(v.q)}">${esc(v.q)}</a></li>`).join('')}</ul><p class="note-small">Short answers are in the questions below — or ask Nathanael directly.</p>`}
+        : `<ul class="question-links">${f.videos.map((v) => `<li><a href="#${faqId(v.q)}">${esc(v.q)}</a></li>`).join('')}</ul><p class="note-small">Short answers are in the questions below. Or ask Nathanael directly.</p>`}
     </div>
     <aside class="help-card"><h2>How Harbison helps</h2><ul>${f.helps.map((h) => `<li>${esc(h)}</li>`).join('')}</ul><a class="btn btn-gold btn-full" href="#lead-form">Talk With Nathanael →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}" data-track="call_click">Call ${esc(site.phone)}</a></aside>
   </div>
@@ -1304,7 +1305,7 @@ ${finalCta()}`
   );
 }
 
-// Printable guide handed out by referral partners. Not indexed — it's a leave-behind, not a search page.
+// Printable guide handed out by referral partners. Not indexed, it's a leave-behind, not a search page.
 export function partnerGuidePage() {
   const g = partnerGuide;
   return page(

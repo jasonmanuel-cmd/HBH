@@ -1,4 +1,4 @@
-// Family Property Transition — content for /sell-loved-ones-house and the partner guide.
+// Family Property Transition, content for /sell-loved-ones-house and the partner guide.
 // Edit copy here; templates.mjs renders it. Videos: paste a YouTube ID into `id` once recorded.
 import site from '../site.config.mjs';
 
@@ -12,14 +12,14 @@ export const family = {
   description: `A loved one downsizing, moving to senior living, or unable to keep up the house? Compare an as-is sale with a traditional listing. Call or text ${site.phone}.`,
   image: img('photo-1570129477492-45c003edd2be'),
   headline: 'Not sure what to do with <em>a loved one’s house?</em>',
-  lead: 'Whether a parent, grandparent, or other relative is downsizing, moving into senior living, or simply can’t keep up with the property anymore, we’ll help you understand your options — including selling as-is or listing traditionally.',
-  answer: `If a loved one is moving out of a Kern County home, the family usually has two realistic paths: sell the house as-is (no repairs, no clean-out, flexible closing) or prepare it and list it on the open market for a potentially higher price. ${site.name} reviews the property and shows both options side by side so the family can choose. Only the owner or someone with legal authority — an agent under a valid power of attorney, trustee, or conservator — can sign a sale.`,
+  lead: 'Whether a parent, grandparent, or other relative is downsizing, moving into senior living, or simply can’t keep up with the property anymore, we’ll help you understand your options, including selling as-is or listing traditionally.',
+  answer: `If a loved one is moving out of a Kern County home, the family usually has two realistic paths: sell the house as-is (no repairs, no clean-out, flexible closing) or prepare it and list it on the open market for a potentially higher price. ${site.name} reviews the property and shows both options side by side so the family can choose. Only the owner or someone with legal authority, such as an agent under a valid power of attorney, trustee, or conservator, can sign a sale.`,
 
-  // Video — Nathanael, 60–90 seconds. Leave id empty until uploaded; a placeholder renders instead.
+  // Video, Nathanael, 60–90 seconds. Leave id empty until uploaded; a placeholder renders instead.
   heroVideo: { id: '', title: `How ${site.agent} helps families with a loved one’s house` },
 
   problems: [
-    ['The house needs repairs', 'You don’t need to fix anything before talking with us. We’ll tell you whether repairs are worth doing — or not.'],
+    ['The house needs repairs', 'You don’t need to fix anything before talking with us. We’ll tell you honestly whether repairs are worth doing.'],
     ['Decades of belongings', 'You don’t need to empty the house before calling. Belongings can be sorted, sold, donated, or left behind.'],
     ['You live somewhere else', 'Much of the process can be handled by phone, text, email, and e-signature. We can be your eyes on the property.'],
     ['Timing is uncertain', 'A fast closing is possible, but it doesn’t have to happen right away. The move comes first; the house can follow.'],
@@ -37,11 +37,11 @@ export const family = {
   },
 
   // Required disclosure: on a direct purchase Harbison is the buyer, not the family's agent.
-  disclosure: `When ${site.name} buys a property directly, ${site.agent} is the buyer — not the family’s agent — and discloses his California real estate license (DRE #${site.dre}) in writing. Families are always welcome to have another relative, an attorney, or an independent agent review any offer before signing.`,
+  disclosure: `When ${site.name} buys a property directly, ${site.agent} is the buyer, not the family’s agent, and discloses his California real estate license (DRE #${site.dre}) in writing. Families are always welcome to have another relative, an attorney, or an independent agent review any offer before signing.`,
 
   timeline: [
     ['First conversation', 'A call or text about the house, the move, and who is involved. No paperwork.'],
-    ['Property review', 'A walkthrough — with you, a relative, or remotely by video. We note condition, belongings, and repairs.'],
+    ['Property review', 'A walkthrough, with you, a relative, or remotely by video. We note condition, belongings, and repairs.'],
     ['Options side by side', 'An as-is number next to an estimated listing outcome, with costs and timelines for each.'],
     ['Family decides', 'Take the time you need. Talk it over with siblings, an attorney, or a fiduciary.'],
     ['Closing on your schedule', 'Escrow and title handle the transfer. Signatures can often be done remotely.'],
@@ -60,7 +60,7 @@ export const family = {
     ['Should we fix the house before selling it?', 'Only if the repair is likely to return more than it costs and the family has the time and budget to manage it. Cosmetic work like paint and flooring sometimes pays; big items like a roof or foundation often don’t. We’ll tell you which repairs, if any, make sense.'],
     ['What if the house is still full of furniture and belongings?', 'You can talk to us before anything is moved. On an as-is sale, belongings you don’t want can stay. On a listing, we can point you to estate-sale and clean-out companies in Kern County.'],
     ['Can I sell a loved one’s Bakersfield house if I live in another state?', 'Usually, yes. Walkthroughs can be done by video, documents are signed electronically, and escrow can arrange a mobile notary where one is required. Many families manage the entire sale from out of town.'],
-    ['Who has to sign to sell a loved one’s house?', 'The owner on title, or someone with legal authority to act for them — for example an agent under a durable power of attorney that covers real estate, a trustee of a living trust, or a court-appointed conservator. If you’re not sure who has authority, an elder-law or estate attorney can tell you. We can talk with any of them.'],
+    ['Who has to sign to sell a loved one’s house?', 'The owner on title, or someone with legal authority to act for them, such as an agent under a durable power of attorney that covers real estate, a trustee of a living trust, or a court-appointed conservator. If you’re not sure who has authority, an elder-law or estate attorney can tell you. We can talk with any of them.'],
     ['Do we have to decide right away?', 'No. Requesting options costs nothing and creates no obligation. Many families take weeks or months, especially while a move is still being planned.'],
     ['How do we know an as-is offer is fair?', 'Compare it with the estimated listing result, minus repairs, commissions, carrying costs, and time. We show that math openly, and you’re welcome to have anyone you trust review it.'],
   ],
@@ -71,7 +71,7 @@ export const family = {
     'Belongings can stay on an as-is sale',
     'Manage the sale from out of town',
     'Work with POAs, trustees, and attorneys',
-    `Licensed local agent — DRE #${site.dre}`,
+    `Licensed local agent, DRE #${site.dre}`,
   ],
 };
 
@@ -112,10 +112,10 @@ export const familyForm = {
 // Partner guide (printed / QR). Families get this from a senior move manager, estate-sale company, etc.
 export const partnerGuide = {
   path: '/family-property-guide',
-  title: 'Family Property Guide — What to Do With a Loved One’s House',
+  title: 'Family Property Guide: What to Do With a Loved One’s House',
   intro: 'A short guide for families in Kern County who are helping a loved one move and aren’t sure what to do with the house.',
   questions: [
-    'Who has legal authority to sign — the owner, a POA, a trustee, or a conservator?',
+    'Who has legal authority to sign: the owner, a POA, a trustee, or a conservator?',
     'Does the house need to sell to pay for the move or care, or can it wait?',
     'Which belongings go with your loved one, which go to family, and which can stay?',
     'Are any repairs worth doing, or would an as-is sale net close to the same?',

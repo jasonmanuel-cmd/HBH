@@ -116,7 +116,7 @@ writeFileSync(
   join(out, 'llms.txt'),
   `# ${site.name}
 
-> ${site.name} buys houses and land as-is in Bakersfield, Tehachapi, California City, and throughout Kern County, California. It is led by ${site.agent}, a California-licensed REALTOR® (DRE #${site.dre}) with ${site.brokerage}, and compares a direct cash offer with listing, renovation, or development so owners can choose the best option. No repairs needed to request options and no obligation to accept an offer. Property access, inspections and closing timing depend on the written agreement, title and escrow.
+> ${site.name} is a cash home buyer in Bakersfield, Tehachapi, California City, and throughout Kern County, California. It buys houses and land as-is for cash. It is led by ${site.agent}, a California-licensed REALTOR® (DRE #${site.dre}) with ${site.brokerage}, and compares a direct cash offer with listing, renovation, or development so owners can choose the best option. No repairs needed to request options and no obligation to accept an offer. Property access, inspections and closing timing depend on the written agreement, title and escrow.
 
 Key facts:
 - Phone (call or text): ${site.phone}

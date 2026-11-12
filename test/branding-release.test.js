@@ -62,14 +62,13 @@ for (const file of ['index.html', 'about.html', 'contact.html']) {
     }
   });
 }
-test('new wordmarks preserve original mark pixels and contain visible Call Harbison text', () => {
-  const original = readFileSync(new URL('../static/assets/h-house-mark-v2.png', import.meta.url)).toString('base64');
+test('new wordmarks embed the Call Harbison logo with the ruler-house H mark', () => {
   for (const file of ['call-harbison.svg', 'call-harbison-reverse.svg']) {
     const svg = readFileSync(new URL(`../static/assets/${file}`, import.meta.url), 'utf8');
-    assert.ok(svg.includes(`data:image/png;base64,${original}`));
-    assert.match(svg, /<text[^>]*>CALL<\/text>/);
-    assert.match(svg, /<text[^>]*>HARBISON<\/text>/);
+    assert.match(svg, /aria-label="Call Harbison"/);
+    assert.match(svg, /<title>Call Harbison<\/title>/);
+    assert.match(svg, /<image href="data:image\/png;base64,/);
+    assert.match(svg, /viewBox="0 0 945 225"/);
     assert.doesNotMatch(svg, /BUYS HOMES/);
-    assert.match(svg, /viewBox="0 0 1172 231"/);
   }
 });

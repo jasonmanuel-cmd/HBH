@@ -50,7 +50,7 @@ test('substantively changed landing pages have matching WebPage and sitemap sour
   for (const path of changedPaths) {
     const [, html, , modified] = pages.find(([, , p]) => p === path);
     const sitemapDate = modified || contentDate(path);
-    assert.equal(sitemapDate, '2026-11-06', path);
+    assert.equal(sitemapDate, '2026-11-12', path);
     const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1]);
     assert.equal(graph['@graph'].find((n) => n['@type'] === 'WebPage').dateModified, sitemapDate, path);
   }
