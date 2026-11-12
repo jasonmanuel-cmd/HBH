@@ -22,8 +22,8 @@ const year = new Date().getFullYear();
 // Fallback delay before gtag.js loads for visitors who never interact (see head()).
 const GA_LOAD_DELAY_MS = 4000;
 // Wordmarks combine the original H-house mark with Call Harbison text.
-const logo = '/assets/call-harbison.svg'; // full color, transparent, 1172×231
-const logoReverse = '/assets/call-harbison-reverse.svg'; // ivory + gold for navy grounds, 1172×231
+const logo = '/assets/call-harbison.svg'; // navy and gold, transparent, 945×225
+const logoReverse = '/assets/call-harbison-reverse.svg'; // gold for navy grounds, transparent, 945×225
 const heroMark = '/assets/h-house-mark-v3.png'; // gold ruler-house H mark, transparent, 256×256
 const ogDefault = '/assets/og-default.jpg'; // 1200×630
 const headshot = '/assets/nathanael-harbison.jpg'; // 325×325
@@ -97,7 +97,7 @@ const orgLd = () => ({
   slogan: site.tagline,
   description: `${site.name} is a cash home buyer in Bakersfield, Tehachapi, California City, and throughout Kern County, California. It buys houses and land as-is for cash and helps owners compare a direct sale with listing, renovation, or development.`,
   url: `${site.url}/`,
-  logo: { '@type': 'ImageObject', url: `${site.url}${logo}`, width: 1172, height: 231 },
+  logo: { '@type': 'ImageObject', url: `${site.url}${logo}`, width: 945, height: 225 },
   image: `${site.url}${ogDefault}`,
   telephone: site.phoneHref,
   email: site.email,
@@ -264,7 +264,7 @@ function header(cta) {
   return `<a class="skip-link" href="#main">Skip to content</a>
 <header class="site-header">
   <div class="container nav-wrap">
-    <a class="brand" href="/" aria-label="${esc(site.name)} home"><img src="${logoReverse}" alt="${esc(site.name)}" width="233" height="46"></a>
+    <a class="brand" href="/" aria-label="${esc(site.name)} home"><img src="${logoReverse}" alt="${esc(site.name)}" width="193" height="46"></a>
     <button class="menu-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav"><span></span><span></span><span></span></button>
     <nav class="nav" id="site-nav" aria-label="Main">
       <a href="/how-it-works">How It Works</a>
@@ -290,7 +290,7 @@ function footer(cta) {
     .join(' · ');
   return `<footer class="footer" id="contact">
   <div class="container footer-grid">
-    <div><img class="footer-logo" src="${logoReverse}" alt="${esc(site.name)}" width="243" height="48" loading="lazy"><p><strong class="footer-tag">${esc(site.tagline)}</strong><br>${esc(supportingPromise)}</p><p class="footer-social">${socials}</p></div>
+    <div><img class="footer-logo" src="${logoReverse}" alt="${esc(site.name)}" width="202" height="48" loading="lazy"><p><strong class="footer-tag">${esc(site.tagline)}</strong><br>${esc(supportingPromise)}</p><p class="footer-social">${socials}</p></div>
     <div><h2 class="footer-h">Explore</h2><a href="/how-it-works">How It Works</a><a href="/situations">Situations</a><a href="${family.path}">Selling a Loved One’s House</a><a href="/guides/cash-home-buyers-bakersfield">Cash Home Buyers</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
     <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/contact">Contact page</a><a href="/#lead-form">Request property options</a></div>
     <div><h2 class="footer-h">Service Area</h2>${areas.map((a) => `<a href="/areas/${a.slug}">${esc(a.name)}</a>`).join('')}</div>
