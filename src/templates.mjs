@@ -4,15 +4,17 @@ import { images, situations as baseSituations, areas as baseAreas, faqs as baseF
 import { californiaCity, extraFaqs, glance, about, guides as baseGuides } from './content-extra.mjs';
 import { family, familyForm, partnerGuide } from './family.mjs';
 import { localSections, foreclosureGuide, inquiryPages } from './content-search.mjs';
+import { cityAreas, bakersfieldZips } from './content-cities.mjs';
+import { moreSituations } from './content-situations-more.mjs';
 import {
   supportingPromise, heroCopy, reassurance, processSteps, routes, compareDisclosure, whyHarbison, transparency, safeguards,
   offerExplanation, offerExample, walkthrough, formSituations, situationFormMap, detailOptions,
   newSituations, stallionSprings, newGuides, guideMeaning,
 } from './content-playbook.mjs';
 
-export const situations = [...baseSituations, ...newSituations];
+export const situations = [...baseSituations, ...newSituations, ...moreSituations];
 // Bakersfield, Tehachapi, Stallion Springs, California City, Kern County
-export const areas = [...baseAreas.slice(0, 2), stallionSprings, californiaCity, ...baseAreas.slice(2)];
+export const areas = [...baseAreas.slice(0, 2), stallionSprings, californiaCity, ...baseAreas.slice(2), ...cityAreas];
 export const faqs = [...baseFaqs.slice(0, 4), ...extraFaqs, ...baseFaqs.slice(4)];
 export const guides = [...baseGuides.map((g) => ({ ...g, meaning: guideMeaning[g.slug] })), ...newGuides, foreclosureGuide];
 
@@ -719,6 +721,7 @@ export function areaPage(a) {
   };
   const extra = `<h3>Communities we cover near ${esc(a.name)}</h3><ul class="chip-list">${a.places.map((p) => `<li>${placeChip(p)}</li>`).join('')}</ul>
       <h3>Situations we help with in ${esc(a.name)}</h3><ul class="chip-list">${situations.map((o) => `<li><a href="/situations/${o.slug}">${esc(o.name)}</a></li>`).join('')}</ul>
+      ${a.slug === 'bakersfield' ? `<h3>Bakersfield ZIP codes we cover</h3><ul class="chip-list">${bakersfieldZips.map((z) => `<li><span>${z}</span></li>`).join('')}</ul>` : ''}
       ${guideLinks(guides)}
       <h3>Other areas we serve</h3><ul class="chip-list">${otherAreas.map((o) => `<li><a href="/areas/${o.slug}">${esc(o.name)}</a></li>`).join('')}</ul>`;
   return detailPage({

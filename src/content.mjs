@@ -38,6 +38,7 @@ export const situations = [
     ],
     faqs: [
       ['Can I sell an inherited house that is still in probate?', 'Often, yes, but it depends on the estate and the court process. We can work with your executor or probate attorney so any sale is structured correctly and timed around required approvals.'],
+      ['Do I pay taxes when I sell an inherited house?', 'Inherited property generally gets a stepped-up tax basis equal to its value on the date of death, which can reduce or remove capital gains if you sell soon after. California Proposition 19 affects property tax reassessment for children. Confirm your situation with a tax professional.'],
       ['Do we have to clean out the house first?', 'No. If we buy the property directly, you can take what matters to the family and leave the rest.'],
     ],
   },
@@ -63,6 +64,7 @@ export const situations = [
     ],
     faqs: [
       ['Will you still make an offer if the house has foundation or roof problems?', 'Yes. Condition issues are factored into the offer. You do not need to fix anything first.'],
+      ['How do I sell a house that needs repairs in California?', 'You can sell it as-is without fixing anything, disclose the known defects, and compare a cash as-is offer with the cost and time of repairing and listing. Get a repair estimate if you are unsure which is better.'],
       ['Do I need to disclose problems I know about?', 'Yes, California requires sellers to disclose known material issues. Being upfront also helps us give you an accurate offer faster.'],
     ],
   },
