@@ -1,4 +1,5 @@
 import { COMMAND_PHASE } from '../lib/command-phase.js';
+import { useNeon } from '../lib/neon.js';
 // Vercel serverless function: POST /api/leads
 // Delivers each lead to whichever destinations are configured via environment variables:
 //   RESEND_API_KEY + LEAD_NOTIFY_EMAIL (+ optional LEAD_FROM_EMAIL)  -> email alert
@@ -400,6 +401,7 @@ export async function deliverDetails(d, env = process.env) {
 }
 
 export default async function handler(req, res, env = process.env, phase = COMMAND_PHASE) {
+  useNeon(env);
   res.setHeader('Cache-Control', 'no-store');
   if (req.method === 'GET' && new URL(req.url || '/', 'http://local').searchParams.get('reliability') === '1') return res.status(200).json({ ok: true, enabled: phase === 'protocol' && env.LEAD_RELIABILITY_ENABLED === 'true', version: 1 });
   if (req.method !== 'POST') {
