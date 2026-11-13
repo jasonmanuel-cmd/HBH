@@ -5,7 +5,7 @@ import { homePage } from '../src/templates.mjs';
 
 // gtag.js (~177 KB) was the largest main-thread cost on phones. It must not be fetched during page load.
 const html = homePage();
-const headStart = html.slice(html.indexOf('<head>'), html.indexOf('<head>') + 1600);
+const headStart = html.slice(html.indexOf('<head>'), html.indexOf('<head>') + 3000);
 
 test('gtag.js is not requested by a script tag in the page source', () => {
   assert.doesNotMatch(html, /<script[^>]+src="https:\/\/www\.googletagmanager\.com\/gtag\/js/);

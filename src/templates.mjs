@@ -208,17 +208,18 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   // gtag.js itself (~177 KB, the biggest main-thread cost on phones) loads on the first interaction
   // or GA_LOAD_DELAY_MS after the load event; it then sends everything already queued.
   const ga = site.gaId
-    ? `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${esc(site.gaId)}',{page_location:location.origin+location.pathname,page_referrer:document.referrer?new URL(document.referrer).origin:''});
-  (function(){var loaded=false;function load(){if(loaded)return;loaded=true;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${esc(site.gaId)}';document.head.appendChild(s)}
+    ? `<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied'});gtag('js',new Date());gtag('config','${esc(site.gaId)}',{page_location:location.origin+location.pathname,page_referrer:document.referrer?new URL(document.referrer).origin:''});
+  (function(){var loaded=false;function load(){if(loaded||!hbhOk())return;loaded=true;gtag('consent','update',{analytics_storage:'granted'});var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id=${esc(site.gaId)}';document.head.appendChild(s)}
   ['pointerdown','keydown','touchstart','scroll'].forEach(function(e){addEventListener(e,load,{once:true,passive:true})});
-  addEventListener('load',function(){setTimeout(load,${GA_LOAD_DELAY_MS})})})();</script>`
+  addEventListener('load',function(){setTimeout(load,${GA_LOAD_DELAY_MS})});window.hbhLoadAnalytics=load})();</script>`
     : '';
   const gtm = site.gtmId
-    ? `<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${esc(site.gtmId)}');</script>`
+    ? `<script>window.hbhLoadTagManager=function(){if(window.hbhGtm||!hbhOk())return;window.hbhGtm=1;(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${esc(site.gtmId)}')};hbhLoadTagManager();</script>`
     : '';
   return `<!doctype html>
 <html lang="en-US" data-command-phase="${COMMAND_PHASE}">
 <head>
+  <script>function hbhOk(){try{var s=JSON.parse(localStorage.getItem('hbh-consent')||'null');return!!s&&s.value==='granted'&&Date.now()-s.at<31536e6}catch(e){return false}}</script>
   ${ga}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -257,7 +258,7 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   <script defer src="/_vercel/insights/script.js"></script>
   <script>window.si=window.si||function(){(window.siq=window.siq||[]).push(arguments)};</script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
-  ${noindex ? '' : `<script>function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"398cd80eb0d6d2a7ebd652d00db3bb8"})});</script>`}
+  ${noindex ? '' : `<script>window.hbhLoadMetricool=function(){if(window.hbhMetricool||!hbhOk())return;window.hbhMetricool=1;function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"398cd80eb0d6d2a7ebd652d00db3bb8"})})};hbhLoadMetricool();</script>`}
   ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>` : ''}
 </head>`;
 }
@@ -297,17 +298,16 @@ function footer(cta) {
     <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/contact">Contact page</a><a href="/#lead-form">Request property options</a></div>
     <div><h2 class="footer-h">Service Area</h2>${areas.map((a) => `<a href="/areas/${a.slug}">${esc(a.name)}</a>`).join('')}</div>
   </div>
-  <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)} · DRE #${esc(site.brokerageDre)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/accessibility">Accessibility</a></span></div>
+  <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)} · DRE #${esc(site.brokerageDre)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/accessibility">Accessibility</a> • <a href="#" data-consent-open>Privacy choices</a></span></div>
 </footer>
 <div class="mobile-bar"><a href="tel:${site.phoneHref}" class="btn btn-outline">Call</a><a href="sms:${site.phoneHref}" class="btn btn-outline">Text</a><a href="${cta}" class="btn btn-gold" data-cta="mobile_bar">Get My Cash Offer</a></div>
-<script src="/command-recovery.js" defer></script><script src="/script.js" defer></script><script src="/analytics.js" defer></script>`;
+<script src="/command-recovery.js" defer></script><script src="/script.js" defer></script><script src="/analytics.js" defer></script><script src="/consent.js" defer></script>`;
 }
 
 function page(opts, body) {
   const cta = opts.hasForm === false ? '/#lead-form' : '#lead-form';
   return `${head(opts)}
 <body data-page-type="${esc(opts.pageType || 'page')}">
-${site.gtmId ? `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${esc(site.gtmId)}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>` : ''}
 ${header(cta)}
 <main id="main">
 ${body}
@@ -1106,6 +1106,8 @@ export function privacyPage() {
     <p>When you submit a form, we collect the information you provide, such as your name, phone number, email address, property address, and details about your situation. We also collect standard technical data (such as browser type, pages visited, and referring site) through cookies and analytics tools.</p>
     <p>Our first-party website statistics record page views and estimated active time, separately from your form details. Raw IP addresses are not retained. Daily visitor hashes rotate, and browser Do Not Track and Global Privacy Control choices are honored for this first-party tracking.</p>
     <p><button type="button" class="btn btn-ghost" data-analytics-optout>Disable first-party analytics in this browser</button></p>
+    <h2 class="prose-h">Cookies and analytics choices</h2>
+    <p>When you first visit, a banner asks whether to allow analytics and marketing measurement tools such as Google Analytics and Metricool. They load only if you accept. If you decline, or your browser sends a Global Privacy Control or Do Not Track signal, they stay off. Use the Privacy choices link in the footer to change your choice at any time.</p>
     <h2 class="prose-h">How we use it</h2>
     <ul>
       <li>To respond to your inquiry and evaluate your property</li>
