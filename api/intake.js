@@ -1,9 +1,11 @@
 // Private server-to-server bridge. Public visitors continue using /api/leads.
 import { authorized, normalizeStandard } from '../lib/shared-intake.js';
+import { useNeon } from '../lib/neon.js';
 import { fetchWithRetry } from '../lib/fetch-retry.js';
 import { randomUUID } from 'node:crypto';
 
 export default async function handler(req, res, env = process.env) {
+  useNeon(env);
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false }); }
   if (!env.CRM_INGEST_SECRET || env.CRM_INGEST_SECRET.length < 32) return res.status(503).json({ ok: false, error: 'Intake unavailable' });

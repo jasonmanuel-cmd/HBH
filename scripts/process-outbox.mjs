@@ -1,7 +1,9 @@
 import { COMMAND_PHASE } from '../lib/command-phase.js';
+import { useNeon } from '../lib/neon.js';
 // Manual one-shot worker. Nothing is scheduled by this repository.
 import { processOutbox, emailAdapter } from '../lib/notification-outbox.js';
 const env=process.env;
+useNeon(env);
 if (COMMAND_PHASE !== 'protocol' || env.SELLER_OUTBOX_DISPATCH_ENABLED !== 'true') {
  console.log('Notification dispatch is OFF. No database access or messages attempted.');
 } else {
