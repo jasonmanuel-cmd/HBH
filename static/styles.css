@@ -115,6 +115,8 @@ a{text-decoration:none;color:inherit}
 .lead-card .check{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start;font-weight:500;font-size:.82rem;line-height:1.45;margin:12px 0 0}
 .lead-card .check input{width:18px;height:18px;min-height:0;margin:2px 0 0;padding:0;accent-color:var(--gold2)}
 .lead-card .check.invalid{outline:2px solid var(--danger);outline-offset:4px;border-radius:4px}
+.fstep-address input[name=street]{font-size:1.1rem;min-height:54px;padding:0 16px}
+.fstep-address .btn-full{min-height:52px;font-size:1rem;margin-top:10px}
 .fstep-nav{display:flex;gap:10px;margin-top:6px}
 .fstep-nav .btn{flex:1;margin-top:0}
 .fstep-nav .btn-ghost{flex:0 0 auto;color:#fff;border-color:rgba(255,255,255,.3)}

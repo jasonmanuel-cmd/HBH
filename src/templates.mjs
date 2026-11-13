@@ -331,18 +331,13 @@ function leadForm({ situation = '', heading = 'Get Your Cash Offer', city = '', 
   return `<aside class="lead-card" id="lead-form" aria-label="Request property options">
       <p class="eyebrow gold">Start Here · Free &amp; No Obligation</p>
       <h2>${esc(heading)}</h2>
-      <form data-lead-form data-steps data-form-type="options" method="post" action="/api/leads"${preset ? ' data-start="1"' : ''} novalidate>
+      <form data-lead-form data-steps data-form-type="options" method="post" action="/api/leads" novalidate>
         <input type="hidden" name="form_type" value="options">
         <input type="hidden" name="route_interest" value="">
         <input type="hidden" name="location_interest" value="${esc(location)}">
         <input type="hidden" name="page_type" value="${esc(pageType)}">
-        <ol class="step-dots" aria-hidden="true">${Array.from({ length: 3 }, (_, i) => `<li${i <= (preset ? 1 : 0) ? ' class="on"' : ''}></li>`).join('')}</ol>
-        <fieldset class="fstep" data-step="1"${preset ? ' hidden' : ''}>
-          <legend class="fstep-q">What would you like help with?</legend>
-          <div class="choice-grid choice-list" role="radiogroup">${choice}</div>
-          <button class="btn btn-gold btn-full" type="button" data-next>Continue →</button>
-        </fieldset>
-        <fieldset class="fstep" data-step="2"${preset ? '' : ' hidden'}>
+        <ol class="step-dots" aria-hidden="true">${Array.from({ length: 3 }, (_, i) => `<li${i === 0 ? ' class="on"' : ''}></li>`).join('')}</ol>
+        <fieldset class="fstep fstep-address" data-step="1">
           <legend class="fstep-q">Where is the property?</legend>
           <label for="f-street-${pageType}">Street address</label><input id="f-street-${pageType}" name="street" autocomplete="address-line1" placeholder="123 Main St" required>
           <div class="addr-row">
@@ -351,6 +346,11 @@ function leadForm({ situation = '', heading = 'Get Your Cash Offer', city = '', 
           </div>
           <input type="hidden" name="state" value="CA">
           <p class="form-hint">California · Kern County and nearby</p>
+          <button class="btn btn-gold btn-full" type="button" data-next>Continue →</button>
+        </fieldset>
+        <fieldset class="fstep" data-step="2" hidden>
+          <legend class="fstep-q">What would you like help with?</legend>
+          <div class="choice-grid choice-list" role="radiogroup">${choice}</div>
           <div class="fstep-nav"><button class="btn btn-ghost" type="button" data-back>Back</button><button class="btn btn-gold" type="button" data-next>Continue →</button></div>
         </fieldset>
         <fieldset class="fstep" data-step="3" hidden>
