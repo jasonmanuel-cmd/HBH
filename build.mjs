@@ -49,11 +49,13 @@ const hashOf = (buf) => createHash('sha256').update(buf).digest('hex').slice(0, 
 const cssHash = hashOf(css);
 const jsHash = hashOf(readFileSync('static/script.js'));
 const analyticsHash = hashOf(readFileSync('static/analytics.js'));
+const consentHash = hashOf(readFileSync('static/consent.js'));
 
 writeFileSync(join(out, `styles.${cssHash}.css`), css);
 rmSync(join(out, 'styles.css'));
 renameSync(join(out, 'script.js'), join(out, `script.${jsHash}.js`));
 renameSync(join(out, 'analytics.js'), join(out, `analytics.${analyticsHash}.js`));
+renameSync(join(out, 'consent.js'), join(out, `consent.${consentHash}.js`));
 
 for (const [file, html] of pages) {
   const path = join(out, file);
@@ -64,6 +66,7 @@ for (const [file, html] of pages) {
       .replace('href="/styles.css"', `href="/styles.${cssHash}.css"`)
       .replace('src="/script.js"', `src="/script.${jsHash}.js"`)
       .replace('src="/analytics.js"', `src="/analytics.${analyticsHash}.js"`)
+      .replace('src="/consent.js"', `src="/consent.${consentHash}.js"`)
   );
 }
 

@@ -4,7 +4,7 @@
   let optedOut = false;
   const allowed = () => {
     if (optedOut) return false;
-    try { return navigator.doNotTrack !== '1' && !navigator.globalPrivacyControl && localStorage.getItem('hbh_analytics') !== 'off'; }
+    try { return navigator.doNotTrack !== '1' && !navigator.globalPrivacyControl && localStorage.getItem('hbh_analytics') !== 'off' && !String(localStorage.getItem('hbh-consent') || '').includes('"denied"'); }
     catch { return false; }
   };
   document.querySelector('[data-analytics-optout]')?.addEventListener('click', (event) => {
