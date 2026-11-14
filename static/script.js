@@ -212,6 +212,12 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
     if (e.target.closest('.choice')) lastPointerDown = Date.now();
   });
 
+  const revealField = (field) => {
+    if (!field) return;
+    field.focus({ preventScroll: true });
+    field.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' });
+  };
+
   form.show = (i, focus = true) => {
     const next = Math.max(0, Math.min(i, steps.length - 1));
     if (next !== current) {
@@ -224,7 +230,7 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
     dots.forEach((d, n) => d.classList.toggle('on', n <= current));
     const h = form.closest('.lead-card')?.querySelector('h2');
     if (h && current === 0 && form.dataset.formType === 'family_transition' && firstHeading) h.textContent = firstHeading;
-    if (focus) steps[current].querySelector('input:not([type=hidden]):not([type=radio]):not([type=checkbox]),select,input[type=radio]:checked,input[type=radio]')?.focus({ preventScroll: true });
+    if (focus) revealField(steps[current].querySelector('input:not([type=hidden]):not([type=radio]):not([type=checkbox]),select,input[type=radio]:checked,input[type=radio]'));
   };
   if (form.dataset.start) form.show(Number(form.dataset.start), false);
 
@@ -258,6 +264,8 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
             : say('Please enter the property address.', 'Por favor, escriba la dirección de la propiedad.'))
           : say('Please choose the closest option.', 'Por favor, elija la opción que más se acerque.');
         status.classList.add('error');
+        const firstInvalid = bad[0];
+        revealField(firstInvalid.tagName === 'INPUT' ? firstInvalid : firstInvalid.querySelector('input'));
         track('lead_form_error', { ...formProps(form), step: current + 1 });
         return;
       }

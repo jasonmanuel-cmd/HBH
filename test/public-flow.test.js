@@ -20,9 +20,9 @@ test('estimator static default values equal the first hydrated calculation for e
 
 test('stepped form Back clears unrelated errors while preserving choices and interrupted progress',()=>{
  const handlers={};let selected=false;
- const field=(value='')=>({value,tagName:'INPUT',focus(){},_classes:new Set(),classList:{add(c){this.owner._classes.add(c);},remove(c){this.owner._classes.delete(c);}}});
+ const field=(value='')=>({value,tagName:'INPUT',focus(){},scrollIntoView(){},_classes:new Set(),classList:{add(c){this.owner._classes.add(c);},remove(c){this.owner._classes.delete(c);}}});
  const address=field();address.classList.owner=address;
- const radio={type:'radio',focus(){}};
+ const radio={type:'radio',focus(){},scrollIntoView(){}};
  const group={tagName:'DIV',querySelector:()=>selected?radio:null,classList:{add(){},remove(){}}};
  const status={className:'form-status',textContent:'',classList:{add(){status.className+=' error';}}};
  const steps=[0,1,2].map((i)=>({hidden:i!==0,querySelector(selector){if(selector==='[name=address]')return i===1?address:null;if(selector==='[name=street]'||selector==='[name=city]'||selector==='[name=zip]'||selector==='select')return null;return i===0?radio:address;},querySelectorAll:selector=>i===0?[group]:[]}));
