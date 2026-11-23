@@ -63,19 +63,19 @@ test('failed CRM storage stops notifications and cannot report success', async (
 
 test('rejects non-POST', async () => {
   const res = mockRes();
-  await handler({ method: 'GET' }, res);
+  await handler({ method: 'GET' }, res, {});
   assert.equal(res.statusCode, 405);
 });
 
 test('honeypot returns ok without delivering', async () => {
   const res = mockRes();
-  await handler({ method: 'POST', body: { ...valid, company: 'spam' } }, res);
+  await handler({ method: 'POST', body: { ...valid, company: 'spam' } }, res, {});
   assert.equal(res.statusCode, 200);
 });
 
 test('invalid lead returns 400 with fields', async () => {
   const res = mockRes();
-  await handler({ method: 'POST', body: JSON.stringify({ name: 'A' }) }, res);
+  await handler({ method: 'POST', body: JSON.stringify({ name: 'A' }) }, res, {});
   assert.equal(res.statusCode, 400);
   assert.ok(res.body.fields.includes('address'));
 });
@@ -120,15 +120,12 @@ test('deliver fails loudly when no destination is configured', async () => {
 test('handler returns 502 when nothing could be delivered', async () => {
   const origErr = console.error;
   console.error = () => {};
-  const origEnv = { RESEND_API_KEY: process.env.RESEND_API_KEY, LEAD_NOTIFY_EMAIL: process.env.LEAD_NOTIFY_EMAIL, SUPABASE_URL: process.env.SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY, LEAD_WEBHOOK_URL: process.env.LEAD_WEBHOOK_URL, TWILIO_ACCOUNT_SID: process.env.TWILIO_ACCOUNT_SID };
-  for (const k of Object.keys(origEnv)) delete process.env[k];
   try {
     const res = mockRes();
-    await handler({ method: 'POST', body: { ...valid } }, res);
+    await handler({ method: 'POST', body: { ...valid } }, res, {});
     assert.equal(res.statusCode, 502);
     assert.equal(res.body.ok, false);
   } finally {
     console.error = origErr;
-    for (const [k, v] of Object.entries(origEnv)) if (v !== undefined) process.env[k] = v;
   }
 });
