@@ -435,7 +435,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
       el?.classList.add('invalid');
       el?.closest('.check, .referral-source')?.classList.add('invalid');
     });
-    revealField(form.querySelector('input.invalid, select.invalid, textarea.invalid'));
+    form.querySelector('input.invalid, select.invalid, textarea.invalid')?.focus();
     status.textContent =
       names.length === 1 && names[0] === 'consent_response' ? say('Please check the box so we can respond to your inquiry.', 'Marque la casilla para que podamos responder a su consulta.')
       : fields.length === 1 && fields[0] === 'heard_about_us' ? say('Please choose how you heard about us.', 'Seleccione cómo se enteró de nosotros.')
