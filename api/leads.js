@@ -105,7 +105,8 @@ export function parseLead(body) {
   };
   if (lead.consent_response || lead.consent_marketing) lead.consent_at = new Date().toISOString();
   const reportedChannel = body.heard_about_us;
-  lead.channel = lead.form_type === 'options' && ['social', 'paid_ads', 'ai_search'].includes(reportedChannel)
+  const validReportedChannel = ['social', 'paid_ads', 'ai_search'].includes(reportedChannel);
+  lead.channel = lead.form_type === 'options' && validReportedChannel
     ? reportedChannel
     : classifyChannel(lead);
   const errors = [];
@@ -116,6 +117,8 @@ export function parseLead(body) {
     lead.address = lead.street = lead.city = lead.zip = '';
   }
   if (!generalInquiry && lead.address.length < 5) errors.push('address');
+  // Current offer forms always send this field. Older submissions can still be recovered without it.
+  if (lead.form_type === 'options' && !generalInquiry && 'heard_about_us' in body && !validReportedChannel) errors.push('heard_about_us');
   if (lead.name.length < 2) errors.push('name');
   if (lead.phone.replace(/\D/g, '').length < 10) errors.push('phone');
   if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) errors.push('email');
