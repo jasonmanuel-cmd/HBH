@@ -15,6 +15,7 @@ export const localSections = {
     ]],
     ['What to have ready for a Bakersfield property review', [
       'The address and parcel number, a recent property tax bill, the mortgage statement or payoff contact, and any repair estimates, inspection reports or permits you already have. For a rental, the current lease and rent amount. For an inherited home, the documents that show who has authority to sign.',
+      'For example, if the seller knows about a garage conversion but has no permit paperwork, start by looking up the parcel number and map through the <a href="https://www.kerncounty.com/government/departments/assessor-recorder/property/assessor-property-search">Kern County Assessor Property Search</a>. Ask the building department for the correct jurisdiction whether it has a permit on file. Share any records you find when comparing an as-is offer with a listing estimate.',
       'None of this is required to start. It simply lets us give you a more useful comparison between a direct as-is offer and a listing, with fewer assumptions behind the numbers.',
     ]],
   ],
@@ -47,6 +48,7 @@ export const localSections = {
     ['Inherited a home in Bakersfield?', [
       'Begin with who has authority to act, then gather the deed or estate documents, loan and tax statements, insurance information and known repair needs. An out-of-area family can compare retaining the home, listing it or seeking a direct as-is offer without committing to a clean-out first.',
       'Whether probate or another transfer process applies depends on ownership and the estate. Do not assume being an heir gives you authority to sign a sale. Have a qualified estate attorney confirm the required authority and approvals, and ask a tax professional about basis and property-tax consequences. This is general information, not legal or tax advice.',
+      'For example, if siblings inherit a vacant house and one lives out of state, first ask the estate attorney who can sign. If a Kern County probate case is already open, the <a href="https://www.kern.courts.ca.gov/divisions/probate">Kern County Superior Court probate division</a> provides access to local rules and examiner notes. Once signing authority is clear, compare written estimates for selling the house as it stands or cleaning it out and listing it.',
       '<a href="/guides/sell-inherited-house-california">Read the California inherited-house guide and its official tax references</a> · <a href="https://selfhelp.courts.ca.gov/probate">California Courts: property after someone dies</a>',
     ]],
   ],

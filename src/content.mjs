@@ -226,7 +226,7 @@ export const areas = [
     geo: [35.3733, -119.0187],
     answer: "Call Harbison pays cash for houses in Bakersfield, CA in any condition, including inherited, vacant, damaged, and tenant-occupied homes. You can compare a direct as-is offer with listing on the market. Property access, inspections and closing timing depend on the written agreement, title and escrow.",
     name: 'Bakersfield',
-    title: 'We Buy Houses for Cash in Bakersfield, CA',
+    title: 'Sell Your House As-Is in Bakersfield, CA',
     description: 'Sell your Bakersfield house for cash, as-is. Compare a written cash offer with listing, renovation, or development, with the terms explained in writing.',
     headline: 'Sell your Bakersfield house <em>for cash, as-is.</em>',
     lead: 'From East Bakersfield and Oildale to Rosedale and the Southwest, we look at Bakersfield properties in every condition and price range.',

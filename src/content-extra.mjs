@@ -111,7 +111,7 @@ export const guides = [
     description: 'A side-by-side look at selling to a cash buyer versus listing with an agent in Kern County. Net proceeds, timelines, risks, and when each makes sense.',
     image: images.list,
     published: '2026-10-23',
-    updated: '2026-11-06',
+    updated: '2026-11-23',
     answer: 'Listing usually brings a higher sale price for a move-in-ready home, while a cash offer can net a similar result for a house that needs major repairs once you subtract repair costs, commissions, holding costs, and time. The right choice depends on the home’s condition, your timeline, and how much uncertainty you can accept.',
     sections: [
       ['What is the difference between a cash offer and listing?', [
@@ -121,6 +121,9 @@ export const guides = [
         'The numbers below are hypothetical, for illustration only. Every property is different.',
         '<div class="compare-wrap"><table class="compare"><thead><tr><th scope="col">Worth $350,000 fixed up; needs $40,000 of work</th><th scope="col">Fix &amp; list</th><th scope="col">Cash offer as-is</th></tr></thead><tbody><tr><th scope="row">Sale price</th><td>$350,000</td><td>$265,000</td></tr><tr><th scope="row">Repairs</th><td>−$40,000</td><td>$0</td></tr><tr><th scope="row">Commissions (example: 5%)</th><td>−$17,500</td><td>$0</td></tr><tr><th scope="row">Closing costs (approx.)</th><td>−$5,000</td><td>−$1,500</td></tr><tr><th scope="row">Holding costs</th><td>−$8,000</td><td>−$1,000</td></tr><tr><th scope="row">Estimated net</th><td><strong>≈ $279,500</strong></td><td><strong>≈ $262,500</strong></td></tr><tr><th scope="row">Illustrative timeline</th><td>4–6 months</td><td>2–4 weeks</td></tr></tbody></table></div>',
         'In this example listing nets more, but only if repairs stay on budget, the home sells at full price, and the buyer’s financing holds. Cost overruns or a price reduction can erase the gap quickly. Timing is illustrative too: the closing date must be agreed in writing and depends on the contract, title and escrow.',
+      ]],
+      ['How much could the numbers change before the cash offer nets more?', [
+        'In the hypothetical example above, fixing and listing nets $17,000 more than the cash offer. If the repairs cost $10,000 more than budgeted and the house costs another $7,000 to hold, the two estimated nets would tie at $262,500, with everything else held constant. Get written repair bids, an itemized estimate of seller costs, and a monthly holding-cost figure before making the same comparison for your house.',
       ]],
       ['When does a cash offer make more sense?', [
         '<ul><li>The home needs major repairs you cannot fund or manage</li><li>You need to close on a specific date</li><li>The property is inherited, vacant, or out of the area</li><li>Tenants, damage, or open permits make showings difficult</li><li>You value certainty over squeezing out the last dollar</li></ul>',
