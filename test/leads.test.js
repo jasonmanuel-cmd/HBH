@@ -17,7 +17,7 @@ test('parseLead validates required fields', () => {
   assert.deepEqual(parseLead({ address: 'x', name: '', phone: '123', email: 'bad' }).errors, ['address', 'name', 'phone', 'email']);
 });
 
-test('cash-offer referral choices populate the lead channel and are optional', () => {
+test('cash-offer referral choices populate the lead channel and reject blank or unknown choices', () => {
   const offer = { ...valid, form_type: 'options', consent_response: 'yes' };
   for (const channel of ['social', 'paid_ads', 'ai_search']) {
     const { lead, errors } = parseLead({ ...offer, heard_about_us: channel });
@@ -25,7 +25,9 @@ test('cash-offer referral choices populate the lead channel and are optional', (
     assert.equal(lead.channel, channel);
   }
   assert.equal(parseLead(offer).lead.channel, 'direct');
-  assert.equal(parseLead({ ...offer, heard_about_us: 'invalid', gclid: 'test' }).lead.channel, 'google_ads');
+  for (const heard_about_us of ['', 'invalid']) {
+    assert.deepEqual(parseLead({ ...offer, heard_about_us }).errors, ['heard_about_us']);
+  }
 });
 
 test('email alerts target both staff addresses when recipients are not overridden', async () => {

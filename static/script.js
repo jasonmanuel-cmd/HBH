@@ -247,6 +247,10 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
     s.querySelectorAll('.choice-grid[role=radiogroup]').forEach((g) => {
       if (!g.querySelector('input:checked')) bad.push(g);
     });
+    if (s.classList?.contains('fstep-address')) {
+      const referral = s.querySelector('.referral-source');
+      if (referral && !referral.querySelector('input[type=radio]:checked')) bad.push(referral);
+    }
     return bad;
   };
   form.addEventListener('click', (e) => {
@@ -262,10 +266,12 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
           ? (form.querySelector('[name=street]')
             ? say('Please enter the street, city, and 5-digit ZIP code.', 'Por favor, escriba la calle, la ciudad y el código postal (ZIP) de 5 dígitos.')
             : say('Please enter the property address.', 'Por favor, escriba la dirección de la propiedad.'))
-          : say('Please choose the closest option.', 'Por favor, elija la opción que más se acerque.');
+          : bad[0].classList.contains('referral-source')
+            ? say('Please choose how you heard about us.', 'Seleccione cómo se enteró de nosotros.')
+            : say('Please choose the closest option.', 'Por favor, elija la opción que más se acerque.');
         status.classList.add('error');
         const firstInvalid = bad[0];
-        revealField(firstInvalid.tagName === 'INPUT' ? firstInvalid : firstInvalid.querySelector('input'));
+        revealField(firstInvalid.tagName === 'INPUT' ? firstInvalid : firstInvalid.querySelector('input:not([type=hidden])'));
         track('lead_form_error', { ...formProps(form), step: current + 1 });
         return;
       }
@@ -325,6 +331,7 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     if (hasConsentCheckbox && !data.consent_response) data.consent_response = '';
 
     const missing = [];
+    if (form.querySelector('.referral-source') && !data.heard_about_us) missing.push('heard_about_us');
     const generalInquiry = data.form_type === 'options' && ['buyer', 'investor', 'home_value'].includes(data.route_interest);
     if (!generalInquiry && (data.address || '').trim().length < 5) missing.push('address');
     if ((data.name || '').trim().length < 2 || (data.first_name !== undefined && !(data.first_name || '').trim())) missing.push('name');
@@ -424,13 +431,14 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
       if (idx >= 0) form.show(idx);
     }
     names.forEach((f) => {
-      const el = form.querySelector(`[name="${f}"]`);
+      const el = form.querySelector(`[name="${f}"]:not([type=hidden])`);
       el?.classList.add('invalid');
-      el?.closest('.check')?.classList.add('invalid');
+      el?.closest('.check, .referral-source')?.classList.add('invalid');
     });
-    form.querySelector('.invalid')?.focus();
+    revealField(form.querySelector('input.invalid, select.invalid, textarea.invalid'));
     status.textContent =
       names.length === 1 && names[0] === 'consent_response' ? say('Please check the box so we can respond to your inquiry.', 'Marque la casilla para que podamos responder a su consulta.')
+      : fields.length === 1 && fields[0] === 'heard_about_us' ? say('Please choose how you heard about us.', 'Seleccione cómo se enteró de nosotros.')
       : fields.includes('relationship') && fields.length === 1 ? say('Please tell us your relationship to the property.', 'Por favor, indíquenos su relación con la propiedad.')
       : say('Please check the highlighted fields and enter valid contact information.', 'Revise los campos resaltados e ingrese información de contacto válida.');
     status.classList.add('error');

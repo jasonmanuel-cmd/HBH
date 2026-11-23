@@ -1,5 +1,5 @@
 {
-  "How did you hear about us? <span1>(optional)</span1>": "¿Cómo se enteró de nosotros? <span1>(opcional)</span1>",
+  "How did you hear about us? <span1>(required)</span1>": "¿Cómo se enteró de nosotros? <span1>(obligatorio)</span1>",
   "Social Media (Facebook/Instagram/TikTok)": "Redes sociales (Facebook/Instagram/TikTok)",
   "Ads": "Anuncios",
   "AI System (ChatGPT/Claude/Gemini)": "Sistema de IA (ChatGPT/Claude/Gemini)"
