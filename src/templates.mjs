@@ -346,6 +346,12 @@ function leadForm({ situation = '', heading = 'Get Your Cash Offer', city = '', 
           </div>
           <input type="hidden" name="state" value="CA">
           <p class="form-hint">California · Kern County and nearby</p>
+          <fieldset class="referral-source">
+            <legend>How did you hear about us? <span class="muted">(optional)</span></legend>
+            <label class="choice"><input type="radio" name="heard_about_us" value="social"><span>Social Media (Facebook/Instagram/TikTok)</span></label>
+            <label class="choice"><input type="radio" name="heard_about_us" value="paid_ads"><span>Ads</span></label>
+            <label class="choice"><input type="radio" name="heard_about_us" value="ai_search"><span>AI System (ChatGPT/Claude/Gemini)</span></label>
+          </fieldset>
           <button class="btn btn-gold btn-full" type="button" data-next>Continue →</button>
         </fieldset>
         <fieldset class="fstep" data-step="2" hidden>

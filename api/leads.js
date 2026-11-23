@@ -104,7 +104,10 @@ export function parseLead(body) {
     consent_marketing: yes(body.consent_marketing),
   };
   if (lead.consent_response || lead.consent_marketing) lead.consent_at = new Date().toISOString();
-  lead.channel = classifyChannel(lead);
+  const reportedChannel = body.heard_about_us;
+  lead.channel = lead.form_type === 'options' && ['social', 'paid_ads', 'ai_search'].includes(reportedChannel)
+    ? reportedChannel
+    : classifyChannel(lead);
   const errors = [];
   const generalInquiry = lead.form_type === 'options' && ['buyer', 'investor', 'home_value'].includes(lead.route_interest);
   // Existing text columns support address-free inquiries, just as the Standard bridge does.
