@@ -219,7 +219,7 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   return `<!doctype html>
 <html lang="en-US" data-command-phase="${COMMAND_PHASE}">
 <head>
-  <script>function hbhOk(){try{var s=JSON.parse(localStorage.getItem('hbh-consent')||'null');return!!s&&s.value==='granted'&&Date.now()-s.at<31536e6}catch(e){return false}}</script>
+  <script>function hbhOk(){try{var s=JSON.parse(localStorage.getItem('hbh-consent')||'null');return navigator.globalPrivacyControl!==true&&navigator.doNotTrack!=='1'&&!!s&&s.replay===true&&s.value==='granted'&&Date.now()-s.at<31536e6}catch(e){return false}}</script>
   ${ga}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -259,6 +259,17 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   <script>window.si=window.si||function(){(window.siq=window.siq||[]).push(arguments)};</script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
   ${noindex ? '' : `<script>window.hbhLoadMetricool=function(){if(window.hbhMetricool||!hbhOk())return;window.hbhMetricool=1;function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"398cd80eb0d6d2a7ebd652d00db3bb8"})})};hbhLoadMetricool();</script>`}
+  ${noindex ? '' : `<script>
+    window.hbhLoadClarity = function () {
+      if (window.clarity || !hbhOk()) return;
+      window.clarity = function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
+      window.clarity('consentv2', { analytics_Storage: 'granted', ad_Storage: 'denied' });
+      const script = document.createElement('script');
+      script.async = true;
+      script.src = 'https://www.clarity.ms/tag/ziuecx6j9o';
+      document.head.appendChild(script);
+    };
+  </script>`}
   ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>` : ''}
 </head>`;
 }
@@ -331,7 +342,7 @@ function leadForm({ situation = '', heading = 'Get Your Cash Offer', city = '', 
   return `<aside class="lead-card" id="lead-form" aria-label="Request property options">
       <p class="eyebrow gold">Start Here · Free &amp; No Obligation</p>
       <h2>${esc(heading)}</h2>
-      <form data-lead-form data-steps data-form-type="options" method="post" action="/api/leads" novalidate>
+      <form data-clarity-mask="true" data-lead-form data-steps data-form-type="options" method="post" action="/api/leads" novalidate>
         <input type="hidden" name="form_type" value="options">
         <input type="hidden" name="route_interest" value="">
         <input type="hidden" name="location_interest" value="${esc(location)}">
@@ -923,7 +934,7 @@ export function inquiryPage(item) {
       <p><a href="/situations/land-development">Land and development due diligence</a> · <a href="/how-it-works#estimator">Illustrative net-proceeds calculator</a></p>
       <h2>Choose your next conversation</h2><ul>${inquiryPages.filter(p => p.slug !== item.slug).map(p => `<li><a href="/${p.slug}">${esc(p.title)}</a></li>`).join('')}</ul>
     </article><aside class="lead-card" id="lead-form"><h2>Start a conversation</h2>
-      <form data-lead-form data-form-type="options" method="post" action="/api/leads" novalidate>
+      <form data-clarity-mask="true" data-lead-form data-form-type="options" method="post" action="/api/leads" novalidate>
         <input type="hidden" name="form_type" value="options"><input type="hidden" name="route_interest" value="${item.route}">
         <input type="hidden" name="situation" value="${esc(item.situation)}"><input type="hidden" name="page_type" value="inquiry">
         <label for="inquiry-name">Name</label><input id="inquiry-name" name="name" autocomplete="name" required>
@@ -1114,7 +1125,7 @@ export function privacyPage() {
     <p>Our first-party website statistics record page views and estimated active time, separately from your form details. Raw IP addresses are not retained. Daily visitor hashes rotate, and browser Do Not Track and Global Privacy Control choices are honored for this first-party tracking.</p>
     <p><button type="button" class="btn btn-ghost" data-analytics-optout>Disable first-party analytics in this browser</button></p>
     <h2 class="prose-h">Cookies and analytics choices</h2>
-    <p>When you first visit, a banner asks whether to allow analytics and marketing measurement tools such as Google Analytics and Metricool. They load only if you accept. If you decline, or your browser sends a Global Privacy Control or Do Not Track signal, they stay off. Use the Privacy choices link in the footer to change your choice at any time.</p>
+    <p>When you first visit, a banner asks whether to allow analytics and marketing measurement tools such as Google Analytics, Metricool, and Microsoft Clarity. Clarity uses masked session recordings and heatmaps to help us understand how visitors use the site. They load only if you accept. If you decline, or your browser sends a Global Privacy Control or Do Not Track signal, they stay off. Use the Privacy choices link in the footer to change your choice at any time.</p>
     <h2 class="prose-h">How we use it</h2>
     <ul>
       <li>To respond to your inquiry and evaluate your property</li>
@@ -1166,7 +1177,7 @@ const radios = (name, list, required = true) => `<div class="choice-grid" role="
 function familyLeadForm() {
   return `<aside class="lead-card family-card" id="lead-form" aria-label="Talk with Nathanael about a loved one's house">
       <h2>What property are you trying to figure out?</h2>
-      <form data-lead-form data-form-type="family_transition" data-steps method="post" action="/api/leads" novalidate>
+      <form data-clarity-mask="true" data-lead-form data-form-type="family_transition" data-steps method="post" action="/api/leads" novalidate>
         <input type="hidden" name="form_type" value="family_transition">
         <ol class="step-dots" aria-hidden="true"><li class="on"></li><li></li><li></li><li></li></ol>
         <fieldset class="fstep" data-step="1">

@@ -9,19 +9,19 @@
   const read = () => {
     try {
       const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
-      if (saved && (saved.value === 'granted' || saved.value === 'denied') && Date.now() - saved.at < MAX_AGE) return saved.value;
+      if (saved && (saved.value === 'granted' || saved.value === 'denied') && (saved.value === 'denied' || saved.replay === true) && Date.now() - saved.at < MAX_AGE) return saved.value;
     } catch {}
     return null;
   };
   const write = (value) => {
-    try { localStorage.setItem(KEY, JSON.stringify({ value, at: Date.now() })); } catch {}
+    try { localStorage.setItem(KEY, JSON.stringify({ value, at: Date.now(), replay: true })); } catch {}
   };
   // A browser privacy signal counts as a decline and no banner is needed.
   const privacySignal = () => navigator.globalPrivacyControl === true || navigator.doNotTrack === '1';
 
   const apply = (value) => {
     if (value === 'granted') {
-      for (const name of ['hbhLoadAnalytics', 'hbhLoadMetricool', 'hbhLoadTagManager']) {
+      for (const name of ['hbhLoadAnalytics', 'hbhLoadMetricool', 'hbhLoadTagManager', 'hbhLoadClarity']) {
         try { if (typeof window[name] === 'function') window[name](); } catch {}
       }
     }
@@ -29,7 +29,17 @@
 
   let banner = null;
   const close = () => { if (banner) { banner.remove(); banner = null; } };
-  const choose = (value) => { write(value); close(); apply(value); };
+  const choose = (value) => {
+    if (privacySignal()) value = 'denied';
+    write(value);
+    close();
+    if (value === 'denied' && typeof window.clarity === 'function') {
+      window.clarity('consentv2', { analytics_Storage: 'denied', ad_Storage: 'denied' });
+      location.reload();
+      return;
+    }
+    apply(value);
+  };
 
   const open = () => {
     if (banner) return;
@@ -43,8 +53,8 @@
     const text = document.createElement('p');
     text.className = 'consent-text';
     text.append(say(
-      'We collect website usage data, such as pages visited and device type, with Google Analytics and similar tools to understand what helps visitors and improve this site. Accept to allow it, or decline and we will use only what the site needs to work. Details are in our ',
-      'Recopilamos datos de uso del sitio, como las páginas visitadas y el tipo de dispositivo, con Google Analytics y herramientas similares para entender qué ayuda a los visitantes y mejorar este sitio. Acepte para permitirlo, o rechace y usaremos solo lo que el sitio necesita para funcionar. Los detalles están en nuestra '
+      'We collect website usage data, such as pages visited and device type, with Google Analytics and similar tools to improve this site. Microsoft Clarity helps us see how people use the site through masked session recordings and heatmaps. Accept to allow it, or decline and we will use only what the site needs to work. Details are in our ',
+      'Recopilamos datos de uso del sitio, como las páginas visitadas y el tipo de dispositivo, con Google Analytics y herramientas similares, incluidas grabaciones de sesiones con datos enmascarados mediante Microsoft Clarity, para entender qué ayuda a los visitantes y mejorar este sitio. Acepte para permitirlo, o rechace y usaremos solo lo que el sitio necesita para funcionar. Los detalles están en nuestra '
     ));
     const link = document.createElement('a');
     link.href = spanish ? '/es/privacy' : '/privacy';
@@ -69,8 +79,8 @@
 
   document.querySelectorAll('[data-consent-open]').forEach((el) => el.addEventListener('click', (event) => { event.preventDefault(); open(); }));
 
+  if (privacySignal()) { write('denied'); return; }
   const saved = read();
   if (saved) { apply(saved); return; }
-  if (privacySignal()) { write('denied'); return; }
   open();
 })();
