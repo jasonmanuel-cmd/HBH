@@ -31,18 +31,7 @@ test('website analytics requires HQ login, stays server-side, clamps the range, 
   try {
     globalThis.fetch = async () => { throw new Error('Unauthenticated requests must not fetch anything'); };
     assert.equal((await call({ method: 'GET', url: '/api/hq?action=analytics' })).statusCode, 401);
-    globalThis.fetch = async (url, init) => {
-      assert.equal(String(url), 'https://www.harbisonstandard.com/api/hq/analytics?days=365&site=harbison_standard');
-      assert.equal(init.headers.Authorization, `Bearer ${env.CRM_INGEST_SECRET}`);
-      assert.equal(init.redirect, 'error');
-      return Response.json({ site: 'harbison_standard', totals: { sessions: 12, pageViews: 23 }, daily: [] });
-    };
-    const stats = await call({ method: 'GET', url: '/api/hq?action=analytics&days=9999', headers: headers() });
-    assert.equal(stats.statusCode, 200);
-    assert.equal(stats.body.analytics.totals.sessions, 12);
-    assert.equal(stats.headers['Cache-Control'], 'no-store');
-    assert.equal(JSON.stringify(stats.body).includes(env.CRM_INGEST_SECRET), false);
-    globalThis.fetch = async () => new Response('{}', { status: 503 });
+    globalThis.fetch = async () => assert.fail('HQ analytics must never forward HTTP requests');
     const failed = await call({ method: 'GET', url: '/api/hq?action=analytics', headers: headers() });
     assert.equal(failed.statusCode, 502);
     assert.equal(failed.body.analytics, undefined);

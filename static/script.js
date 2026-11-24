@@ -78,7 +78,10 @@ const attribution = () => {
 const pageType = document.body.dataset.pageType || 'page';
 const device = () => (matchMedia('(max-width: 640px)').matches ? 'mobile' : matchMedia('(max-width: 980px)').matches ? 'tablet' : 'desktop');
 window.dataLayer = window.dataLayer || [];
+const clarityEvents = new Set(['guide_view', 'situation_page_view', 'location_page_view', 'phone_click', 'sms_click', 'email_click', 'cta_click', 'generate_lead']);
 const track = (event, props = {}) => {
+  if (document.body.dataset.analyticsExcluded === 'true' || typeof window.hbhOk !== 'function' || !window.hbhOk()) return;
+  if (clarityEvents.has(event) && typeof window.clarity === 'function') window.clarity('event', event);
   const payload = {
     page_path: location.pathname,
     page_type: pageType,
@@ -86,14 +89,23 @@ const track = (event, props = {}) => {
     device_type: device(),
     ...props,
   };
-  window.dataLayer.push({ event, ...payload });
-  if (window.gtag) window.gtag('event', event, payload);
+  if (window.gtag && !window.hbhGtm) window.gtag('event', event, payload);
+  else window.dataLayer.push({ event, ...payload });
 };
 const PAGE_VIEW_EVENTS = { guide: 'guide_view', situation: 'situation_page_view', location: 'location_page_view' };
-if (PAGE_VIEW_EVENTS[pageType]) track(PAGE_VIEW_EVENTS[pageType]);
+if (PAGE_VIEW_EVENTS[pageType]) {
+  const reportView = () => {
+    if (!window.hbhOk?.()) return;
+    track(PAGE_VIEW_EVENTS[pageType]);
+    window.removeEventListener('hbh-analytics-consent', reportView);
+  };
+  window.addEventListener('hbh-analytics-consent', reportView);
+}
 
 document.addEventListener('click', (e) => {
   if (e.target.closest('a[href^="tel:"]')) track('phone_click');
+  if (e.target.closest('a[href^="sms:"]')) track('sms_click');
+  if (e.target.closest('a[href^="mailto:"]')) track('email_click');
   const tracked = e.target.closest('[data-track]');
   if (tracked) track(tracked.dataset.track);
   const cta = e.target.closest('[data-cta]');

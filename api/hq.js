@@ -1,3 +1,4 @@
+import { analyticsSql, readAnalytics } from '../lib/analytics-store.js';
 import { COMMAND_PHASE } from '../lib/command-phase.js';
 import { useNeon } from '../lib/neon.js';
 import { sellerOperations } from '../lib/seller-operations-api.js';
@@ -8,7 +9,7 @@ import { sellerOperations } from '../lib/seller-operations-api.js';
 // Env: HQ_PASSWORD (required), SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (required),
 //      HQ_SESSION_SECRET (optional — otherwise derived from the password + service key, so changing
 //      the password signs everyone out).
-import { createHmac, createHash, timingSafeEqual } from 'node:crypto';
+import { createHmac, createHash, randomUUID, timingSafeEqual } from 'node:crypto';
 import { brandOf, brandFilter, STANDARD_FORM } from '../lib/shared-intake.js';
 import { demoLeadReason } from '../lib/demo-leads.js';
 import { clientIp, createRateLimiter } from '../lib/request-ip.js';
@@ -489,16 +490,16 @@ export default async function handler(req, res, env = process.env, phase = COMMA
     }
 
     if (action === 'analytics' && req.method === 'GET') {
-      if (!env.CRM_INGEST_SECRET) return res.status(503).json({ ok: false, error: 'Website analytics connection is not configured.' });
       const days = Math.min(Math.max(Math.floor(Number(url.searchParams.get('days')) || 30), 1), 365);
       const site = url.searchParams.get('site') || 'harbison_standard';
       if (!['harbison_standard', 'call_harbison'].includes(site)) return res.status(400).json({ ok: false, error: 'Unknown website.' });
-      const response = await fetch(`https://www.harbisonstandard.com/api/hq/analytics?days=${days}&site=${site}`, {
-        headers: { Authorization: `Bearer ${env.CRM_INGEST_SECRET}` }, signal: AbortSignal.timeout(25000), redirect: 'error',
-      });
-      if (!response.ok) return res.status(502).json({ ok: false, error: 'Website analytics are temporarily unavailable.' });
-      const analytics = await response.json();
-      if (analytics.site !== site || !analytics.totals || !Array.isArray(analytics.daily)) throw new Error('Invalid analytics response');
+      let analytics;
+      try { analytics = await readAnalytics(analyticsSql(env), site, days); }
+      catch (error) {
+        const trace = randomUUID();
+        console.error('[analytics] HQ read failed', { trace, site, code: error?.code === 'DB_NOT_CONFIGURED' ? 'DB_NOT_CONFIGURED' : 'STORAGE_FAILED' });
+        return res.status(502).json({ ok: false, error: 'Website analytics are temporarily unavailable.', trace });
+      }
       return res.status(200).json({ ok: true, site, analytics });
     }
 

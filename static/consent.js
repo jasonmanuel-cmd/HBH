@@ -24,6 +24,7 @@
       for (const name of ['hbhLoadAnalytics', 'hbhLoadMetricool', 'hbhLoadTagManager', 'hbhLoadClarity']) {
         try { if (typeof window[name] === 'function') window[name](); } catch {}
       }
+      window.dispatchEvent(new Event('hbh-analytics-consent'));
     }
   };
 
@@ -33,8 +34,8 @@
     if (privacySignal()) value = 'denied';
     write(value);
     close();
-    if (value === 'denied' && typeof window.clarity === 'function') {
-      window.clarity('consentv2', { analytics_Storage: 'denied', ad_Storage: 'denied' });
+    if (value === 'denied') {
+      window.clarity?.('consentv2', { analytics_Storage: 'denied', ad_Storage: 'denied' });
       location.reload();
       return;
     }
