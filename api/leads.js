@@ -1,3 +1,4 @@
+import { leadWebhookTarget } from '../lib/lead-webhook.js';
 import { COMMAND_PHASE } from '../lib/command-phase.js';
 import { useNeon } from '../lib/neon.js';
 // Vercel serverless function: POST /api/leads
@@ -258,7 +259,8 @@ async function textLeadAndTeam(lead, env) {
 }
 
 async function postWebhook(lead, env) {
-  const res = await fetchWithRetry(env.LEAD_WEBHOOK_URL, {
+  const res = await fetchWithRetry(leadWebhookTarget(env.LEAD_WEBHOOK_URL), {
+    redirect: 'error',
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ ...lead, submitted_at: new Date().toISOString() }),
@@ -388,10 +390,11 @@ export async function deliverDetails(d, env = process.env) {
     }, { retries: 0 }).then(async (r) => { if (!r.ok) throw new Error(`Resend ${r.status}`); })]);
   }
   if (env.LEAD_WEBHOOK_URL) {
-    tasks.push(['webhook', fetchWithRetry(env.LEAD_WEBHOOK_URL, {
+    tasks.push(['webhook', Promise.resolve().then(() => fetchWithRetry(leadWebhookTarget(env.LEAD_WEBHOOK_URL), {
+      redirect: 'error',
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ kind: 'details', ...d, submitted_at: new Date().toISOString() }),
-    }, { retries: 0 }).then((r) => { if (!r.ok) throw new Error(`Webhook ${r.status}`); })]);
+    }, { retries: 0 })).then((r) => { if (!r.ok) throw new Error(`Webhook ${r.status}`); })]);
   }
   const results = await Promise.allSettled(tasks.map(([, p]) => p));
   const delivered = ['supabase'];

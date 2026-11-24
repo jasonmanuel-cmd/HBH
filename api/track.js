@@ -1,47 +1,46 @@
-// Same-origin collector. Only this server can label records as Call Harbison.
-import { createHmac } from 'node:crypto';
-import { clientIp } from '../lib/request-ip.js';
+import { randomUUID } from 'node:crypto';
+import { buildPages } from '../src/pages.mjs';
+import { esPath } from '../src/i18n/translate.mjs';
+import { analyticsSql, storePage } from '../lib/analytics-store.js';
 
-export default async function handler(req, res, env = process.env) {
+const sites = new Map([
+  ['www.callharbison.com', 'call_harbison'], ['callharbison.com', 'call_harbison'],
+  ['www.harbisonstandard.com', 'harbison_standard'], ['harbisonstandard.com', 'harbison_standard'],
+]);
+const publicPaths = new Set(buildPages().flatMap(([, , path]) => path && path !== '/privacy' ? [path, esPath(path)] : []));
+const uuid = value => typeof value === 'string' && /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(value);
+
+export default async function handler(req, res, env = process.env, sqlFactory = analyticsSql) {
   res.setHeader('Cache-Control', 'no-store');
-  const url = new URL(req.url || '/api/track', 'http://x');
-  // Browser CSP report sink (routed from /csp-report in vercel.json without adding a separate function).
-  if (url.searchParams.get('csp') === '1') {
-    return res.end ? res.status(204).end('') : res.status(204).json({ ok: true });
-  }
-  if (req.method !== 'POST') return res.status(405).json({ ok: false });
-  if (!env.CRM_INGEST_SECRET) return res.status(503).json({ ok: false });
-  if (req.headers?.dnt === '1' || req.headers?.['sec-gpc'] === '1') return res.status(202).json({ ok: true, stored: false });
+  const trace = randomUUID();
+  res.setHeader('X-Analytics-Request-ID', trace);
+  const url = new URL(req.url || '/api/track', 'http://local');
+  if (url.searchParams.get('csp') === '1') return res.end ? res.status(204).end('') : res.status(204).json({ ok: true });
+  const reply = (status, code) => res.status(status).json({ ok: status < 400, stored: status === 200, ...(code ? { code } : {}) });
+  if (env.HBH_ANALYTICS_DISABLED === 'true') return reply(202, 'COLLECTOR_DISABLED');
+  if (req.method !== 'POST') return reply(405, 'METHOD_NOT_ALLOWED');
+  const headers = req.headers || {};
+  if (headers['x-analytics-visitor'] || headers['x-analytics-hop']) return reply(508, 'FORWARDING_REJECTED');
+  if (headers.dnt === '1' || headers['sec-gpc'] === '1') return reply(202, 'PRIVACY_OPT_OUT');
+  const host = String(headers.host || '').toLowerCase();
+  const site = sites.get(host);
+  if (!site || (headers.origin && headers.origin !== `https://${host}`)) return reply(403, 'ORIGIN_REJECTED');
+  if (/bot\b|crawler|spider|headlesschrome/i.test(String(headers['user-agent'] || ''))) return reply(202, 'AUTOMATED_TRAFFIC');
   let body = req.body;
-  try { if (typeof body === 'string') body = JSON.parse(body); } catch { return res.status(400).json({ ok: false }); }
-  if (!body || !/^[a-f0-9-]{36}$/i.test(body.sid || '') || !['start', 'pageview', 'heartbeat', 'end'].includes(body.type)) return res.status(400).json({ ok: false });
-  const path = typeof body.path === 'string' ? body.path.split(/[?#]/)[0].slice(0, 300) : '/';
-  if (!path.startsWith('/') || path.startsWith('//') || /^\/(hq|api)(\/|$)/.test(path)) return res.status(400).json({ ok: false });
-  const ip = clientIp(req) || 'unknown';
-  const visitor = createHmac('sha256', env.CRM_INGEST_SECRET).update(`call_harbison:${new Date().toISOString().slice(0, 10)}:${ip}`).digest('hex');
-  // Explicit transport allowlist: never forward inquiry fields or arbitrary campaign/title text.
-  const payload = { sid: body.sid, type: body.type, site: 'call_harbison', path };
-  if (/^[a-f0-9-]{36}$/i.test(body.pageToken || '')) payload.pageToken = body.pageToken;
-  if (Number.isFinite(body.durationSeconds)) payload.durationSeconds = Math.max(0, Math.min(1800, Math.round(body.durationSeconds)));
-  if (['direct', 'search', 'social', 'referral'].includes(body.referrerType)) payload.referrerType = body.referrerType;
-  if (typeof body.referrerHost === 'string' && /^[a-z0-9.-]{1,253}$/i.test(body.referrerHost)) payload.referrerHost = body.referrerHost;
+  try { if (typeof body === 'string') body = JSON.parse(body); } catch { return reply(400, 'INVALID_JSON'); }
+  const path = typeof body?.path === 'string' ? body.path.split(/[?#]/)[0] : '';
+  if (!publicPaths.has(path) || !uuid(body?.sid) || !uuid(body?.pageToken) || !['start', 'pageview', 'heartbeat', 'end'].includes(body.type)) {
+    return reply(400, 'INVALID_EVENT');
+  }
+  if (body.consent !== true) return reply(202, 'CONSENT_REQUIRED');
+  const duration = Number.isFinite(body.durationSeconds) ? Math.max(0, Math.min(1800, Math.round(body.durationSeconds))) : 0;
+  const referrer = ['direct', 'search', 'social', 'referral'].includes(body.referrerType) ? body.referrerType : null;
   try {
-    const response = await fetch('https://www.harbisonstandard.com/api/track', {
-      method: 'POST', signal: AbortSignal.timeout(10000), redirect: 'error',
-      headers: {
-        'Content-Type': 'application/json', Authorization: `Bearer ${env.CRM_INGEST_SECRET}`,
-        'x-analytics-user-agent': String(req.headers?.['user-agent'] || '').slice(0, 500),
-        'x-analytics-visitor': visitor,
-        'x-analytics-country': String(req.headers?.['x-vercel-ip-country'] || ''),
-        'x-analytics-region': String(req.headers?.['x-vercel-ip-country-region'] || ''),
-        'x-analytics-city': String(req.headers?.['x-vercel-ip-city'] || ''),
-      },
-      body: JSON.stringify(payload),
-    });
-    const result = await response.json();
-    return res.status(response.status).json({ ok: result.ok === true, stored: result.stored === true });
-  } catch {
-    console.error('[analytics] Call Harbison collector unavailable');
-    return res.status(502).json({ ok: false });
+    await storePage(sqlFactory(env), { site, sid: body.sid, token: body.pageToken, path, type: body.type, duration, referrer });
+    return reply(200);
+  } catch (error) {
+    const code = ['DB_NOT_CONFIGURED', '42P01', '42501', '53300', '57P01'].includes(error?.code) ? error.code : 'STORAGE_FAILED';
+    console.error('[analytics] database write failed', { trace, site, event: body.type, code });
+    return reply(code === 'DB_NOT_CONFIGURED' ? 503 : 502, code);
   }
 }

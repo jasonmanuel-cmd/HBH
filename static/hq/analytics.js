@@ -1,4 +1,4 @@
-// Uses the existing HQ session. Aggregates are proxied by the server; no cross-site credentials reach this page.
+// Uses the existing HQ session. Aggregates are read by the server; no cross-site credentials reach this page.
 let analyticsRequest = 0;
 const duration = (value) => {
   const seconds = Math.max(0, Number(value) || 0);
@@ -19,10 +19,11 @@ async function loadAnalytics() {
     const result = await api('analytics', { params: { days, site } });
     if (request !== analyticsRequest || $('#analytics').hidden || $('#analytics').dataset.site !== site) return;
     const data = result.analytics;
+    $('#analytics-source').textContent = data.source;
     const totals = data.totals;
     const number = (value) => Number(value || 0).toLocaleString('en-US');
     const cards = [
-      ['Sessions', number(totals.sessions)], ['Daily visitor estimates (sum)', number(totals.uniqueVisitors)],
+      ['Sessions', number(totals.sessions)],
       ['Page views', number(totals.pageViews)], ['Pages per session', Number(totals.pagesPerSession || 0).toFixed(2)],
       ['Average time on site', duration(totals.avgDurationSeconds)], ['Median time on site', duration(totals.medianDurationSeconds)],
       ['Total time on site', duration(totals.totalDurationSeconds)],
@@ -31,9 +32,7 @@ async function loadAnalytics() {
     const max = Math.max(1, ...data.daily.map((day) => Number(day.sessions) || 0));
     $('#analytics-traffic').innerHTML = totals.sessions ? `<div class="analytics-chart" role="img" aria-label="Daily website sessions over the last ${Number(days)} days">${data.daily.map((day) => `<div style="height:${Math.max(0, (Number(day.sessions) || 0) / max * 100)}%" title="${esc(day.day)}: ${number(day.sessions)} sessions"><span class="sr-only">${esc(day.day)}: ${number(day.sessions)} sessions</span></div>`).join('')}</div><div class="spark-l"><span>${esc(data.daily[0]?.day)}</span><span>${esc(data.daily[data.daily.length - 1]?.day)}</span></div>` : '<p class="empty">No website sessions were recorded in this date range.</p>';
     const groups = [
-      ['How they arrived', data.referrers], ['Top referring sites', data.referrerHosts], ['Campaigns (UTM)', data.campaigns],
-      ['Countries', data.countries], ['States / regions', data.regions], ['Cities', data.cities],
-      ['Devices', data.devices], ['Browsers', data.browsers], ['Operating systems', data.operatingSystems],
+      ['How they arrived', data.referrers],
       ['Most viewed pages', data.topPages], ['Entry pages', data.entryPages], ['Exit pages', data.exitPages],
       ['By hour (UTC)', (data.hourlyUtc || []).map((entry) => ({ key: `${entry.hour}:00`, value: entry.value }))],
     ];
