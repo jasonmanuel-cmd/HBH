@@ -261,15 +261,78 @@ function head({ title, description, path, image, noindex = false, ld, preload, a
   <script defer src="/_vercel/speed-insights/script.js"></script>`}
   ${excluded ? '' : `<script>window.hbhLoadMetricool=function(){if(window.hbhMetricool||!hbhOk())return;window.hbhMetricool=1;function loadScript(a){var b=document.getElementsByTagName("head")[0],c=document.createElement("script");c.type="text/javascript",c.src="https://tracker.metricool.com/resources/be.js",c.onreadystatechange=a,c.onload=a,b.appendChild(c)}loadScript(function(){beTracker.t({hash:"398cd80eb0d6d2a7ebd652d00db3bb8"})})};hbhLoadMetricool();</script>`}
   ${excluded ? '' : `<script>
-    window.hbhLoadClarity = function () {
-      if (window.clarity || !hbhOk() || location.search || location.hash || !['www.callharbison.com', 'callharbison.com'].includes(location.hostname)) return;
-      window.clarity = function () { (window.clarity.q = window.clarity.q || []).push(arguments); };
-      window.clarity('consentv2', { analytics_Storage: 'granted', ad_Storage: 'denied' });
-      const script = document.createElement('script');
-      script.async = true;
-      script.src = 'https://www.clarity.ms/tag/ziuecx6j9o';
-      document.head.appendChild(script);
-    };
+    (() => {
+      const release = 'hbh-clarity-v2';
+      const important = new Set(['lead_form_start', 'lead_form_error', 'estimator_interact', 'generate_lead']);
+      const approved = new Set([
+        'guide_view', 'situation_page_view', 'location_page_view', 'phone_click',
+        'sms_click', 'email_click', 'cta_click', 'video_play', ...important
+      ]);
+      const pageTypes = new Set(['home', 'about', 'accessibility', 'contact', 'guide', 'guides_index',
+        'how_it_works', 'inquiry', 'location', 'situation', 'situations_index']);
+      const pending = new Set();
+      const dispatched = new Set();
+      let stub, initialized, retry;
+      let deadline = 0;
+      const eligible = () => hbhOk() && !location.search && !location.hash &&
+        ['www.callharbison.com', 'callharbison.com'].includes(location.hostname) &&
+        document.body?.dataset.analyticsExcluded !== 'true';
+      const consent = { analytics_Storage: 'granted', ad_Storage: 'denied' };
+
+      const flush = () => {
+        if (!eligible()) {
+          pending.clear();
+          return;
+        }
+        const client = window.clarity;
+        // Microsoft's tag replaces the bootstrap queue when the library initializes.
+        if (typeof client !== 'function' || client === stub || Array.isArray(client.q)) {
+          if (!retry && Date.now() < deadline) retry = setTimeout(() => { retry = null; flush(); }, 100);
+          return;
+        }
+        try {
+          if (initialized !== client) {
+            client('consentv2', consent);
+            const type = document.body?.dataset.pageType;
+            client('set', 'hbh_website', 'call_harbison');
+            client('set', 'hbh_language', document.documentElement.lang.toLowerCase().startsWith('es') ? 'es' : 'en');
+            client('set', 'hbh_page_type', pageTypes.has(type) ? type : 'page');
+            client('set', 'hbh_release', release);
+            initialized = client;
+          }
+          for (const event of pending) {
+            pending.delete(event);
+            dispatched.add(event);
+            client('set', 'hbh_interaction', event);
+            if (important.has(event)) client('upgrade', event);
+            client('event', event);
+          }
+        } catch {
+          // A third-party failure must never interrupt the form or GA/GTM.
+        }
+      };
+
+      window.hbhLoadClarity = () => {
+        if (!eligible()) return;
+        if (!window.clarity) {
+          stub = function () { (stub.q = stub.q || []).push(arguments); };
+          window.clarity = stub;
+          stub('consentv2', consent);
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = 'https://www.clarity.ms/tag/ziuecx6j9o';
+          document.head.appendChild(script);
+        }
+        deadline = Date.now() + 10000;
+        flush();
+      };
+
+      window.hbhClarityEvent = (event) => {
+        if (!eligible() || !approved.has(event) || dispatched.has(event)) return;
+        pending.add(event);
+        flush();
+      };
+    })();
   </script>`}
   ${ld ? `<script type="application/ld+json">${JSON.stringify(ld).replace(/</g, '\\u003c')}</script>` : ''}
 </head>`;

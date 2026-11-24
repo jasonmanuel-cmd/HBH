@@ -78,10 +78,9 @@ const attribution = () => {
 const pageType = document.body.dataset.pageType || 'page';
 const device = () => (matchMedia('(max-width: 640px)').matches ? 'mobile' : matchMedia('(max-width: 980px)').matches ? 'tablet' : 'desktop');
 window.dataLayer = window.dataLayer || [];
-const clarityEvents = new Set(['guide_view', 'situation_page_view', 'location_page_view', 'phone_click', 'sms_click', 'email_click', 'cta_click', 'generate_lead']);
 const track = (event, props = {}) => {
   if (document.body.dataset.analyticsExcluded === 'true' || typeof window.hbhOk !== 'function' || !window.hbhOk()) return;
-  if (clarityEvents.has(event) && typeof window.clarity === 'function') window.clarity('event', event);
+  window.hbhClarityEvent?.(event);
   const payload = {
     page_path: location.pathname,
     page_type: pageType,
