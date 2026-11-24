@@ -77,26 +77,56 @@ test('lead webhook blocks same-deployment callbacks', () => {
   assert.equal(leadWebhookTarget('https://hook.test/x'), 'https://hook.test/x');
 });
 
-test('browser forwards approved Clarity event names only after consent', async () => {
-  const script = await readFile(new URL('../static/script.js', import.meta.url), 'utf8');
-  const section = script.slice(script.indexOf('const clarityEvents'), script.indexOf('const PAGE_VIEW_EVENTS'));
-  const ga = [], clarity = [], dataLayer = [];
+test('Clarity waits for the real client, sends allowlisted metadata, and deduplicates events', () => {
+  const html = buildPages().find(([file]) => file === 'contact.html')[1];
+  const [, loader] = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].find(([, code]) => code.includes('hbhLoadClarity ='));
+  const calls = [], scripts = [], timers = [];
   let consent = false;
-  const window = { hbhOk: () => consent, clarity: (...args) => clarity.push(args), gtag: (...args) => ga.push(args), dataLayer };
+  const window = {};
+  const document = { documentElement: { lang: 'es-US' }, body: { dataset: { pageType: 'contact' } },
+    createElement: () => ({}), head: { appendChild: script => scripts.push(script) } };
+  vm.runInNewContext(loader, { window, document, location: { hostname: 'www.callharbison.com' },
+    hbhOk: () => consent, setTimeout: callback => timers.push(callback) });
+  window.hbhLoadClarity();
+  window.hbhClarityEvent('lead_form_error');
+  assert.equal(scripts.length, 0);
+  consent = true;
+  window.hbhLoadClarity();
+  window.hbhClarityEvent('lead_form_error');
+  window.hbhClarityEvent('lead_form_error');
+  window.hbhClarityEvent('private@example.invalid');
+  assert.equal(scripts.length, 1);
+  assert.equal(window.clarity.q.length, 1, 'only Consent V2 enters the bootstrap queue');
+  window.clarity = (...args) => calls.push(args);
+  timers.shift()();
+  window.hbhClarityEvent('lead_form_error');
+  window.hbhClarityEvent('sms_click');
+  window.hbhClarityEvent('generate_lead');
+  consent = false;
+  window.hbhClarityEvent('email_click');
+  assert.deepEqual(calls.filter(args => args[0] === 'event'), [
+    ['event', 'lead_form_error'], ['event', 'sms_click'], ['event', 'generate_lead'],
+  ]);
+  assert.deepEqual(calls.filter(args => args[0] === 'upgrade'), [['upgrade', 'lead_form_error'], ['upgrade', 'generate_lead']]);
+  assert.ok(calls.some(args => args.join(':') === 'set:hbh_language:es'));
+  assert.ok(calls.some(args => args.join(':') === 'set:hbh_page_type:contact'));
+  assert.ok(calls.some(args => args.join(':') === 'set:hbh_release:hbh-clarity-v2'));
+  assert.equal(calls[0][1].ad_Storage, 'denied');
+  assert.equal(calls[0][1].analytics_Storage, 'granted');
+});
+
+test('central tracking preserves a single GA event and passes only its name to Clarity', async () => {
+  const script = await readFile(new URL('../static/script.js', import.meta.url), 'utf8');
+  const section = script.slice(script.indexOf('const track ='), script.indexOf('const PAGE_VIEW_EVENTS'));
+  const ga = [], clarity = [], dataLayer = [];
+  const window = { hbhOk: () => true, hbhClarityEvent: (...args) => clarity.push(args), gtag: (...args) => ga.push(args), dataLayer };
   const document = { body: { dataset: {} } };
   const context = vm.createContext({ window, document, location: { pathname: '/contact' }, device: () => 'desktop', pageType: 'contact' });
-  vm.runInContext(section, context);
-  const emit = (event) => vm.runInContext(`track(${JSON.stringify(event)}, { example: 'ignored by Clarity' })`, context);
-  emit('sms_click');
-  assert.equal(clarity.length, 0);
-  consent = true;
-  for (const event of ['lead_form_success', 'generate_lead', 'sms_click', 'email_click']) emit(event);
-  assert.deepEqual(clarity, [['event','generate_lead'], ['event','sms_click'], ['event','email_click']]);
+  vm.runInNewContext(section, context);
+  vm.runInNewContext("track('generate_lead', { qualification: 'unqualified' })", context);
+  assert.deepEqual(clarity, [['generate_lead']]);
   assert.equal(ga.filter(args => args[1] === 'generate_lead').length, 1);
   assert.equal(dataLayer.length, 0);
-  document.body.dataset.analyticsExcluded = 'true';
-  emit('email_click');
-  assert.equal(clarity.length, 3);
 });
 
 test('public HTML masks the full recording and private HTML excludes Clarity', () => {
