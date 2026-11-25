@@ -50,7 +50,7 @@ a{text-decoration:none;color:inherit}
 .gold{color:var(--gold2)}
 .gold-dark{color:var(--gold-dark)}
 .hero h1,.section h2,.local-copy h2,.page-title,.form-band h2{font-family:"Playfair Display","Playfair Fallback",Georgia,serif;line-height:.95;letter-spacing:-.03em;margin:0}
-.hero h1{font-size:clamp(4rem,7vw,7rem);color:#fff}
+.hero h1{font-size:clamp(3rem,5vw,5rem);line-height:1.03;color:#fff;overflow-wrap:break-word}
 .hero h1.h1-sub{font-size:clamp(2.8rem,5vw,4.6rem);line-height:1}
 .h1-kicker{display:block;font-family:Inter,'Inter Fallback',sans-serif;font-size:.95rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold2);font-weight:700;line-height:1.3;margin-bottom:18px}
 .hero h1 em,.section h2 em,.local-copy h2 em,.page-title em,.form-band h2 em{color:var(--gold2);font-weight:600}
@@ -58,6 +58,8 @@ a{text-decoration:none;color:inherit}
 .navy h2 em,.navy .page-title em{color:var(--gold2)}
 .hero-brand{display:flex;align-items:center;gap:18px;margin:0 0 22px}
 .hero-brand .eyebrow{margin:0}
+.hero:not(.hero-sub) .hero-grid{align-items:start}
+.hero:not(.hero-sub) .hero-brand{display:none}
 .hero-mark{width:96px;height:96px;flex:none;filter:drop-shadow(0 8px 24px rgba(0,0,0,.45))}
 .hero-lead{color:rgba(255,255,255,.9);font-size:1.12rem;max-width:620px;margin:30px 0 34px}
 .hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
@@ -96,7 +98,21 @@ a{text-decoration:none;color:inherit}
 .form-status{font-size:.85rem;margin:0}
 .form-status.error{color:var(--danger)}
 .form-status.ok{color:var(--gold2)}
-.hp{position:absolute!important;left:-9999px;width:1px;height:1px;overflow:hidden}
+.hp{position:absolute!important;left:-9999px!important;top:auto!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);white-space:nowrap;pointer-events:none}
+.hero-trust{display:flex;align-items:center;gap:12px;margin-top:24px;padding:16px 0;border-top:1px solid rgba(255,255,255,.25);color:#fff}
+.hero-trust img{width:64px;height:64px;border-radius:50%;object-fit:cover;flex:none}
+.hero-trust div{display:grid;gap:2px;font-size:.8rem;line-height:1.35}
+.hero-trust a{color:var(--gold2);text-decoration:underline;text-underline-offset:2px}
+.hero-trust span{color:rgba(255,255,255,.78)}
+.contact-preference{border:0;padding:0;margin:16px 0 0;min-width:0}
+.contact-preference legend{font-weight:700;font-size:.85rem}
+.contact-choices{grid-template-columns:repeat(3,minmax(0,1fr));margin-top:8px}
+.contact-choices .choice span{text-align:center;justify-content:center;min-height:48px;padding:8px}
+.form-next{margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.2)}
+.form-next h3{font-size:1rem;margin:0 0 8px;color:#fff}
+.form-next ol{margin:0;padding-left:22px;color:rgba(255,255,255,.78);font-size:.82rem;line-height:1.5}
+.form-next li+li{margin-top:6px}
+.buyer-disclosure{font-size:.75rem;line-height:1.45;color:rgba(255,255,255,.7);margin:16px 0 0!important}
 .step-dots{list-style:none;display:flex;gap:6px;padding:0;margin:0 0 20px}
 .step-dots li{flex:1;height:3px;background:rgba(255,255,255,.18);border-radius:2px;transition:background .25s}
 .step-dots li.on{background:var(--gold2)}
@@ -402,7 +418,7 @@ main>section:not(:first-child),.local-band{content-visibility:auto;contain-intri
   .final-cta-grid{grid-template-columns:1fr}
   .mobile-bar{display:grid;grid-template-columns:1fr 1fr 1.5fr;gap:8px;position:fixed;left:0;right:0;bottom:0;z-index:999;padding:10px 4vw calc(10px + env(safe-area-inset-bottom));background:rgba(3,31,43,.97);border-top:1px solid rgba(224,181,94,.3)}
   .mobile-bar .btn{min-height:46px;padding:0 10px}
-  body{padding-bottom:70px}
+  body{padding-bottom:calc(82px + env(safe-area-inset-bottom))}
   .situation span{opacity:1}
   /* Mobile tap targets >= 48px */
   .choice span,.choice-list .choice span{min-height:48px;display:flex;align-items:center}
@@ -427,7 +443,14 @@ main>section:not(:first-child),.local-band{content-visibility:auto;contain-intri
 }
 @media(max-width:640px){
   .brand img{height:38px}
-  .hero h1{font-size:3.45rem}
+  .hero h1{font-size:clamp(2.05rem,8.5vw,3.25rem)}
+  .hero-grid{padding:18px 0 40px;gap:12px}
+  .hero-lead{font-size:.96rem;line-height:1.35;margin:10px 0}
+  .hero-actions{margin-top:10px;gap:8px}
+  .hero-actions .btn{padding:11px 14px;font-size:.86rem}
+  .hero-trust{margin-top:10px;padding:8px 0}
+  .hero-trust img{width:52px;height:52px}
+  .contact-choices{grid-template-columns:1fr 1fr 1fr}
   .hero h1.h1-sub{font-size:2.5rem}
   .two-col,.situation-grid,.steps,.steps.four,.steps.five,.footer-grid,.card-grid,.glance,.principles,.choice-list,.why-list,.problem-grid,.path-grid,.video-grid,.about-hero{grid-template-columns:1fr}
   .addr-row{grid-template-columns:1.2fr .8fr}
@@ -498,6 +521,4 @@ main>section:not(:first-child),.local-band{content-visibility:auto;contain-intri
   .menu-toggle{min-width:44px}
   .lang-switch{padding:0 10px;font-size:.76rem}
 }
-/* Keep the investor introduction above the existing property-options card. */
-.inquiry-card { margin-bottom: 1.25rem; }
 .details-card > summary { cursor: pointer; font-weight: 700; margin-bottom: 1rem; }

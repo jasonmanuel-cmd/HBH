@@ -94,32 +94,28 @@ export const walkthrough = [
 
 // ---------- Stepped options form ----------
 export const formSituations = [
-  'I may want to sell directly',
-  'The property needs major repairs',
-  'I inherited the property',
-  'The property is vacant',
-  'There are tenant or rental issues',
-  'I am relocating or facing a deadline',
-  'I am considering listing',
-  'I am unsure what to do',
+  'Inherited / Probate',
+  'Needs Major Repairs',
+  'Tenant / Rental Issue',
+  'Need to Sell Fast',
   'Other',
 ];
 
 // Situation page → preselected answer (the form then opens on the address step).
 export const situationFormMap = {
-  'inherited-property': 'I inherited the property',
-  'needs-major-repairs': 'The property needs major repairs',
-  'fire-water-damage': 'The property needs major repairs',
-  'unfinished-remodel': 'The property needs major repairs',
-  'vacant-property': 'The property is vacant',
-  'problem-tenants': 'There are tenant or rental issues',
-  'sell-rental-property': 'There are tenant or rental issues',
-  relocation: 'I am relocating or facing a deadline',
-  'life-change': 'I am unsure what to do',
-  'failed-listing': 'I am considering listing',
+  'inherited-property': 'Inherited / Probate',
+  'needs-major-repairs': 'Needs Major Repairs',
+  'fire-water-damage': 'Needs Major Repairs',
+  'unfinished-remodel': 'Needs Major Repairs',
+  'vacant-property': 'Other',
+  'problem-tenants': 'Tenant / Rental Issue',
+  'sell-rental-property': 'Tenant / Rental Issue',
+  relocation: 'Need to Sell Fast',
+  'life-change': 'Other',
+  'failed-listing': 'Other',
   'land-development': 'Other',
-  'behind-on-mortgage': 'I am unsure what to do',
-  'code-violations-unpermitted-work': 'The property needs major repairs',
+  'behind-on-mortgage': 'Other',
+  'code-violations-unpermitted-work': 'Needs Major Repairs',
   'hoarding-contents': 'Other',
   'liens-back-taxes': 'Other',
 };
