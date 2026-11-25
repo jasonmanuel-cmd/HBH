@@ -93,13 +93,11 @@ ${pages
 `
 );
 
-// Preserve existing crawler access preferences. Access does not guarantee indexing or AI citations.
-const aiBots = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'Claude-User', 'PerplexityBot', 'Perplexity-User', 'Google-Extended', 'Applebot-Extended', 'Bingbot', 'CCBot', 'DuckAssistBot', 'meta-externalagent'];
+// Search crawlers use the wildcard group. These tokens opt out of model training.
+const trainingAgents = ['GPTBot', 'ClaudeBot', 'Google-Extended', 'Applebot-Extended'];
 writeFileSync(
   join(out, 'robots.txt'),
   `User-agent: *
-Allow: /
-Content-Signal: ai-train=no, search=yes, ai-input=no
 Disallow: /api/
 Disallow: /_agent-markdown/
 Disallow: /thank-you
@@ -108,16 +106,8 @@ Disallow: /es/thank-you
 Disallow: /es/family-property-guide
 Disallow: /hq
 
-${aiBots.map((b) => `User-agent: ${b}`).join('\n')}
-Allow: /
-Content-Signal: ai-train=no, search=yes, ai-input=no
-Disallow: /api/
-Disallow: /_agent-markdown/
-Disallow: /thank-you
-Disallow: /family-property-guide
-Disallow: /es/thank-you
-Disallow: /es/family-property-guide
-Disallow: /hq
+${trainingAgents.map((agent) => `User-agent: ${agent}`).join('\n')}
+Disallow: /
 
 Sitemap: ${site.url}/sitemap.xml
 `
