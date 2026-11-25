@@ -33,6 +33,13 @@ The canary intentionally fails if seller operations mode is enabled, because its
 - Direct Neon readback found that row with `is_test=true`, zero matching notification-outbox jobs, and zero matching rows in `v_uncontacted`. This confirms storage in the intended Neon project and exclusion from those two operational paths. Local tests cover HQ and funnel exclusion; live owner inbox receipt remains pending.
 - Reset the Vercel Production project setting `LEAD_CANARY_ENABLED=false` after the controlled test. The public domain remains on disabled deployment `dpl_D7JQ1odHM7cdcdCYPnsHD2W2DLnF`. Do not enable the daily canary or promote the tested deployment until the owner confirms email receipt.
 
+## Daily canary enabled, 2026-11-25
+
+- Jason confirmed an owner-alert email reached his inbox. Nathanael's receipt was not independently confirmed.
+- Enabled the Vercel Production canary setting and tested deployment `dpl_F7ZwdSxYKnLDrJDfcqn7gZUJN5B6` before promotion. Its authenticated canary returned `stored=true` and `ownerAlertAccepted=true` for test lead `44ed5aad-3c32-44f8-95aa-074abc5907d1`. Direct Neon readback confirmed `is_test=true`, no notification-outbox job, and no `v_uncontacted` row for that lead.
+- Promoted that deployment. The `www.callharbison.com` alias resolves to it; deployment configuration includes `/api/lead-canary` at `0 16 * * *` UTC. The first scheduled run and any human receipt of its alert remain unverified.
+- Gate 0 remains open for a controlled public `/api/leads` submission and failure/retry evidence. The current canary exercises the shared `deliver` path, not the complete public form handler. The legacy alert path is still at most once; provider acceptance and one owner receipt do not establish durable recovery from future alert failures.
+
 ## Rollback
 
 Disable `LEAD_CANARY_ENABLED` to stop synthetic writes. Revert the Gate 0 application commit and redeploy only while the lead reliability protocol remains in `preactivation`. Keep the additive `is_test` column and existing test rows until they have been reconciled; dropping them during rollback would remove exclusion evidence. Do not revert to a version that exposes the regulated pages or automated SMS after those flags have been activated.
