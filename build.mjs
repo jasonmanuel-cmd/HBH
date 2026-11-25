@@ -7,6 +7,7 @@ import { areas, guides, faqs, situations, contentDate } from './src/templates.mj
 import { buildPages } from './src/pages.mjs';
 import { decoratePage, esPath, loadDictionary, translatePage } from './src/i18n/translate.mjs';
 import { family } from './src/family.mjs';
+import { pageMarkdown } from './src/markdown.mjs';
 import { COMMAND_PHASE, assertCommandBuild } from './lib/command-phase.js';
 
 assertCommandBuild(process.env);
@@ -57,7 +58,12 @@ renameSync(join(out, 'script.js'), join(out, `script.${jsHash}.js`));
 renameSync(join(out, 'analytics.js'), join(out, `analytics.${analyticsHash}.js`));
 renameSync(join(out, 'consent.js'), join(out, `consent.${consentHash}.js`));
 
-for (const [file, html] of pages) {
+for (const [file, html, publicPath] of pages) {
+  if (publicPath) {
+    const markdownFile = join(out, '_agent-markdown', file.replace(/\.html$/, '.md'));
+    mkdirSync(dirname(markdownFile), { recursive: true });
+    writeFileSync(markdownFile, pageMarkdown(html));
+  }
   const path = join(out, file);
   mkdirSync(dirname(path), { recursive: true });
   writeFileSync(
@@ -93,7 +99,9 @@ writeFileSync(
   join(out, 'robots.txt'),
   `User-agent: *
 Allow: /
+Content-Signal: ai-train=no, search=yes, ai-input=no
 Disallow: /api/
+Disallow: /_agent-markdown/
 Disallow: /thank-you
 Disallow: /family-property-guide
 Disallow: /es/thank-you
@@ -102,7 +110,9 @@ Disallow: /hq
 
 ${aiBots.map((b) => `User-agent: ${b}`).join('\n')}
 Allow: /
+Content-Signal: ai-train=no, search=yes, ai-input=no
 Disallow: /api/
+Disallow: /_agent-markdown/
 Disallow: /thank-you
 Disallow: /family-property-guide
 Disallow: /es/thank-you
