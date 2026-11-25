@@ -8,6 +8,7 @@ import handler from './api/leads.js';
 import hqHandler from './api/hq.js';
 import intakeHandler from './api/intake.js';
 import trackHandler from './api/track.js';
+import attributionHandler from './api/lead-attribution.js';
 import { family } from './src/family.mjs';
 
 const PORT = Number(process.env.PORT) || 3000;
@@ -51,13 +52,13 @@ createServer(async (req, res) => {
     return trackHandler(req, res);
   }
 
-  if (['/api/leads', '/api/hq', '/api/intake', '/api/track'].includes(url.pathname)) {
+  if (['/api/leads', '/api/hq', '/api/intake', '/api/track', '/api/lead-attribution'].includes(url.pathname)) {
     let raw = '';
     for await (const chunk of req) raw += chunk;
     req.body = raw;
     res.status = (c) => ((res.statusCode = c), res);
     res.json = (b) => (res.setHeader('Content-Type', 'application/json'), res.end(JSON.stringify(b)));
-    return url.pathname === '/api/hq' ? hqHandler(req, res) : url.pathname === '/api/track' ? trackHandler(req, res) : url.pathname === '/api/intake' ? intakeHandler(req, res) : handler(req, res);
+    return url.pathname === '/api/hq' ? hqHandler(req, res) : url.pathname === '/api/track' ? trackHandler(req, res) : url.pathname === '/api/intake' ? intakeHandler(req, res) : url.pathname === '/api/lead-attribution' ? attributionHandler(req, res) : handler(req, res);
   }
 
   // Mirror vercel.json redirects locally.

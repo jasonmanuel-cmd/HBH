@@ -118,13 +118,14 @@ export function parseLead(body) {
     lead.address = lead.street = lead.city = lead.zip = '';
   }
   if (!generalInquiry && lead.address.length < 5) errors.push('address');
-  // Current offer forms always send this field. Older submissions can still be recovered without it.
+  // Accept historic reported channels, but new offer forms capture them after submission.
   if (lead.form_type === 'options' && !generalInquiry && 'heard_about_us' in body && !validReportedChannel) errors.push('heard_about_us');
   if (lead.name.length < 2) errors.push('name');
   if (lead.phone.replace(/\D/g, '').length < 10) errors.push('phone');
   if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) errors.push('email');
   if (lead.form_type === 'family_transition' && !lead.relationship) errors.push('relationship');
   if (lead.form_type === 'options' && !lead.consent_response) errors.push('consent_response');
+  if (lead.form_type === 'options' && lead.contact_pref === 'Email' && !lead.email) errors.push('email');
   if (lead.form_type === 'family_transition' && 'consent_response' in body && !lead.consent_response) errors.push('consent_response');
   return { lead, errors };
 }

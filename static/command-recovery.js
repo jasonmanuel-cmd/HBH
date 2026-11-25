@@ -67,5 +67,5 @@
   window.addEventListener?.('hbh-command-state',show);form.addEventListener('submit',()=>setTimeout(show,0));show();
  }
  const sellerDetailsAvailable=async()=>{try{const ref=await inquiry();return Boolean(ref.details_token);}catch{return false;}};
- window.HBHCommands={read,write,remove,lock,submit,resolve,startNew,bind,sellerDetailsAvailable};
+ window.HBHCommands={read,write,remove,lock,submit,resolve,startNew,bind,sellerDetailsAvailable,getLeadReference:inquiry};
 })();

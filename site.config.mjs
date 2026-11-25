@@ -32,6 +32,7 @@ export default {
 
   phone: '(661) 472-7499',
   phoneHref: '+16614727499',
+  responsePromise: process.env.RESPONSE_PROMISE || 'Nathanael reviews your property and follows up using your preferred contact method.',
   // Publish only a verified, monitored domain mailbox. Empty hides public email contact.
   email: /^[-.+\w]+@callharbison\.com$/i.test(process.env.PUBLIC_CONTACT_EMAIL || '') ? process.env.PUBLIC_CONTACT_EMAIL : '',
 

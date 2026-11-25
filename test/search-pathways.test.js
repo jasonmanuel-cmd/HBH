@@ -87,7 +87,8 @@ test('inquiry pages and neutral completion preserve accessible forms and cautiou
   }
   assert.match(pages.get('investors.html'), /not an offer of securities/);
   assert.match(pages.get('home-value.html'), /does not promise an appraisal/);
-  assert.ok(pages.get('index.html').indexOf("I'm interested in investing") < pages.get('index.html').indexOf('Get Your Cash Offer'));
+  assert.doesNotMatch(pages.get('index.html'), /inquiry-card|I'm interested in investing/);
+  assert.match(pages.get('index.html'), /href="\/investors">Investors<\/a>/);
   assert.match(pages.get('thank-you.html'), /details-card[^>]*hidden/);
   assert.match(pages.get('thank-you.html'), /confirms that original request/);
   assert.match(readFileSync(new URL('../static/script.js', import.meta.url), 'utf8'), /if \(!json\.duplicate\)/);

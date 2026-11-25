@@ -18,30 +18,23 @@ test('estimator static default values equal the first hydrated calculation for e
  for(const [key,value] of before)assert.equal(nodes.get(key).textContent,value,`Default changed on hydration: ${key}`);
 });
 
-test('stepped form Back clears unrelated errors while preserving choices and interrupted progress',()=>{
- const handlers={};let selected=false, referralSelected=false;
+test('stepped form validates address before situation and preserves progress on Back',()=>{
+ const handlers={};let selected=false;
  const field=(value='')=>({value,tagName:'INPUT',focus(){},scrollIntoView(){},_classes:new Set(),classList:{add(c){this.owner._classes.add(c);},remove(c){this.owner._classes.delete(c);}}});
  const address=field();address.classList.owner=address;
  const radio={type:'radio',focus(){},scrollIntoView(){}};
  const group={tagName:'DIV',querySelector:()=>selected?radio:null,classList:{add(){},remove(){}}};
- let referralFocused=false;
- const referralRadio={focus(){referralFocused=true;},scrollIntoView(){}};
- const referral={tagName:'FIELDSET',querySelector:selector=>selector.endsWith(':checked')?(referralSelected?referralRadio:null):referralRadio,classList:{add(){},contains:c=>c==='referral-source'}};
  const status={className:'form-status',textContent:'',classList:{add(){status.className+=' error';}}};
- const steps=[0,1,2].map((i)=>({hidden:i!==0,classList:{contains:c=>i===1&&c==='fstep-address'},querySelector(selector){if(selector==='.referral-source')return referral;if(selector==='[name=address]')return i===1?address:null;if(selector==='[name=street]'||selector==='[name=city]'||selector==='[name=zip]'||selector==='select')return null;return i===0?radio:address;},querySelectorAll:selector=>i===0?[group]:[]}));
+ const steps=[0,1,2].map((i)=>({hidden:i!==0,classList:{contains:c=>i===0&&c==='fstep-address'},querySelector(selector){if(selector==='[name=address]')return i===0?address:null;if(selector==='[name=street]'||selector==='[name=city]'||selector==='[name=zip]'||selector==='select')return null;return i===1?radio:address;},querySelectorAll:selector=>selector==='.choice-grid[role=radiogroup]'&&i===1?[group]:[]}));
  const form={dataset:{},closest:()=>null,addEventListener:(name,fn)=>handlers[name]=fn,querySelectorAll:selector=>selector==='.fstep'?steps:selector==='.step-dots li'?[]:selector==='.invalid'&&address._classes.has('invalid')?[address]:[],querySelector:selector=>selector==='.form-status'?status:selector==='.fstep:not([hidden]) [data-next]'?{click:()=>click('next')}:null};
  const click=kind=>handlers.click({target:{closest:selector=>selector===`[data-${kind}]`?{}:null}});
  const code=script.slice(script.indexOf("document.querySelectorAll('form[data-steps]')"),script.indexOf('// ---------- Lead forms ----------'));
  vm.runInNewContext(code,{document:{querySelectorAll:()=>[form]},say:en=>en,formProps:()=>({}),track(){},setTimeout});
- selected=true;click('next');assert.equal(steps[1].hidden,false);
- for(let i=0;i<2;i++) {
-  click('next');assert.match(status.textContent,/address/);assert.ok(address._classes.has('invalid'));
-  click('back');assert.equal(steps[0].hidden,false);assert.equal(status.textContent,'');assert.equal(status.className,'form-status');assert.equal(address._classes.has('invalid'),false);assert.equal(selected,true);
-  click('next');assert.equal(steps[1].hidden,false);
- }
+ click('next');assert.match(status.textContent,/address/);assert.ok(address._classes.has('invalid'));
  let prevented=false;handlers.keydown({key:'Enter',target:address,preventDefault(){prevented=true;}});assert.equal(prevented,true);assert.match(status.textContent,/address/);
- click('back');assert.equal(status.textContent,'');click('next');address.value='101 Synthetic Example Ave';
- click('next');assert.equal(steps[2].hidden,true);assert.match(status.textContent,/how you heard/);assert.equal(referralFocused,true);
- referralSelected=true;click('next');assert.equal(steps[2].hidden,false);
- click('back');assert.equal(address.value,'101 Synthetic Example Ave');assert.equal(status.textContent,'');click('next');assert.equal(steps[2].hidden,false);
+ address.value='101 Synthetic Example Ave';click('next');assert.equal(steps[1].hidden,false);assert.equal(address._classes.has('invalid'),false);
+ click('next');assert.equal(steps[2].hidden,true);assert.match(status.textContent,/closest option/);
+ selected=true;click('next');assert.equal(steps[2].hidden,false);
+ click('back');assert.equal(steps[1].hidden,false);assert.equal(address.value,'101 Synthetic Example Ave');assert.equal(status.textContent,'');assert.equal(selected,true);
+ click('next');assert.equal(steps[2].hidden,false);
 });
