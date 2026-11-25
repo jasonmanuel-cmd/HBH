@@ -8,6 +8,7 @@ import { buildPages } from './src/pages.mjs';
 import { decoratePage, esPath, loadDictionary, translatePage } from './src/i18n/translate.mjs';
 import { family } from './src/family.mjs';
 import { pageMarkdown } from './src/markdown.mjs';
+import { indexNowEntry } from './lib/indexnow.mjs';
 import { COMMAND_PHASE, assertCommandBuild } from './lib/command-phase.js';
 
 assertCommandBuild(process.env);
@@ -58,11 +59,15 @@ renameSync(join(out, 'script.js'), join(out, `script.${jsHash}.js`));
 renameSync(join(out, 'analytics.js'), join(out, `analytics.${analyticsHash}.js`));
 renameSync(join(out, 'consent.js'), join(out, `consent.${consentHash}.js`));
 
+const indexNowPages = {};
 for (const [file, html, publicPath] of pages) {
   if (publicPath) {
     const markdownFile = join(out, '_agent-markdown', file.replace(/\.html$/, '.md'));
     mkdirSync(dirname(markdownFile), { recursive: true });
-    writeFileSync(markdownFile, pageMarkdown(html));
+    const markdown = pageMarkdown(html);
+    writeFileSync(markdownFile, markdown);
+    const entry = indexNowEntry(new URL(publicPath, site.url).href, html, markdown);
+    if (entry) indexNowPages[entry.url] = entry.hash;
   }
   const path = join(out, file);
   mkdirSync(dirname(path), { recursive: true });
@@ -75,6 +80,8 @@ for (const [file, html, publicPath] of pages) {
       .replace('src="/consent.js"', `src="/consent.${consentHash}.js"`)
   );
 }
+
+writeFileSync(join(out, 'indexnow-manifest.json'), JSON.stringify(indexNowPages) + '\n');
 
 writeFileSync(
   join(out, 'sitemap.xml'),

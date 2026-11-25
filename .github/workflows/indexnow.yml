@@ -1,0 +1,58 @@
+name: IndexNow
+on:
+  deployment_status:
+  schedule:
+    - cron: '27 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: indexnow-callharbison-production
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: >-
+      (github.event_name == 'deployment_status' &&
+       github.event.deployment_status.state == 'success' &&
+       github.event.deployment_status.creator.login == 'vercel[bot]' &&
+       github.event.deployment.creator.login == 'vercel[bot]' &&
+       github.event.deployment.environment == 'Production') ||
+      ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
+       github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Submit changes and save accepted state
+        shell: bash
+        run: |
+          set -euo pipefail
+          state_ref=refs/heads/indexnow-state
+          previous="$RUNNER_TEMP/indexnow-previous.json"
+          next="$RUNNER_TEMP/indexnow-next.json"
+          parent=()
+          if [[ -n "$(git ls-remote --heads origin "$state_ref")" ]]; then
+            git fetch --no-tags origin "$state_ref"
+            git show FETCH_HEAD:manifest.json > "$previous"
+            parent=(-p "$(git rev-parse FETCH_HEAD)")
+          fi
+
+          node scripts/indexnow.mjs "$previous" "$next"
+          if [[ -f "$previous" ]] && cmp -s "$previous" "$next"; then
+            exit 0
+          fi
+
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          blob=$(git hash-object -w "$next")
+          tree=$(printf '100644 blob %s\tmanifest.json\n' "$blob" | git mktree)
+          commit=$(git commit-tree "$tree" "${parent[@]}" -m 'Checkpoint production IndexNow URLs')
+          git push origin "$commit:$state_ref"
