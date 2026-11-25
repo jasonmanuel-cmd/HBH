@@ -26,6 +26,13 @@ The canary intentionally fails if seller operations mode is enabled, because its
 - Configured Production `LEAD_NOTIFY_EMAIL` for Jason and Nathanael; configured `CRON_SECRET` and an independent ntfy failure topic as Vercel secrets. `LEAD_CANARY_ENABLED`, `ENABLE_AUTO_SMS`, and `ENABLE_FORECLOSURE_PAGES` are explicitly false. A generic alarm test POST received HTTP 200, which does not establish that a person received a push notification.
 - Keep the canary disabled until the owner subscribes to the independent alarm, confirms receipt, the updated code is deployed with the new environment, and a controlled live canary confirms storage plus owner alert receipt. Do not count provider acceptance as acknowledgement.
 
+## Controlled canary, 2026-11-25
+
+- Jason confirmed receipt of the independent ntfy alarm on his phone. A second generic alarm POST returned HTTP 200.
+- Tested deployment `dpl_5zy8oXeJWiyPHFoqh5NK1NTgV1V2` without promoting it to the public domain. Its authenticated canary returned `stored=true` and `ownerAlertAccepted=true` for test lead `57c71114-2b13-4b42-bcfa-b4996b0575f5`.
+- Direct Neon readback found that row with `is_test=true`, zero matching notification-outbox jobs, and zero matching rows in `v_uncontacted`. This confirms storage in the intended Neon project and exclusion from those two operational paths. Local tests cover HQ and funnel exclusion; live owner inbox receipt remains pending.
+- Reset the Vercel Production project setting `LEAD_CANARY_ENABLED=false` after the controlled test. The public domain remains on disabled deployment `dpl_D7JQ1odHM7cdcdCYPnsHD2W2DLnF`. Do not enable the daily canary or promote the tested deployment until the owner confirms email receipt.
+
 ## Rollback
 
 Disable `LEAD_CANARY_ENABLED` to stop synthetic writes. Revert the Gate 0 application commit and redeploy only while the lead reliability protocol remains in `preactivation`. Keep the additive `is_test` column and existing test rows until they have been reconciled; dropping them during rollback would remove exclusion evidence. Do not revert to a version that exposes the regulated pages or automated SMS after those flags have been activated.
