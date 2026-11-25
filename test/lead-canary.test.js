@@ -48,8 +48,8 @@ test('canary rejects unauthorized calls and alerts the independent monitor on st
   const config = env();
   const original = globalThis.fetch;
   const calls = [];
-  globalThis.fetch = async (url) => {
-    calls.push(String(url));
+  globalThis.fetch = async (url, options) => {
+    calls.push({ url: String(url), options });
     if (String(url).includes('monitor.example.test')) return Response.json({ ok: true });
     return new Response('storage unavailable', { status: 503 });
   };
@@ -62,8 +62,10 @@ test('canary rejects unauthorized calls and alerts the independent monitor on st
     const failed = response();
     await handler({ method: 'GET', headers: { authorization: `Bearer ${config.CRON_SECRET}` } }, failed, config);
     assert.equal(failed.statusCode, 503);
-    assert.ok(calls.some(url => url.includes('monitor.example.test')));
-    assert.ok(!calls.some(url => url.includes('api.resend.com')));
+    const alarm = calls.find(call => call.url.includes('monitor.example.test'));
+    assert.equal(alarm.options.headers['Content-Type'], 'text/plain; charset=utf-8');
+    assert.match(alarm.options.body, /lead check failed/);
+    assert.ok(!calls.some(call => call.url.includes('api.resend.com')));
   } finally { globalThis.fetch = original; console.error = originalError; }
 });
 

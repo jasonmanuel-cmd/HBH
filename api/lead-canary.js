@@ -47,8 +47,8 @@ export default async function handler(req, res, env = process.env) {
       try {
         const alert = await fetch(leadWebhookTarget(env.CANARY_FAILURE_WEBHOOK_URL), {
           method: 'POST', redirect: 'error', signal: AbortSignal.timeout(10000),
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ service: 'callharbison-lead-canary', status: 'failed', at: new Date().toISOString() }),
+          headers: { 'Content-Type': 'text/plain; charset=utf-8', 'X-Title': 'Call Harbison lead canary failed', 'X-Priority': '5' },
+          body: 'The Call Harbison lead check failed. Check Vercel function logs and the lead database.',
         });
         if (!alert.ok) throw new Error('Failure webhook rejected alert');
       } catch { console.error('[lead-canary] failure alert unavailable'); }

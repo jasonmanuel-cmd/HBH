@@ -13,10 +13,18 @@ Date: 2026-11-25. Scope: Call Harbison repository only. This is a code handoff, 
 
 1. Apply `supabase/migrations/20261125010000_lead_canary.sql` to the isolated HBH lead database after backup. The canary preflights `is_test` before insertion and never uses the legacy missing-column fallback.
 2. Confirm the production environment has database storage, `RESEND_API_KEY`, explicit `LEAD_NOTIFY_EMAIL`, verified `LEAD_FROM_EMAIL`, `CRON_SECRET`, and an independent `CANARY_FAILURE_WEBHOOK_URL`. Keep `ENABLE_AUTO_SMS=false` and `ENABLE_FORECLOSURE_PAGES=false`.
+   The failure receiver accepts a plain-text HTTPS POST and receives no seller information. For a phone push receiver, the owner must subscribe and confirm receipt before the canary is enabled.
 3. Set `LEAD_CANARY_ENABLED=true` only after the migration and failure receiver are verified. Vercel invokes `/api/lead-canary` at 16:00 UTC daily. Check the flagged row, owner alert provider receipt, failure receiver, and owner acknowledgement. Synthetic records are filtered from HQ reads and funnel views and are excluded from CRM webhook and SMS.
 4. Exercise database outage, alert provider rejection, duplicate submission, and replay in a nonproduction environment. Confirm recovery ownership before enabling further conversion work.
 
 The canary intentionally fails if seller operations mode is enabled, because its direct alert path cannot validate that mode's queued worker. A separate canary for the active queue and worker is required before activating seller operations.
+
+## Execution record, 2026-11-25
+
+- The Call Harbison Neon project `green-sun-72811206` had two lead rows and no `is_test` column before migration. The production Vercel project has `DATABASE_URL` configured, but Vercel does not export its secret value through this CLI session; the live canary must confirm the deployed app uses the migrated database.
+- Created untouched restore branch `gate0-restore-2026-11-25` (`br-small-recipe-bfy7s0zp`) and expiring migration-test branch `gate0-migration-test-2026-11-25` (`br-crimson-pond-bfblbc3n`). The seven migration statements passed as one transaction on the test branch, then on main. Main retains two lead rows, has the `is_test` column, and has all four reporting views.
+- Configured Production `LEAD_NOTIFY_EMAIL` for Jason and Nathanael; configured `CRON_SECRET` and an independent ntfy failure topic as Vercel secrets. `LEAD_CANARY_ENABLED`, `ENABLE_AUTO_SMS`, and `ENABLE_FORECLOSURE_PAGES` are explicitly false. A generic alarm test POST received HTTP 200, which does not establish that a person received a push notification.
+- Keep the canary disabled until the owner subscribes to the independent alarm, confirms receipt, the updated code is deployed with the new environment, and a controlled live canary confirms storage plus owner alert receipt. Do not count provider acceptance as acknowledgement.
 
 ## Rollback
 
