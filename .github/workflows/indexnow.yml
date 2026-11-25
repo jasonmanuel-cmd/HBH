@@ -8,10 +8,6 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: indexnow-callharbison-production
-  cancel-in-progress: false
-
 jobs:
   publish:
     if: >-
@@ -22,6 +18,9 @@ jobs:
        github.event.deployment.environment == 'Production') ||
       ((github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') &&
        github.ref == 'refs/heads/main')
+    concurrency:
+      group: indexnow-callharbison-production
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     timeout-minutes: 7
     steps:
