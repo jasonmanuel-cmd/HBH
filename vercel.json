@@ -4,6 +4,9 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "trailingSlash": false,
+  "crons": [
+    { "path": "/api/lead-canary", "schedule": "0 16 * * *" }
+  ],
   "rewrites": [
     {
       "source": "/csp-report",

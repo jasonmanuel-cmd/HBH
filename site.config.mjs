@@ -32,7 +32,8 @@ export default {
 
   phone: '(661) 472-7499',
   phoneHref: '+16614727499',
-  email: 'nate85.realtor@gmail.com',
+  // Publish only a verified, monitored domain mailbox. Empty hides public email contact.
+  email: /^[-.+\w]+@callharbison\.com$/i.test(process.env.PUBLIC_CONTACT_EMAIL || '') ? process.env.PUBLIC_CONTACT_EMAIL : '',
 
   // Licensee info — California requires the DRE number on advertising.
   agent: 'Nathanael Harbison',

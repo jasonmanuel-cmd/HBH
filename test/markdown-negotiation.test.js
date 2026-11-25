@@ -31,6 +31,7 @@ test('Markdown keeps readable headings and links while dropping scripts and form
   const [, html] = buildPages().find(([file]) => file === 'contact.html');
   const md = pageMarkdown(html);
   assert.match(md, /^# .*Call Harbison/m);
-  assert.match(md, /mailto:/);
+  assert.match(md, /tel:\+16614727499/);
+  assert.doesNotMatch(md, /mailto:/);
   assert.doesNotMatch(md, /<script|data-lead-form|captcha|How did you hear about us\?/);
 });

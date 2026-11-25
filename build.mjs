@@ -130,7 +130,7 @@ writeFileSync(
 
 Key facts:
 - Phone (call or text): ${site.phone}
-- Email: ${site.email}
+${site.email ? `- Email: ${site.email}` : '- Contact: phone or website form'}
 - Service area: ${areas.map((a) => a.name).join(', ')}
 - Response time: typically within 24 hours
 - Languages: English and Spanish. The whole site is also available in Spanish under /es

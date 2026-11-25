@@ -30,7 +30,7 @@ test('sms alone does not count as a stored lead', async () => {
   try {
     const env = { TWILIO_ACCOUNT_SID: 'a', TWILIO_AUTH_TOKEN: 'b', TWILIO_FROM: '+16615550100' };
     assert.equal((await deliver(parseLead(base).lead, env)).ok, false);
-    assert.equal((await deliver(parseLead(base).lead, { ...env, LEAD_WEBHOOK_URL: 'https://h.test' })).ok, true);
+    assert.equal((await deliver(parseLead(base).lead, { ...env, LEAD_WEBHOOK_URL: 'https://h.test' })).ok, false);
   } finally { globalThis.fetch = orig; console.error = err; }
 });
 

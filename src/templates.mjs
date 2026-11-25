@@ -12,11 +12,12 @@ import {
   newSituations, stallionSprings, newGuides, guideMeaning,
 } from './content-playbook.mjs';
 
-export const situations = [...baseSituations, ...newSituations, ...moreSituations];
+const foreclosurePagesEnabled = process.env.ENABLE_FORECLOSURE_PAGES === 'true';
+export const situations = [...baseSituations, ...newSituations, ...moreSituations.filter(item => foreclosurePagesEnabled || item.slug !== 'behind-on-mortgage')];
 // Bakersfield, Tehachapi, Stallion Springs, California City, Kern County
 export const areas = [...baseAreas.slice(0, 2), stallionSprings, californiaCity, ...baseAreas.slice(2), ...cityAreas];
 export const faqs = [...baseFaqs.slice(0, 4), ...extraFaqs, ...baseFaqs.slice(4)];
-export const guides = [...baseGuides.map((g) => ({ ...g, meaning: guideMeaning[g.slug] })), ...newGuides, foreclosureGuide];
+export const guides = [...baseGuides.map((g) => ({ ...g, meaning: guideMeaning[g.slug] })), ...newGuides, ...(foreclosurePagesEnabled ? [foreclosureGuide] : [])];
 
 const esc = (s = '') => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const strip = (s = '') => String(s).replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
@@ -102,13 +103,13 @@ const orgLd = () => ({
   logo: { '@type': 'ImageObject', url: `${site.url}${logo}`, width: 945, height: 225 },
   image: `${site.url}${ogDefault}`,
   telephone: site.phoneHref,
-  email: site.email,
+  ...(site.email ? { email: site.email } : {}),
   address: { '@type': 'PostalAddress', addressLocality: site.city, addressRegion: site.state, addressCountry: 'US' },
   geo: { '@type': 'GeoCoordinates', latitude: 35.3733, longitude: -119.0187 },
   areaServed: areas.map(placeLd),
   founder: { '@id': ids.person },
   employee: { '@id': ids.person },
-  contactPoint: { '@type': 'ContactPoint', telephone: site.phoneHref, email: site.email, contactType: 'customer service', areaServed: 'US-CA', availableLanguage: ['English', 'Spanish'] },
+  contactPoint: { '@type': 'ContactPoint', telephone: site.phoneHref, ...(site.email ? { email: site.email } : {}), contactType: 'customer service', areaServed: 'US-CA', availableLanguage: ['English', 'Spanish'] },
   knowsAbout: ['Selling a house as-is', 'Cash home buying', 'We buy houses for cash', 'Sell my house fast', 'Inherited and probate property', 'Real estate listing', 'Home renovation', 'Land development', 'Kern County real estate'],
   hasOfferCatalog: {
     '@type': 'OfferCatalog',
@@ -126,7 +127,7 @@ const personLd = () => ({
   url: `${site.url}/about`,
   image: { '@type': 'ImageObject', url: `${site.url}${headshot}`, width: 325, height: 325 },
   telephone: site.phoneHref,
-  email: site.email,
+  ...(site.email ? { email: site.email } : {}),
   worksFor: [{ '@id': ids.org }, { '@id': ids.brokerage }],
   hasCredential: {
     '@type': 'EducationalOccupationalCredential',
@@ -370,7 +371,7 @@ function footer(cta) {
   <div class="container footer-grid">
     <div><img class="footer-logo" src="${logoReverse}" alt="${esc(site.name)}" width="202" height="48" loading="lazy"><p><strong class="footer-tag">${esc(site.tagline)}</strong><br>${esc(supportingPromise)}</p><p class="footer-social">${socials}</p></div>
     <div><h2 class="footer-h">Explore</h2><a href="/how-it-works">How It Works</a><a href="/situations">Situations</a><a href="${family.path}">Selling a Loved One’s House</a><a href="/guides/cash-home-buyers-bakersfield">Cash Home Buyers</a><a href="/guides">Seller Guides</a><a href="/about">About Nathanael</a><a href="/#faq">FAQ</a></div>
-    <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a><a href="mailto:${esc(site.email)}">${esc(site.email)}</a><a href="/contact">Contact page</a><a href="/#lead-form">Request property options</a></div>
+    <div><h2 class="footer-h">Contact</h2><a href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a><a href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a>${site.email ? `<a href="mailto:${esc(site.email)}">${esc(site.email)}</a>` : ''}<a href="/contact">Contact page</a><a href="/#lead-form">Request property options</a></div>
     <div><h2 class="footer-h">Service Area</h2>${areas.map((a) => `<a href="/areas/${a.slug}">${esc(a.name)}</a>`).join('')}</div>
   </div>
   <div class="container footer-bottom"><span>© ${year} ${esc(site.name)}. ${esc(site.agent)}, DRE #${esc(site.dre)} • <a href="${site.brokerageUrl}">${esc(site.brokerage)} · DRE #${esc(site.brokerageDre)}</a></span><span><a href="/privacy">Privacy</a> • <a href="/terms">Terms</a> • <a href="/accessibility">Accessibility</a> • <a href="#" data-consent-open>Privacy choices</a></span></div>
@@ -902,7 +903,7 @@ export function aboutPage() {
         ${site.agentProfiles.map((u) => `<li><a href="${u}" rel="noopener me" target="_blank">${esc(u.replace(/^https:\/\/(www\.)?/, ''))}</a></li>`).join('\n        ')}
       </ul>
     </article>
-    <aside class="help-card"><h2>Talk with Nathanael</h2><ul><li>Call or text ${esc(site.phone)}</li><li>${esc(site.email)}</li><li>Replies typically within 24 hours</li><li>Serving ${areas.map((a) => esc(a.name)).join(', ')}</li></ul><a class="btn btn-gold btn-full" href="/#lead-form">Get My Cash Offer →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a></aside>
+    <aside class="help-card"><h2>Talk with Nathanael</h2><ul><li>Call or text ${esc(site.phone)}</li>${site.email ? `<li>${esc(site.email)}</li>` : ''}<li>Replies typically within 24 hours</li><li>Serving ${areas.map((a) => esc(a.name)).join(', ')}</li></ul><a class="btn btn-gold btn-full" href="/#lead-form">Get My Cash Offer →</a><a class="btn btn-ghost btn-full" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a></aside>
   </div>
 </section>
 ${finalCta('/#lead-form')}`
@@ -1116,7 +1117,7 @@ ${finalCta('/#lead-form')}`
 export function contactPage() {
   const path = '/contact';
   const title = pageTitle('Contact Call Harbison: Get a Cash Offer');
-  const description = `Call or text ${site.phone}, email ${site.email}, or send the property address. Serving Bakersfield, Tehachapi, and Kern County.`;
+  const description = `Call or text ${site.phone}${site.email ? `, email ${site.email}` : ''}, or send the property address. Serving Bakersfield, Tehachapi, and Kern County.`;
   const crumbs = [['Home', '/'], ['Contact', path]];
   const image = `${site.url}${ogDefault}`;
   const contactLd = { '@type': 'ContactPage', '@id': `${site.url}${path}#contact`, about: { '@id': `${site.url}/#business` } };
@@ -1130,12 +1131,12 @@ export function contactPage() {
       <h1 class="page-title">Property problem? <em>Call Harbison.</em></h1>
       <dl class="contact-list">
         <div><dt>Call or text</dt><dd><a class="link" href="tel:${site.phoneHref}">Call ${esc(site.phone)}</a> · <a class="link" href="sms:${site.phoneHref}">Text ${esc(site.phone)}</a></dd></div>
-        <div><dt>Email</dt><dd><a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a></dd></div>
+        ${site.email ? `<div><dt>Email</dt><dd><a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a></dd></div>` : ''}
         <div><dt>Response</dt><dd>Typically within 24 hours</dd></div>
         <div><dt>Service area</dt><dd>${areas.map((a) => `<a class="link" href="/areas/${a.slug}">${esc(a.name)}</a>`).join(', ')}</dd></div>
         <div><dt>Licensed</dt><dd>${esc(site.agent)}, REALTOR® · DRE #${esc(site.dre)} · ${esc(site.brokerage)}</dd></div>
       </dl>
-      <p class="note-small">If you’ve asked us to stop contacting you, you won’t hear from us again. To make that request, reply STOP to any text or email ${esc(site.email)}.</p>
+      <p class="note-small">If you’ve asked us to stop contacting you, you won’t hear from us again. To make that request, reply STOP to any text or call ${esc(site.phone)}.</p>
     </div>
     ${leadForm({ heading: 'Send Us the Property', pageType: 'contact' })}
   </div>
@@ -1161,7 +1162,7 @@ export function accessibilityPage() {
       <li>Describe meaningful images with alternative text</li>
     </ul>
     <h2 class="prose-h">Need help or found a problem?</h2>
-    <p>If any part of this site is hard to use, call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a> or email <a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a>. We’ll help you directly and fix the issue.</p>`,
+    <p>If any part of this site is hard to use, call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>${site.email ? ` or email <a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a>` : ''}. We’ll help you directly and fix the issue.</p>`,
   });
 }
 
@@ -1202,9 +1203,9 @@ export function privacyPage() {
     <h2 class="prose-h">Sharing</h2>
     <p>We do not sell your personal information. We may share it with service providers who help us operate our business (for example, hosting, email, CRM, and title/escrow companies when you choose to move forward), or when required by law.</p>
     <h2 class="prose-h">Your California privacy rights</h2>
-    <p>California residents may request access to, correction of, or deletion of their personal information. To make a request, email <a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a>.</p>
+    <p>California residents may request access to, correction of, or deletion of their personal information. To make a request, call <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>${site.email ? ` or email <a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a>` : ''}.</p>
     <h2 class="prose-h">Contact</h2>
-    <p>Questions? Contact us at <a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a> or <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>.</p>`,
+    <p>Questions? Call or text <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a>${site.email ? ` or email <a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a>` : ''}.</p>`,
   });
 }
 
@@ -1227,7 +1228,7 @@ export function termsPage() {
     <h2 class="prose-h">Limitation of liability</h2>
     <p>This site is provided “as is.” To the fullest extent permitted by law, we are not liable for damages arising from your use of the site.</p>
     <h2 class="prose-h">Contact</h2>
-    <p><a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a> • <a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a></p>`,
+    <p>${site.email ? `<a class="link" href="mailto:${esc(site.email)}">${esc(site.email)}</a> • ` : ''}<a class="link" href="tel:${site.phoneHref}">${esc(site.phone)}</a></p>`,
   });
 }
 
@@ -1406,7 +1407,7 @@ export function partnerGuidePage() {
     <h2 class="prose-h">Your two main options</h2>
     <p><strong>Sell as-is:</strong> no repairs, belongings can stay, closing on your schedule. <strong>List traditionally:</strong> prepare the home and aim for full market value. Many families compare both before deciding.</p>
     <h2 class="prose-h">Talk it through with a local, licensed agent</h2>
-    <p>${esc(site.agent)} · ${esc(site.name)} · DRE #${esc(site.dre)}<br>Call or text <strong>${esc(site.phone)}</strong> · ${esc(site.email)}<br>Online: <strong>${esc(site.url.replace(/^https?:\/\//, ''))}/family</strong></p>
+    <p>${esc(site.agent)} · ${esc(site.name)} · DRE #${esc(site.dre)}<br>Call or text <strong>${esc(site.phone)}</strong>${site.email ? ` · ${esc(site.email)}` : ''}<br>Online: <strong>${esc(site.url.replace(/^https?:\/\//, ''))}/family</strong></p>
     <p class="disclaimer">You choose whether to contact us. We never ask for medical information. On a direct purchase, Harbison is the buyer and discloses its license status in writing; you’re welcome to have anyone you trust review an offer.</p>
     <p class="no-print"><button class="btn btn-gold" type="button" onclick="print()">Print this guide</button></p>
   </div>

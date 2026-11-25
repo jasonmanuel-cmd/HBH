@@ -1,6 +1,6 @@
-# Harbison Buys Homes
+# Call Harbison
 
-Website for Harbison Buys Homes — "Property problem? Call Harbison." Static pages plus one serverless API for the lead form, built for Vercel.
+Website for Call Harbison — "Property problem? Call Harbison." Static pages plus one serverless API for the lead form, built for Vercel.
 
 ## One CRM for both websites
 

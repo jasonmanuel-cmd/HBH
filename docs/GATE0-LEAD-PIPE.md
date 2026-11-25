@@ -1,0 +1,25 @@
+# Gate 0: lead pipe and entity lock
+
+Date: 2026-11-25. Scope: Call Harbison repository only. This is a code handoff, not evidence that production alerts reach a person.
+
+## Verified in source
+
+- `/api/leads` now refuses success without configured database storage. Normal legacy submissions save first, then attempt Resend, webhook, or SMS delivery. Seller operations mode enqueues an alert in the database transaction. The public reliability command/outbox exists but remains in the source phase `preactivation`; its worker is manual and disabled.
+- The legacy alert path is still at most once. A Resend 200 means provider acceptance, not inbox receipt or owner acknowledgement. A duplicate retry can succeed after the first attempt stored a lead but failed to alert. Production end-to-end delivery and acknowledgement remain unverified.
+- Anonymous form telemetry sends only controlled page/form/step fields. It does not send entered names, phone numbers, email addresses, or property addresses. Submitted lead data is stored only after the form is sent.
+- The California DRE public lookup dated 2026-11-24 lists Nathanael Harbison (02059393) as licensed under The Mora Partners Inc. (02227690). Current source uses that broker; no active `Compass` references were found. Historical CRM records for Harbison Standard retain their separate origin label.
+
+## Canary release sequence
+
+1. Apply `supabase/migrations/20261125010000_lead_canary.sql` to the isolated HBH lead database after backup. The canary preflights `is_test` before insertion and never uses the legacy missing-column fallback.
+2. Confirm the production environment has database storage, `RESEND_API_KEY`, explicit `LEAD_NOTIFY_EMAIL`, verified `LEAD_FROM_EMAIL`, `CRON_SECRET`, and an independent `CANARY_FAILURE_WEBHOOK_URL`. Keep `ENABLE_AUTO_SMS=false` and `ENABLE_FORECLOSURE_PAGES=false`.
+3. Set `LEAD_CANARY_ENABLED=true` only after the migration and failure receiver are verified. Vercel invokes `/api/lead-canary` at 16:00 UTC daily. Check the flagged row, owner alert provider receipt, failure receiver, and owner acknowledgement. Synthetic records are filtered from HQ reads and funnel views and are excluded from CRM webhook and SMS.
+4. Exercise database outage, alert provider rejection, duplicate submission, and replay in a nonproduction environment. Confirm recovery ownership before enabling further conversion work.
+
+The canary intentionally fails if seller operations mode is enabled, because its direct alert path cannot validate that mode's queued worker. A separate canary for the active queue and worker is required before activating seller operations.
+
+## Rollback
+
+Disable `LEAD_CANARY_ENABLED` to stop synthetic writes. Revert the Gate 0 application commit and redeploy only while the lead reliability protocol remains in `preactivation`. Keep the additive `is_test` column and existing test rows until they have been reconciled; dropping them during rollback would remove exclusion evidence. Do not revert to a version that exposes the regulated pages or automated SMS after those flags have been activated.
+
+Primary metric: stored, owner-alerted, acknowledged real seller inquiries per eligible submission. The code and local tests alone do not establish a production value for that metric.

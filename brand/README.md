@@ -1,6 +1,6 @@
 # Brand originals (not deployed)
 
-Source files for the Harbison Buys Homes logo. The website serves optimized copies from `static/assets/`.
+Source files for the Call Harbison logo. The website serves optimized copies from `static/assets/`.
 
 | File | Use |
 | --- | --- |
