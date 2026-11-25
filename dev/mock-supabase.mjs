@@ -87,7 +87,7 @@ export function matches(row, key, expr) {
   }
   const [op, ...rest] = expr.split('.');
   const val = rest.join('.');
-  const cell = row[key];
+  const cell = key === 'is_test' ? row.is_test ?? false : row[key];
   const cmp = (a, b) => (Date.parse(a) && Date.parse(b) ? Date.parse(a) - Date.parse(b) : a < b ? -1 : a > b ? 1 : 0);
   if (op === 'eq') return String(cell) === String(parseVal(val));
   if (op === 'neq') return cell != null && String(cell) !== String(parseVal(val));
@@ -104,6 +104,7 @@ export function matches(row, key, expr) {
 function computeFunnel() {
   const groups = new Map();
   for (const l of db.leads) {
+    if (l.is_test) continue;
     if (l.status === 'spam') continue;
     const month = `${String(l.created_at).slice(0, 7)}-01`;
     const channel = l.channel || 'unknown';

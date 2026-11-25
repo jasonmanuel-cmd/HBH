@@ -12,7 +12,7 @@ const invoke = async (data, env) => {
 };
 async function fixture(fn, { emailFailure = false } = {}) {
   const realFetch = globalThis.fetch, realError = console.error;
-  const env = { RESEND_API_KEY: 'test', HQ_PASSWORD: 'mock' };
+  const env = { RESEND_API_KEY: 'test', LEAD_NOTIFY_EMAIL: 'owner@example.test', HQ_PASSWORD: 'mock' };
   installMockSupabase(env);
   const mockDbFetch = globalThis.fetch;
   const alerts = [];

@@ -28,7 +28,7 @@ test('all inquiry intents require response consent, keep marketing separate and 
 });
 
 test('legacy address-free retry stores intent once, notifies once, and cannot receive seller details', async () => {
-  const original = globalThis.fetch, env = { RESEND_API_KEY: 'synthetic', HQ_PASSWORD: 'synthetic' };
+  const original = globalThis.fetch, env = { RESEND_API_KEY: 'synthetic', LEAD_NOTIFY_EMAIL: 'owner@example.test', HQ_PASSWORD: 'synthetic' };
   installMockSupabase(env); const databaseFetch = globalThis.fetch;
   let alerts = [];
   globalThis.fetch = async (url, init) => {
@@ -87,7 +87,8 @@ test('inquiry pages and neutral completion preserve accessible forms and cautiou
   }
   assert.match(pages.get('investors.html'), /not an offer of securities/);
   assert.match(pages.get('home-value.html'), /does not promise an appraisal/);
-  assert.ok(pages.get('index.html').indexOf("I'm interested in investing") < pages.get('index.html').indexOf('Get Your Cash Offer'));
+  assert.doesNotMatch(pages.get('index.html'), /inquiry-card|I'm interested in investing/);
+  assert.match(pages.get('index.html'), /href="\/investors">Investors<\/a>/);
   assert.match(pages.get('thank-you.html'), /details-card[^>]*hidden/);
   assert.match(pages.get('thank-you.html'), /confirms that original request/);
   assert.match(readFileSync(new URL('../static/script.js', import.meta.url), 'utf8'), /if \(!json\.duplicate\)/);

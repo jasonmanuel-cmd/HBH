@@ -211,6 +211,9 @@ async function logTrashEvent(env, id, detail, actor) {
 
 // ---------- Supabase ----------
 async function sb(env, path, { method = 'GET', body, prefer } = {}) {
+  if (method === 'GET' && (path === 'leads' || path.startsWith('leads?'))) {
+    path += `${path.includes('?') ? '&' : '?'}is_test=eq.false`;
+  }
   const res = await fetch(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/${path}`, {
     method,
     headers: {

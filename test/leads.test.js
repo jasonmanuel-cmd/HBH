@@ -30,7 +30,7 @@ test('cash-offer referral choices populate the lead channel and reject blank or 
   }
 });
 
-test('email alerts target both staff addresses when recipients are not overridden', async () => {
+test('email alerts require an explicit owner recipient and database storage', async () => {
   const original = globalThis.fetch;
   const calls = [];
   globalThis.fetch = async (url, options) => {
@@ -38,9 +38,9 @@ test('email alerts target both staff addresses when recipients are not overridde
     return { ok: true };
   };
   try {
-    const result = await deliver(parseLead(valid).lead, { RESEND_API_KEY: 'test-key' });
-    assert.equal(result.ok, true);
-    assert.deepEqual(calls[0].body.to, ['nate85.realtor@gmail.com', 'coaiebay@gmail.com']);
+    const result = await deliver(parseLead(valid).lead, { RESEND_API_KEY: 'test-key', LEAD_NOTIFY_EMAIL: 'owner@example.test' });
+    assert.equal(result.ok, false);
+    assert.equal(calls.length, 0);
   } finally { globalThis.fetch = original; }
 });
 
@@ -80,14 +80,14 @@ test('invalid lead returns 400 with fields', async () => {
   assert.ok(res.body.fields.includes('address'));
 });
 
-test('deliver posts to configured webhook and reports failures', async () => {
+test('deliver does not post to a webhook before durable storage', async () => {
   const calls = [];
   const orig = globalThis.fetch;
   globalThis.fetch = async (url, opts) => (calls.push([url, JSON.parse(opts.body)]), { ok: true });
   try {
     const r = await deliver(parseLead(valid).lead, { LEAD_WEBHOOK_URL: 'https://hook.test/x' });
-    assert.deepEqual(r, { ok: true, delivered: ['webhook'], failures: [] });
-    assert.equal(calls[0][1].address, valid.address);
+    assert.equal(r.ok, false);
+    assert.equal(calls.length, 0);
 
     globalThis.fetch = async () => ({ ok: false, status: 500, text: async () => 'err' });
     const origErr = console.error;
@@ -95,7 +95,7 @@ test('deliver posts to configured webhook and reports failures', async () => {
     const bad = await deliver(parseLead(valid).lead, { LEAD_WEBHOOK_URL: 'https://hook.test/x' });
     console.error = origErr;
     assert.equal(bad.ok, false);
-    assert.deepEqual(bad.failures[0].channel, 'webhook');
+    assert.deepEqual(bad.failures[0].channel, 'storage');
   } finally {
     globalThis.fetch = orig;
   }
@@ -109,7 +109,7 @@ test('deliver fails loudly when no destination is configured', async () => {
   try {
     const r = await deliver(parseLead(valid).lead, {});
     assert.equal(r.ok, false);
-    assert.equal(r.error, 'no_delivery_configured');
+    assert.equal(r.failures[0].channel, 'storage');
     assert.deepEqual(r.delivered, []);
   } finally {
     console.error = origErr;

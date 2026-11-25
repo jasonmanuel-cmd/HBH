@@ -258,10 +258,6 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
     s.querySelectorAll('.choice-grid[role=radiogroup]').forEach((g) => {
       if (!g.querySelector('input:checked')) bad.push(g);
     });
-    if (s.classList?.contains('fstep-address')) {
-      const referral = s.querySelector('.referral-source');
-      if (referral && !referral.querySelector('input[type=radio]:checked')) bad.push(referral);
-    }
     return bad;
   };
   form.addEventListener('click', (e) => {
@@ -277,9 +273,7 @@ document.querySelectorAll('form[data-steps]').forEach((form) => {
           ? (form.querySelector('[name=street]')
             ? say('Please enter the street, city, and 5-digit ZIP code.', 'Por favor, escriba la calle, la ciudad y el código postal (ZIP) de 5 dígitos.')
             : say('Please enter the property address.', 'Por favor, escriba la dirección de la propiedad.'))
-          : bad[0].classList.contains('referral-source')
-            ? say('Please choose how you heard about us.', 'Seleccione cómo se enteró de nosotros.')
-            : say('Please choose the closest option.', 'Por favor, elija la opción que más se acerque.');
+          : say('Please choose the closest option.', 'Por favor, elija la opción que más se acerque.');
         status.classList.add('error');
         const firstInvalid = bad[0];
         revealField(firstInvalid.tagName === 'INPUT' ? firstInvalid : firstInvalid.querySelector('input:not([type=hidden])'));
@@ -342,12 +336,12 @@ document.querySelectorAll('form[data-lead-form]').forEach((form) => {
     if (hasConsentCheckbox && !data.consent_response) data.consent_response = '';
 
     const missing = [];
-    if (form.querySelector('.referral-source') && !data.heard_about_us) missing.push('heard_about_us');
     const generalInquiry = data.form_type === 'options' && ['buyer', 'investor', 'home_value'].includes(data.route_interest);
     if (!generalInquiry && (data.address || '').trim().length < 5) missing.push('address');
     if ((data.name || '').trim().length < 2 || (data.first_name !== undefined && !(data.first_name || '').trim())) missing.push('name');
     if ((data.phone || '').replace(/\D/g, '').length < 10) missing.push('phone');
     if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) missing.push('email');
+    if (data.contact_pref === 'Email' && !data.email) missing.push('email');
     if (form.dataset.formType === 'family_transition' && !data.relationship) missing.push('relationship');
     if (hasConsentCheckbox && data.consent_response !== 'yes') missing.push('consent_response');
     if (missing.length) return showErrors(missing);
@@ -465,6 +459,39 @@ if (detailsCard) {
     detailsCard.hidden = !(saved?.address && saved?.details_token);
   }
 }
+document.querySelectorAll('form[data-attribution-form]').forEach((form) => {
+  const card = form.closest('.attribution-card');
+  const status = form.querySelector('.form-status');
+  let leadReference;
+  (async () => {
+    try {
+      leadReference = commandPhase === 'protocol'
+        ? await window.HBHCommands?.getLeadReference()
+        : store.get('hbh_lead', sessionStorage);
+      card.hidden = !leadReference?.details_token;
+    } catch { card.hidden = true; }
+  })();
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const source = form.elements.self_reported_source.value;
+    if (!source || !leadReference?.details_token) return;
+    const button = form.querySelector('button[type=submit]');
+    button.disabled = true;
+    try {
+      const response = await fetch('/api/lead-attribution', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ details_token: leadReference.details_token, self_reported_source: source }),
+      });
+      if (!response.ok) throw new Error(say('Could not save your answer. Please try again.', 'No se pudo guardar su respuesta. Inténtelo de nuevo.'));
+      status.textContent = say('Thank you. Your answer was saved.', 'Gracias. Se guardó su respuesta.');
+      status.className = 'form-status ok';
+    } catch (error) {
+      status.textContent = error.message;
+      status.className = 'form-status error';
+      button.disabled = false;
+    }
+  });
+});
 document.querySelectorAll('form[data-details-form]').forEach((form) => {
   if (commandPhase === 'protocol') window.HBHCommands?.bind(form, true);
   const status = form.querySelector('.form-status');

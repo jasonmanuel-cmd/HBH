@@ -1,9 +1,9 @@
 {
-  "name": "harbison-buys-homes",
+  "name": "call-harbison",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Harbison Buys Homes website",
+  "description": "Call Harbison website",
   "scripts": {
     "build": "node build.mjs",
     "dev": "node dev.mjs",

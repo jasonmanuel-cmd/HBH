@@ -122,7 +122,7 @@ test('outbox lease expiry/finish fencing and uncertain sends require evidence be
 }));
 
 test('channel snapshots preserve recipients, no webhook URL secrets; consent revoked before claim suppresses ACK',()=>fixture(async(db)=>{
- const b=body();const config={...env,LEAD_WEBHOOK_URL:'https://webhook.invalid/private-secret',TWILIO_ACCOUNT_SID:'test-account',TWILIO_AUTH_TOKEN:'test-secret',TWILIO_FROM:'+16615550102',LEAD_ALERT_SMS:'+16615550103,+16615550104',LEAD_ACK_ENABLED:'true'};
+ const b=body();const config={...env,LEAD_WEBHOOK_URL:'https://webhook.invalid/private-secret',TWILIO_ACCOUNT_SID:'test-account',TWILIO_AUTH_TOKEN:'test-secret',TWILIO_FROM:'+16615550102',LEAD_ALERT_SMS:'+16615550103,+16615550104',LEAD_ACK_ENABLED:'true',ENABLE_AUTO_SMS:'true'};
  assert.equal((await invoke(b,config)).statusCode,200);const jobs=(await db.query('select * from lead_alert_outbox')).rows;assert.equal(jobs.length,5);
  assert.equal(jobs.filter(j=>j.channel==='sms').length,2);assert.equal(jobs.filter(j=>j.channel==='customer_sms').length,1);
  const webhook=jobs.find(j=>j.channel==='webhook');assert.equal(webhook.target,digest(config.LEAD_WEBHOOK_URL));assert.ok(!JSON.stringify(jobs).includes('private-secret'));assert.ok(!JSON.stringify(jobs).includes('test-secret'));

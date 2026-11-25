@@ -118,13 +118,14 @@ export function parseLead(body) {
     lead.address = lead.street = lead.city = lead.zip = '';
   }
   if (!generalInquiry && lead.address.length < 5) errors.push('address');
-  // Current offer forms always send this field. Older submissions can still be recovered without it.
+  // Accept historic reported channels, but new offer forms capture them after submission.
   if (lead.form_type === 'options' && !generalInquiry && 'heard_about_us' in body && !validReportedChannel) errors.push('heard_about_us');
   if (lead.name.length < 2) errors.push('name');
   if (lead.phone.replace(/\D/g, '').length < 10) errors.push('phone');
   if (lead.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(lead.email)) errors.push('email');
   if (lead.form_type === 'family_transition' && !lead.relationship) errors.push('relationship');
   if (lead.form_type === 'options' && !lead.consent_response) errors.push('consent_response');
+  if (lead.form_type === 'options' && lead.contact_pref === 'Email' && !lead.email) errors.push('email');
   if (lead.form_type === 'family_transition' && 'consent_response' in body && !lead.consent_response) errors.push('consent_response');
   return { lead, errors };
 }
@@ -159,17 +160,18 @@ const e164 = (p) => {
 };
 
 export const notificationRecipients = (env) => [...new Set(
-  (env.LEAD_NOTIFY_EMAIL || 'nate85.realtor@gmail.com,coaiebay@gmail.com')
+  (env.LEAD_NOTIFY_EMAIL || '')
     .split(',').map((value) => value.trim()).filter(Boolean)
 )];
 
 async function sendEmail(lead, env) {
+  if (!notificationRecipients(env).length) throw new Error('Lead alert recipient missing');
   const rows = [...Object.entries(lead), ...(wantsSpanish(lead) ? [['language', 'Spanish: please reply in Spanish']] : [])]
     .filter(([k, v]) => v && k !== 'id')
     .map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#62717a">${escapeHtml(k)}</td><td style="padding:4px 0"><strong>${escapeHtml(v)}</strong></td></tr>`)
     .join('');
   const siteBase = (env.SITE_URL || 'https://www.callharbison.com').replace(/\/$/, '');
-  const hqLink = lead.id ? ` · <a href="${escapeHtml(`${siteBase}/hq?lead=${encodeURIComponent(lead.id)}`)}">Open in Harbison HQ →</a>` : '';
+  const hqLink = lead.id && !lead.is_test ? ` · <a href="${escapeHtml(`${siteBase}/hq?lead=${encodeURIComponent(lead.id)}`)}">Open in Harbison HQ →</a>` : '';
   const res = await fetchWithRetry('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json', ...(lead.id ? { 'Idempotency-Key': `lead-${lead.id}` } : {}) },
@@ -177,8 +179,10 @@ async function sendEmail(lead, env) {
       from: env.LEAD_FROM_EMAIL || 'Harbison Leads <onboarding@resend.dev>',
       to: notificationRecipients(env),
       reply_to: lead.email || undefined,
-      subject: `New ${lead.form_type === 'family_transition' ? 'family property' : 'property'} lead [${lead.channel}]${wantsSpanish(lead) ? ' [ES]' : ''}: ${lead.address || lead.situation}`,
-      html: `<h2 style="font-family:Georgia,serif;color:#031f2b">New property lead</h2><table>${rows}</table><p><a href="tel:${escapeHtml(lead.phone)}">Call ${escapeHtml(lead.name)}</a>${hqLink}</p>`,
+      subject: `${lead.is_test ? '[TEST] ' : ''}New ${lead.form_type === 'family_transition' ? 'family property' : 'property'} lead [${lead.channel}]${wantsSpanish(lead) ? ' [ES]' : ''}: ${lead.address || lead.situation}`,
+      html: lead.is_test
+        ? '<h2>Synthetic lead canary</h2><p>Test only. Do not contact or route to a customer pipeline.</p>'
+        : `<h2 style="font-family:Georgia,serif;color:#031f2b">New property lead</h2><table>${rows}</table><p><a href="tel:${escapeHtml(lead.phone)}">Call ${escapeHtml(lead.name)}</a>${hqLink}</p>`,
     }),
   });
   if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
@@ -200,7 +204,7 @@ async function saveToSupabase(lead, env) {
   if (res.ok) return readInsertResult(res, lead, env);
   const text = await res.text();
   // Migration 002 not run yet? Save the core lead instead of losing it.
-  if (res.status === 400 && /column/i.test(text) && env.SELLER_OPERATIONS_ENABLED !== 'true' && !['buyer', 'investor', 'home_value'].includes(lead.route_interest)) {
+  if (!lead.is_test && res.status === 400 && /column/i.test(text) && env.SELLER_OPERATIONS_ENABLED !== 'true' && !['buyer', 'investor', 'home_value'].includes(lead.route_interest)) {
     console.warn('[leads] Supabase missing new columns — run supabase/migrations/002_family_transition.sql. Saving core fields.');
     const core = Object.fromEntries(LEGACY_FIELDS.map((k) => [k, lead[k] || null]));
     const retry = await fetchWithRetry(endpoint, {
@@ -246,6 +250,7 @@ async function sendSms(to, body, env) {
 
 // Instant acknowledgement to the lead + alert to the team. Speed-to-lead is the single biggest conversion lever.
 async function textLeadAndTeam(lead, env) {
+  if (lead.is_test || env.ENABLE_AUTO_SMS !== 'true') return;
   const jobs = [];
   const to = e164(lead.phone);
   if (env.LEAD_ACK_ENABLED === 'true' && to && lead.contact_pref !== 'Email' && lead.consent_response) {
@@ -269,10 +274,12 @@ async function postWebhook(lead, env) {
 }
 
 export async function deliver(lead, env = process.env) {
+  if (lead.is_test && env.SELLER_OPERATIONS_ENABLED === 'true') return { ok: false, delivered: [], error: 'canary_requires_direct_alert' };
   if (env.SELLER_OPERATIONS_ENABLED === 'true') lead = { ...lead, notification_mode: 'durable' };
   const crmConfigured = Boolean(env.SUPABASE_URL || env.SUPABASE_SERVICE_ROLE_KEY);
   const delivered = [];
   const failures = [];
+  if (!crmConfigured) return { ok: false, delivered, failures: [safeFailure('storage', new Error('Storage not configured'))] };
   // Persist before notifying. At most one request wins the insert and attempts alerts.
   // Legacy mode retains its at-most-once notification attempt; operations mode uses the atomic outbox.
   if (crmConfigured) {
@@ -294,9 +301,9 @@ export async function deliver(lead, env = process.env) {
   }
   const tasks = [];
   if (env.RESEND_API_KEY) tasks.push(['email', sendEmail(lead, env)]);
-  if (env.LEAD_WEBHOOK_URL) tasks.push(['webhook', postWebhook(lead, env)]);
+  if (env.LEAD_WEBHOOK_URL && !lead.is_test) tasks.push(['webhook', postWebhook(lead, env)]);
   // A customer acknowledgment must never precede successful durable storage.
-  if (delivered.includes('supabase') && env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM) tasks.push(['sms', textLeadAndTeam(lead, env)]);
+  if (!lead.is_test && env.ENABLE_AUTO_SMS === 'true' && delivered.includes('supabase') && env.TWILIO_ACCOUNT_SID && env.TWILIO_AUTH_TOKEN && env.TWILIO_FROM) tasks.push(['sms', textLeadAndTeam(lead, env)]);
   if (!tasks.length && !delivered.length) {
     console.error('[leads] no storing destination configured', { id: lead.id });
     return { ok: false, delivered, error: 'no_delivery_configured' };
@@ -310,7 +317,7 @@ export async function deliver(lead, env = process.env) {
       console.error('[leads] notification failed', { id: lead.id, channel: failure.channel });
     }
   });
-  const stored = crmConfigured ? delivered.includes('supabase') : delivered.some((d) => d !== 'sms');
+  const stored = crmConfigured && delivered.includes('supabase');
   if (stored && lead.id && failures.length && crmConfigured) {
     try {
       const warning = await fetchWithRetry(`${env.SUPABASE_URL.replace(/\/$/, '')}/rest/v1/lead_events`, {
@@ -321,7 +328,7 @@ export async function deliver(lead, env = process.env) {
       if (!warning.ok) throw new Error('Warning storage failed');
     } catch { console.error('[leads] notification warning could not be stored', { id: lead.id }); }
   }
-  return { ok: stored, delivered, failures };
+  return { ok: stored && (lead.is_test ? delivered.includes('email') : true), delivered, failures };
 }
 
 // ---------- Optional details from the thank-you page ----------
@@ -467,7 +474,7 @@ export default async function handler(req, res, env = process.env, phase = COMMA
 
   if (body.submission_id !== undefined && (typeof body.submission_id !== 'string' || !UUID.test(body.submission_id))) return res.status(400).json({ ok: false, error: 'Invalid submission reference.' });
   // Stable browser retries require the atomic database path, not email/webhook-only delivery.
-  if (body.submission_id && (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY)) return res.status(502).json({ ok: false, error: 'We could not save your request. Please call us instead.', code: 'STORAGE_UNAVAILABLE' });
+  if (!env.SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) return res.status(502).json({ ok: false, error: 'We could not save your request. Please call us instead.', code: 'STORAGE_UNAVAILABLE' });
   lead.id = body.submission_id || randomUUID();
   const result = await deliver(lead, env);
   if (!result.ok && result.failures?.[0]?.code === 'SUBMISSION_CONFLICT') return res.status(409).json({ ok: false, error: es ? 'Ya recibimos una solicitud con esta referencia. Llámenos para actualizarla.' : 'A request with this reference was already received. Please call us to update it.', code: 'SUBMISSION_CONFLICT' });
