@@ -28,20 +28,21 @@ The canary intentionally fails if seller operations mode is enabled, because its
 
 ## Controlled canary, 2026-11-25
 
-- Jason confirmed receipt of the independent ntfy alarm on his phone. A second generic alarm POST returned HTTP 200.
+- Two generic ntfy alarm POSTs returned HTTP 200. Jason later clarified that neither response established phone push receipt at that time.
 - Tested deployment `dpl_5zy8oXeJWiyPHFoqh5NK1NTgV1V2` without promoting it to the public domain. Its authenticated canary returned `stored=true` and `ownerAlertAccepted=true` for test lead `57c71114-2b13-4b42-bcfa-b4996b0575f5`.
 - Direct Neon readback found that row with `is_test=true`, zero matching notification-outbox jobs, and zero matching rows in `v_uncontacted`. This confirms storage in the intended Neon project and exclusion from those two operational paths. Local tests cover HQ and funnel exclusion; live owner inbox receipt remains pending.
 - Reset the Vercel Production project setting `LEAD_CANARY_ENABLED=false` after the controlled test. The public domain remains on disabled deployment `dpl_D7JQ1odHM7cdcdCYPnsHD2W2DLnF`. Do not enable the daily canary or promote the tested deployment until the owner confirms email receipt.
 
 ## Daily canary enabled, 2026-11-25
 
-- Jason confirmed an owner-alert email reached his inbox. Nathanael's receipt was not independently confirmed.
+- Jason confirmed an owner-alert email reached his inbox and reported that Nathanael received his too; Nathanael did not confirm directly in this session.
 - Enabled the Vercel Production canary setting and tested deployment `dpl_F7ZwdSxYKnLDrJDfcqn7gZUJN5B6` before promotion. Its authenticated canary returned `stored=true` and `ownerAlertAccepted=true` for test lead `44ed5aad-3c32-44f8-95aa-074abc5907d1`. Direct Neon readback confirmed `is_test=true`, no notification-outbox job, and no `v_uncontacted` row for that lead.
 - Promoted that deployment. The `www.callharbison.com` alias resolves to it; deployment configuration includes `/api/lead-canary` at `0 16 * * *` UTC. The first scheduled run and any human receipt of its alert remain unverified.
+- When Jason clarified that ntfy had not yet pushed to his phone, disabled the canary, restored disabled deployment `dpl_D7JQ1odHM7cdcdCYPnsHD2W2DLnF`, and verified the live endpoint returned `enabled=false`. A third generic ntfy test POST returned HTTP 200; Jason then confirmed that push reached his phone. Re-enabled the setting and promoted the tested enabled deployment `dpl_F7ZwdSxYKnLDrJDfcqn7gZUJN5B6` again.
 - Gate 0 remains open for a controlled public `/api/leads` submission and failure/retry evidence. The current canary exercises the shared `deliver` path, not the complete public form handler. The legacy alert path is still at most once; provider acceptance and one owner receipt do not establish durable recovery from future alert failures.
 
 ## Rollback
 
-Disable `LEAD_CANARY_ENABLED` to stop synthetic writes. Revert the Gate 0 application commit and redeploy only while the lead reliability protocol remains in `preactivation`. Keep the additive `is_test` column and existing test rows until they have been reconciled; dropping them during rollback would remove exclusion evidence. Do not revert to a version that exposes the regulated pages or automated SMS after those flags have been activated.
+Set the Vercel Production `LEAD_CANARY_ENABLED=false` for future deployments and promote the already verified disabled deployment `dpl_D7JQ1odHM7cdcdCYPnsHD2W2DLnF` to stop scheduled synthetic writes immediately. Revert the Gate 0 application commit and redeploy only while the lead reliability protocol remains in `preactivation`. Keep the additive `is_test` column and existing test rows until they have been reconciled; dropping them during rollback would remove exclusion evidence. Do not revert to a version that exposes the regulated pages or automated SMS after those flags have been activated.
 
 Primary metric: stored, owner-alerted, acknowledged real seller inquiries per eligible submission. The code and local tests alone do not establish a production value for that metric.
