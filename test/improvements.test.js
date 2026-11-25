@@ -266,8 +266,26 @@ test('built dist outputs fingerprinted assets, HQ subroutes, hardened robots.txt
   assert.ok(inherited.includes('data-back'), 'preselected stepped form retains Back button');
 
   const robots = readFileSync('dist/robots.txt', 'utf8');
-  assert.equal((robots.match(/Disallow: \/hq/g) || []).length, 2, 'every robots block disallows /hq');
-  assert.equal((robots.match(/Disallow: \/thank-you/g) || []).length, 2, 'every robots block disallows /thank-you');
+  assert.match(robots, /^(?:(?:User-agent|Allow|Disallow|Sitemap): [^\r\n]+\n|\n)+$/);
+  const [publicGroup, trainingGroup, sitemapRule] = robots.trim().split('\n\n');
+  assert.deepEqual(publicGroup.split('\n'), [
+    'User-agent: *',
+    'Disallow: /api/',
+    'Disallow: /_agent-markdown/',
+    'Disallow: /thank-you',
+    'Disallow: /family-property-guide',
+    'Disallow: /es/thank-you',
+    'Disallow: /es/family-property-guide',
+    'Disallow: /hq',
+  ]);
+  assert.deepEqual(trainingGroup.split('\n'), [
+    'User-agent: GPTBot',
+    'User-agent: ClaudeBot',
+    'User-agent: Google-Extended',
+    'User-agent: Applebot-Extended',
+    'Disallow: /',
+  ]);
+  assert.equal(sitemapRule, 'Sitemap: https://www.callharbison.com/sitemap.xml');
 
   const sitemap = readFileSync('dist/sitemap.xml', 'utf8');
   assert.ok(sitemap.includes('<loc>https://www.callharbison.com/contact</loc><lastmod>2026-11-12</lastmod>'), 'pages without their own date use the current content date');

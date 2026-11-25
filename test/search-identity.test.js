@@ -1,6 +1,5 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import site from '../site.config.mjs';
 import { buildPages } from '../src/pages.mjs';
 import { loadDictionary, translatePage, decoratePage } from '../src/i18n/translate.mjs';
@@ -58,10 +57,4 @@ test('public pages retain canonical URLs and valid JSON-LD; utility pages remain
   }
   const es = decoratePage(page('about.html'), { lang: 'en', filePath: 'about.html', siteUrl: site.url });
   assert.ok(es.includes(`hreflang="es" href="${site.url}/es/about"`));
-});
-
-test('explicit bot rules preserve the same Spanish utility-path exclusions as the wildcard', () => {
-  const source = readFileSync(new URL('../build.mjs', import.meta.url), 'utf8');
-  assert.equal(source.split('Disallow: /es/thank-you').length - 1, 2);
-  assert.equal(source.split('Disallow: /es/family-property-guide').length - 1, 2);
 });
