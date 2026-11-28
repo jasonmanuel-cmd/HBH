@@ -15,6 +15,17 @@
   ],
   "redirects": [
     {
+      "source": "/go/apollo",
+      "missing": [
+        {
+          "type": "host",
+          "value": "(?:www\\.)?callharbison\\.com|hbh-[a-z0-9-]+-jasons-projects-1d845fc4\\.vercel\\.app"
+        }
+      ],
+      "destination": "https://www.callharbison.com/go/apollo",
+      "permanent": false
+    },
+    {
       "source": "/family",
       "destination": "/sell-loved-ones-house",
       "permanent": false
