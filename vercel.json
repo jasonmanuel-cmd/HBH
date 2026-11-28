@@ -37,6 +37,13 @@
   ],
   "headers": [
     {
+      "source": "/go/apollo",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store" },
+        { "key": "X-Robots-Tag", "value": "noindex" }
+      ]
+    },
+    {
       "source": "/indexnow-manifest.json",
       "headers": [
         { "key": "Cache-Control", "value": "no-store" },
