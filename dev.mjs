@@ -5,6 +5,8 @@ import { readFile, stat } from 'node:fs/promises';
 import { extname, join, resolve, sep } from 'node:path';
 import { execSync } from 'node:child_process';
 import handler from './api/leads.js';
+import apolloHandler from './api/apollo.js';
+import { apolloStore } from './lib/apollo.js';
 import hqHandler from './api/hq.js';
 import intakeHandler from './api/intake.js';
 import trackHandler from './api/track.js';
@@ -13,9 +15,15 @@ import { family } from './src/family.mjs';
 const PORT = Number(process.env.PORT) || 3000;
 const HOST = process.env.HOST || '127.0.0.1';
 
+process.env.APOLLO_LOCAL_DEV = '1';
+let mockApolloStore;
 if (process.argv.includes('--mock')) {
   const { installOperationsMock } = await import('./dev/operations-mock.mjs');
   await installOperationsMock();
+  const { PGlite } = await import('@electric-sql/pglite');
+  const db = new PGlite();
+  await db.exec(await readFile(new URL('./migrations/apollo.sql', import.meta.url),'utf8'));
+  mockApolloStore = apolloStore(async (q,p) => (await db.query(q,p)).rows);
   console.log(`HQ mock mode: sample data, password "demo" → http://localhost:${PORT}/hq`);
 }
 
@@ -44,6 +52,10 @@ async function findFile(pathname) {
 createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
 
+  if (url.pathname === '/go/apollo/' || url.pathname === '/go/apollo.html') {
+    res.writeHead(308, { Location: '/go/apollo' }); return res.end();
+  }
+  if (url.pathname === '/go/apollo') return apolloHandler(req,res,process.env,mockApolloStore);
   if (url.pathname === '/csp-report') {
     req.url = '/api/track?csp=1';
     res.status = (c) => ((res.statusCode = c), res);
@@ -57,7 +69,7 @@ createServer(async (req, res) => {
     req.body = raw;
     res.status = (c) => ((res.statusCode = c), res);
     res.json = (b) => (res.setHeader('Content-Type', 'application/json'), res.end(JSON.stringify(b)));
-    return url.pathname === '/api/hq' ? hqHandler(req, res) : url.pathname === '/api/track' ? trackHandler(req, res) : url.pathname === '/api/intake' ? intakeHandler(req, res) : handler(req, res);
+    return url.pathname === '/api/hq' ? hqHandler(req, res, process.env, undefined, mockApolloStore) : url.pathname === '/api/track' ? trackHandler(req, res) : url.pathname === '/api/intake' ? intakeHandler(req, res) : handler(req, res);
   }
 
   // Mirror vercel.json redirects locally.

@@ -207,6 +207,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
         <button role="tab" aria-selected="false" data-tab="analytics-standard" id="tab-analytics">Harbison Standard stats</button>
         <button role="tab" aria-selected="false" data-tab="analytics-call" id="tab-analytics-call">Call Harbison stats</button>
         <button role="tab" aria-selected="false" data-tab="operations" id="tab-operations">Seller operations</button>
+        <button role="tab" aria-selected="false" data-tab="apollo" id="tab-apollo">Apollo QR</button>
       </nav>
       <div class="top-actions">
         <button class="btn top-add" id="top-new-lead" type="button">+ New lead</button>
@@ -217,6 +218,21 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
   </header>
 
   <main>
+<section id="apollo" role="tabpanel" aria-labelledby="tab-apollo" hidden>
+  <div class="dash-head"><div><h2>Apollo QR</h2><p class="muted">The printed QR stays the same when you update Apollo.</p></div><button type="button" class="btn ghost" id="apollo-reload">Reload settings</button></div>
+  <p><a href="https://callharbison.com/go/apollo" target="_blank" rel="noopener noreferrer">Open the permanent QR link</a></p>
+  <p id="apollo-status" role="status" aria-live="polite"></p>
+  <form id="apollo-form" class="card" hidden>
+    <p id="apollo-current"></p>
+    <label for="apollo-destination">QR destination (optional)</label><br>
+    <input id="apollo-destination" type="url" maxlength="2048" autocomplete="off" style="width:100%" placeholder="https://…">
+    <p class="muted">Use an approved public address or an exact YouTube video link. Leave blank to show the Apollo page.</p>
+    <label for="apollo-video">Walkthrough on the Apollo page (optional)</label><br>
+    <input id="apollo-video" type="url" maxlength="2048" autocomplete="off" style="width:100%" placeholder="https://www.youtube.com/watch?v=…">
+    <p class="muted">Use a shareable YouTube video link without extra tracking parameters.</p>
+    <button type="submit" id="apollo-save" class="btn">Save Apollo settings</button>
+  </form>
+</section>
 <section id="operations" role="tabpanel" aria-labelledby="tab-operations" hidden>
  <div class="dash-head"><div><h2>Seller operations</h2><p class="muted">Jay and Billy handle intake and follow-up. Nathanael handles licensed property and transaction discussions.</p></div><button class="btn ghost" id="ops-refresh">Refresh</button></div>
  <p id="ops-message" role="status" aria-live="polite"></p>
@@ -552,6 +568,7 @@ td .sub{display:block;color:var(--muted);font-size:.8rem}
 <script src="/hq/app.js" defer></script>
 <script src="/command-recovery.js" defer></script>
 <script src="/hq/operations.js" defer></script>
+<script src="/hq/apollo.js" defer></script>
 <script src="/hq/analytics.js" defer></script>
 </body>
 </html>

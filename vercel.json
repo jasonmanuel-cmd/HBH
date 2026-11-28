@@ -7,7 +7,9 @@
   "crons": [
     { "path": "/api/lead-canary", "schedule": "0 16 * * *" }
   ],
+  "functions": { "api/apollo.js": { "includeFiles": "content/apollo.html" } },
   "rewrites": [
+    { "source": "/go/apollo", "destination": "/api/apollo" },
     {
       "source": "/csp-report",
       "destination": "/api/track?csp=1"

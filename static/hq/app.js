@@ -56,7 +56,7 @@ function tabFromLocation() {
   if (p.endsWith('/leads')) return 'leads';
   if (p.endsWith('/partners')) return 'partners';
   const t = new URLSearchParams(location.search).get('tab');
-  return ['operations', 'dash', 'leads', 'partners', 'analytics-standard', 'analytics-call'].includes(t) ? t : 'dash';
+  return ['apollo', 'operations', 'dash', 'leads', 'partners', 'analytics-standard', 'analytics-call'].includes(t) ? t : 'dash';
 }
 
 function syncUrl({ tab, leadId, replace = false } = {}) {
@@ -75,6 +75,7 @@ function syncUrl({ tab, leadId, replace = false } = {}) {
     if (list.q) sp.set('q', list.q);
   }
   const openId = leadId !== undefined ? leadId : current?.id;
+  if (activeTab === 'apollo') sp.set('tab', 'apollo');
   if (openId) sp.set('lead', openId);
   const next = `${path}${sp.toString() ? `?${sp}` : ''}`;
   if (`${location.pathname}${location.search}` !== next) {
@@ -84,6 +85,7 @@ function syncUrl({ tab, leadId, replace = false } = {}) {
 
 // ---------- auth ----------
 function showLogin(msg = '') {
+  window.clearApolloSettings?.();
   $('#app').hidden = true;
   $('#login').hidden = false;
   $('#login-err').textContent = msg;
@@ -133,6 +135,8 @@ function openTab(name, navigate = true) {
   const analytics = name.startsWith('analytics-');
   document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === name)));
   $('#operations').hidden = name !== 'operations';
+  $('#apollo').hidden = name !== 'apollo';
+  if (name === 'apollo') window.loadApolloSettings?.();
   if (name === 'operations') window.loadSellerOperations?.();
   $('#dash').hidden = name !== 'dash';
   $('#leads').hidden = name !== 'leads';

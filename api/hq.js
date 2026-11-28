@@ -1,5 +1,6 @@
 import { analyticsSql, readAnalytics } from '../lib/analytics-store.js';
 import { COMMAND_PHASE } from '../lib/command-phase.js';
+import { apolloHq } from '../lib/apollo.js';
 import { useNeon } from '../lib/neon.js';
 import { sellerOperations } from '../lib/seller-operations-api.js';
 // HQ panel API: POST/GET/PATCH/DELETE /api/hq?action=...
@@ -327,7 +328,7 @@ export function computeStats(leads, now = Date.now()) {
 }
 
 // ---------- handler ----------
-export default async function handler(req, res, env = process.env, phase = COMMAND_PHASE) {
+export default async function handler(req, res, env = process.env, phase = COMMAND_PHASE, apolloStoreOverride) {
   useNeon(env);
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Robots-Tag', 'noindex, nofollow');
@@ -363,6 +364,8 @@ export default async function handler(req, res, env = process.env, phase = COMMA
   if (!session) return res.status(401).json({ ok: false, error: 'Please sign in.' });
   // Writes must come from the HQ page's own script (plus SameSite=Strict on the cookie).
   if (req.method !== 'GET' && req.headers?.['x-hq'] !== '1') return res.status(403).json({ ok: false, error: 'Forbidden' });
+
+  if (action === 'apollo') return apolloHq({ req, res, body, env, session, store: apolloStoreOverride });
 
   try {
     if (await sellerOperations({ action, req, res, body, session, env, sb, phase })) return;
